@@ -13,11 +13,36 @@ from django.views import View
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from django.shortcuts import render
 from dotenv import load_dotenv
 import os
 
 User = get_user_model()
 load_dotenv()
+
+
+def verificationMail(name, verification_link, email):
+    context = {
+        "verification_link": verification_link,
+        "email_address": email,
+        "name": name or "User",
+    }
+
+    html_message = render_to_string("backend/emailConfirm.html", context=context)
+    plain_message = strip_tags(html_message)
+
+    msg = EmailMultiAlternatives(
+        subject="Request for Confirm your email {title}".format(title=email),
+        body=plain_message,
+        from_email="noreply@hepatocai.com",
+        to=[email],
+    )
+
+    msg.attach_alternative(html_message, "text/html")
+    msg.send()
 
 
 def SendVerificationEmail(user):
@@ -26,20 +51,7 @@ def SendVerificationEmail(user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     verification_link = f"http://{DOMAIN}/accounts/verify-email/{uid}/{token}/"
 
-    send_mail(
-        subject="Verify Your Email for HepatoCAI",
-        message=(
-            f'Dear {user.get_full_name() or "User"},\n\n'
-            "Thank you for registering with HepatoCAI — your trusted assistant for liver disease classification and analysis.\n\n"
-            "To activate your account and start using our AI-powered health tools, please verify your email by clicking the link below:\n\n"
-            f"{verification_link}\n\n"
-            "If you did not sign up for HepatoCAI, please ignore this email.\n\n"
-            "Best regards,\n"
-            "The HepatoCAI Team"
-        ),
-        from_email="noreply@hepatocai.com",
-        recipient_list=[user.email],
-    )
+    verificationMail(user.get_full_name(), verification_link, user.email)
 
 
 class SendVerificationEmailView(View):
@@ -51,34 +63,29 @@ class SendVerificationEmailView(View):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "User not found."}, status=404)
+            return Response(
+                {"error": "User not found."}, status=404
+            )  # TODO redirect to register page with a massage "user not Found"
 
         if user.is_active:
-            return Response({"message": "Email already verified."})
+            return Response(
+                {"message": "Email already verified."}
+            )  # TODO redirect to login page and show a message "Email already verified"
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         verification_link = f"http://{DOMAIN}/accounts/verify-email/{uid}/{token}/"
 
-        send_mail(
-            subject="Verify your HepatoCAI account",
-            message=(
-                f"Hi {user.username},\n\n"
-                "Thanks for registering with HepatoCAI, your AI-powered assistant for liver diagnostics.\n\n"
-                f"Please verify your email by clicking the link below:\n{verification_link}\n\n"
-                "If you did not register, you can ignore this email.\n\n"
-                "— The HepatoCAI Team"
-            ),
-            from_email="noreply@hepatocai.com",
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+        verificationMail(user.get_full_name(), verification_link, user.email)
 
-        return Response({"message": "Verification email sent."})
+        return Response(
+            {"message": "Verification email sent."}
+        )  # TODO redirect to login page and show a message "Verification email sent"
 
 
 class VerifyEmailView(View):
     def get(self, request, uidb64, token):
+        BaseURLForntend = os.getenv("BaseURLForntend")
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
@@ -88,11 +95,21 @@ class VerifyEmailView(View):
         if user and default_token_generator.check_token(user, token):
             user.is_active = True  # ✅ Activate user account
             user.save()
-            return HttpResponse(
-                "Your email has been verified and your account is now active."
+            return render(
+                request,
+                "backend/confirmationDone.html",
+                context={"login": str(BaseURLForntend) + "accounts/login"},
             )
         else:
-            return HttpResponse("Verification link is invalid or expired.")
+            return render(
+                request,
+                "backend/expiredConfirmationToken.html",
+                context={
+                    "sendVerificationEmai": "www.example.com",
+                    "login": str(BaseURLForntend) + "accounts/login",
+                    "register": str(BaseURLForntend) + "accounts/register",
+                },
+            )
 
 
 class LoginViewSet(viewsets.ViewSet):
@@ -136,7 +153,7 @@ class RegisterViewset(viewsets.ViewSet):
             messages.success(
                 request,
                 "Registration successful. Please verify your email to activate your account.",
-            )
+            )  # TODO what does the message do?
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)

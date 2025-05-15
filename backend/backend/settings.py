@@ -59,7 +59,15 @@ INSTALLED_APPS = [
     "accounts",
     "note",
     "rest_framework",
+    "django_rest_passwordreset",
     "corsheaders",
+    # Django apps
+    "django.contrib.sites",  # required by allauth
+    # Allauth apps
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",  # Google provider
 ]
 
 MIDDLEWARE = [
@@ -84,7 +92,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -178,3 +186,21 @@ EMAIL_HOST_PASSWORD = os.getenv(
     "EMAIL_HOST_PASSWORD"
 )  # Use app password, not your main password
 DEFAULT_FROM_EMAIL = f"HepatoCAI {os.getenv("EMAIL_HOST_USER")}"
+
+
+# Allauth settings
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",  # default
+    "allauth.account.auth_backends.AuthenticationBackend",  # for allauth
+]
+
+SITE_ID = 1  # TODO might need to change if needed
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# Optional: allauth settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "optional"

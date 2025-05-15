@@ -7,6 +7,7 @@ from .views import (
     SendVerificationEmailView,
     VerifyEmailView,
 )
+from django.urls import include
 
 router = DefaultRouter()
 router.register("register", RegisterViewset, basename="register")
@@ -23,4 +24,9 @@ urlpatterns += [
     path(
         "verify-email/<uidb64>/<token>/", VerifyEmailView.as_view(), name="verify-email"
     ),
+    path(
+        "password-reset/",
+        include("django_rest_passwordreset.urls", namespace="password_reset"),
+    ),
+    path("accounts/", include("allauth.urls")),  # allauth routes
 ]

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Token Expired</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        justify-self: unset;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+        padding: 50px;
+      }
+      h1 {
+        color: #c0392b;
+      }
+      p {
+        font-size: 18px;
+      }
+      .btn-group {
+        margin-top: 30px;
+      }
+      .btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .btn:hover {
+        background-color: #2980b9;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Verification Link Expired</h1>
+    <p>Your email verification link has expired or is invalid.</p>
+
+    <div class="btn-group">
+      <a href="{{sendVerificationEmail}}" class="btn"
+        >Send Verification Email</a
+      >
+      <a href="{{login}}" class="btn">Login</a>
+      <a href="{register}" class="btn">Register</a>
+    </div>
+  </body>
+</html>

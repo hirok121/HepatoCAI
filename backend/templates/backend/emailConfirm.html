@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      color: #333;
+      background-color: #f4f4f4;
+      padding: 20px;
+    "
+  >
+    <div
+      style="
+        max-width: 600px;
+        margin: auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+      "
+    >
+      <h2 style="color: #2c3e50">Confirm Your Email Address</h2>
+      <p>Dear {{name}},</p>
+      <p>
+        Thank you for registering with HepatoCAI — your trusted assistant for
+        liver disease classification and analysis.<br />
+        <br />
+        To activate your account and start using our AI-powered health tools,
+        please verify your email address (<strong>{{ email_address }}</strong>)
+        by clicking the button below.
+      </p>
+      <br />
+
+      <p style="text-align: center">
+        <a
+          href="{{ verification_link }}"
+          style="
+            background-color: #5a189a;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+          "
+        >
+          Confirm Email
+        </a>
+      </p>
+      <br />
+      <p>If you did not sign up for HepatoCAI, please ignore this email.</p>
+      <p>Best regards,<br />The HepatoCAI Team</p>
+    </div>
+  </body>
+</html>

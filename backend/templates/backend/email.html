@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <body
+    style="
+      font-family: Arial, sans-serif;
+      color: #333;
+      background-color: #f4f4f4;
+      padding: 20px;
+    "
+  >
+    <div
+      style="
+        max-width: 600px;
+        margin: auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+      "
+    >
+      <h2 style="color: #2c3e50">Reset Your Password</h2>
+      <p>Hello,</p>
+      <p>
+        We received a request to reset the password for your HepatoCAI account
+        associated with <strong>{{ email_adress }}</strong>.
+      </p>
+      <p>Click the button below to choose a new password:</p>
+
+      <p style="text-align: center">
+        <a
+          href="{{ full_link }}"
+          style="
+            background-color: #5a189a;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+          "
+        >
+          Reset Password
+        </a>
+      </p>
+
+      <p>
+        If you did not request a password reset, you can safely ignore this
+        email.
+      </p>
+      <p>Regards,<br />The HepatoCAI Team</p>
+    </div>
+  </body>
+</html>
