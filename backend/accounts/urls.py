@@ -6,6 +6,8 @@ from .views import (
     UserViewset,
     SendVerificationEmailView,
     VerifyEmailView,
+    google_login_view,
+    logout_view,
 )
 from django.urls import include
 
@@ -28,5 +30,7 @@ urlpatterns += [
         "password-reset/",
         include("django_rest_passwordreset.urls", namespace="password_reset"),
     ),
-    path("accounts/", include("allauth.urls")),  # allauth routes
+    # TODO: the login and logout page should not be here , it should be in frontend
+    path("glogin/", google_login_view),
+    path("logout/", logout_view, name="logout"),
 ]

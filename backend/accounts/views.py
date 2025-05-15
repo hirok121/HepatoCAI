@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
@@ -16,7 +16,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from dotenv import load_dotenv
 import os
 
@@ -98,7 +98,7 @@ class VerifyEmailView(View):
             return render(
                 request,
                 "backend/confirmationDone.html",
-                context={"login": str(BaseURLForntend) + "accounts/login"},
+                context={"login": f"http://{BaseURLForntend}/accounts/login"},
             )
         else:
             return render(
@@ -106,8 +106,8 @@ class VerifyEmailView(View):
                 "backend/expiredConfirmationToken.html",
                 context={
                     "sendVerificationEmai": "www.example.com",
-                    "login": str(BaseURLForntend) + "accounts/login",
-                    "register": str(BaseURLForntend) + "accounts/register",
+                    "login": f"http://{BaseURLForntend}/accounts/login",
+                    "register": f"http://{BaseURLForntend}/accounts/register",
                 },
             )
 
@@ -168,3 +168,15 @@ class UserViewset(viewsets.ViewSet):
         queryset = User.objects.all()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
+
+
+# TODO should be deleted after the frontend is done
+# create view for login.html
+def google_login_view(request):
+    return render(request, "backend/login.html")
+
+
+# logout
+def logout_view(request):
+    logout(request)
+    return redirect("/accounts/google/login/")

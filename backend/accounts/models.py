@@ -6,6 +6,10 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 class CustomUserManager(BaseUserManager):
@@ -38,7 +42,8 @@ class CustomUser(AbstractUser):
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(reset_password_token, *args, **kwargs):
-    sitelink = "http://localhost:5173/"
+    BaseURLForntend = os.getenv("BaseURLForntend", default="localhost:5173")
+    sitelink = f"http://{BaseURLForntend}"
     token = "{}".format(reset_password_token.key)
     full_link = str(sitelink) + str("password-reset/") + str(token)
 

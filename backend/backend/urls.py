@@ -7,6 +7,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("accounts/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
+    path("accounts/", include("allauth.urls")),  # allauth routes
     path("accounts/", include("accounts.urls")),
     path("note/", include("note.urls")),
 ]
