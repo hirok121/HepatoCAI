@@ -6,8 +6,10 @@ from .views import (
     UserViewset,
     SendVerificationEmailView,
     VerifyEmailView,
+    ProfileViewSet,
     google_login_view,
     logout_view,
+    login_redirect_view,
 )
 from django.urls import include
 
@@ -15,6 +17,7 @@ router = DefaultRouter()
 router.register("register", RegisterViewset, basename="register")
 router.register("login", LoginViewSet, basename="login")
 router.register("users", UserViewset, basename="users")
+router.register("profile", ProfileViewSet, basename="profile")
 urlpatterns = router.urls
 
 urlpatterns += [
@@ -30,6 +33,7 @@ urlpatterns += [
         "password-reset/",
         include("django_rest_passwordreset.urls", namespace="password_reset"),
     ),
+    path("accounts/google/login/redirect/", login_redirect_view, name="login-redirect"),
     # TODO: the login and logout page should not be here , it should be in frontend
     path("glogin/", google_login_view),
     path("logout/", logout_view, name="logout"),

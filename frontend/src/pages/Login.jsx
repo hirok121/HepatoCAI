@@ -4,7 +4,7 @@ import "../styles/Login.css";
 function Login() {
   return (
     <div className="login-container">
-      <Form route="/api/token/" method="login" />
+      <Form route="/accounts/token/" method="login" />
     </div>
   );
 }

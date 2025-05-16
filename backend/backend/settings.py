@@ -20,7 +20,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+FRONTEND_URL = os.getenv("FRONTEND_URL", default="http://localhost:5173")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="django-insecure-!@#4$%^&*()")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "api",
-    "accounts",
+    "users",
     "note",
     "rest_framework",
     "django_rest_passwordreset",
@@ -71,6 +71,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -78,17 +79,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
-
-AUTH_USER_MODEL = "accounts.CustomUser"
+AUTH_USER_MODEL = "users.CustomUser"
 
 TEMPLATES = [
     {
@@ -172,12 +168,15 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWS_CREDENTIALS = True
+# CORS settings
+# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 # Email settings
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -197,13 +196,32 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 2
 
-LOGIN_REDIRECT_URL = "/accounts/glogin/"
-LOGOUT_REDIRECT_URL = "/accounts/glogin/"
+LOGIN_REDIRECT_URL = "/users/accounts/google/login/redirect/"  # or whatever view you want to handle the final step
+LOGOUT_REDIRECT_URL = "/users/glogin/"
 
 # Optional: allauth settings
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Automatically log in the user after social login
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Automatically create a user account when a user logs in with a social account
+
+
+# google Oauth2 settings
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": "193538155468-mhf1k66uicqhuht696p8brg82i9ii7mt.apps.googleusercontent.com",
+            "secret": "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",
+            "key": "",
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "REDIRECT_URI": "http://127.0.0.1:8000/users/acounts/google/login/redirect/",
+    }
+}

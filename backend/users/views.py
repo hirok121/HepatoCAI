@@ -1,5 +1,6 @@
 from rest_framework import generics
-from .serializers import LoginSerializer, RegisterSerializer
+from rest_framework.decorators import action
+from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions
@@ -17,6 +18,16 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django.shortcuts import render, redirect
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import HttpResponseRedirect
+
+from allauth.socialaccount.models import SocialAccount, SocialToken
+
+import json
 from dotenv import load_dotenv
 import os
 
@@ -49,12 +60,32 @@ def SendVerificationEmail(user):
     DOMAIN = os.getenv("DOMAIN", default="localhost:8000")
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    verification_link = f"http://{DOMAIN}/accounts/verify-email/{uid}/{token}/"
+    verification_link = f"http://{DOMAIN}/users/verify-email/{uid}/{token}/"
 
     verificationMail(user.get_full_name(), verification_link, user.email)
 
 
-class SendVerificationEmailView(View):
+@login_required
+def login_redirect_view(request):
+    BaseURLFrontend = os.getenv("BaseURLForntend", default="http://localhost:5173")
+    jwt_data = request.session.pop("jwt", None)
+
+    if jwt_data:
+        access = jwt_data["access"]
+        refresh = jwt_data["refresh"]
+        # print("JWT data (from login redirect view):", jwt_data) # Debugging line
+        return HttpResponseRedirect(
+            f"http://localhost:5173/auth/callback?access={access}&refresh={refresh}"
+        )
+
+    return HttpResponseRedirect(
+        f"http://localhost:5173/auth/callback?error=missing_token"
+    )
+
+
+class SendVerificationEmailView(
+    View
+):  # TODO if email is not verified then verification email can be sent by this view
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -74,7 +105,7 @@ class SendVerificationEmailView(View):
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        verification_link = f"http://{DOMAIN}/accounts/verify-email/{uid}/{token}/"
+        verification_link = f"http://{DOMAIN}/users/verify-email/{uid}/{token}/"
 
         verificationMail(user.get_full_name(), verification_link, user.email)
 
@@ -98,7 +129,7 @@ class VerifyEmailView(View):
             return render(
                 request,
                 "backend/confirmationDone.html",
-                context={"login": f"http://{BaseURLForntend}/accounts/login"},
+                context={"login": f"{BaseURLForntend}/login"},
             )
         else:
             return render(
@@ -106,13 +137,14 @@ class VerifyEmailView(View):
                 "backend/expiredConfirmationToken.html",
                 context={
                     "sendVerificationEmai": "www.example.com",
-                    "login": f"http://{BaseURLForntend}/accounts/login",
-                    "register": f"http://{BaseURLForntend}/accounts/register",
+                    "login": f"{BaseURLForntend}/login",
+                    "register": f"{BaseURLForntend}/register",
                 },
             )
 
 
 class LoginViewSet(viewsets.ViewSet):
+    #! this is almost the same as the TokenObtainPairView from rest_framework_simplejwt.views
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
@@ -170,6 +202,27 @@ class UserViewset(viewsets.ViewSet):
         return Response(serializer.data)
 
 
+class ProfileViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
+    serializer_class = ProfileSerializer
+
+    @action(detail=False, methods=["get", "patch"], url_path="me")
+    def me(self, request):
+        if request.method == "GET":
+            serializer = ProfileSerializer(request.user)
+            return Response(serializer.data)
+
+        elif request.method == "PATCH":
+            serializer = ProfileSerializer(
+                request.user, data=request.data, partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=400)
+
+
 # TODO should be deleted after the frontend is done
 # create view for login.html
 def google_login_view(request):
@@ -179,4 +232,4 @@ def google_login_view(request):
 # logout
 def logout_view(request):
     logout(request)
-    return redirect("/accounts/google/login/")
+    return redirect("/users/glogin/")

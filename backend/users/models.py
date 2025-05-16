@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django_rest_passwordreset.signals import reset_password_token_created
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.urls import reverse
 from django.template.loader import render_to_string
@@ -33,6 +35,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(max_length=200, unique=True)
     birthday = models.DateField(null=True, blank=True)
     username = models.CharField(max_length=200, null=True, blank=True)
+    full_name = models.CharField(max_length=200, null=True, blank=True)
 
     objects = CustomUserManager()
 
@@ -43,9 +46,9 @@ class CustomUser(AbstractUser):
 @receiver(reset_password_token_created)
 def password_reset_token_created(reset_password_token, *args, **kwargs):
     BaseURLForntend = os.getenv("BaseURLForntend", default="localhost:5173")
-    sitelink = f"http://{BaseURLForntend}"
+    sitelink = f"http://{BaseURLForntend}/"
     token = "{}".format(reset_password_token.key)
-    full_link = str(sitelink) + str("password-reset/") + str(token)
+    full_link = f"{sitelink}password-reset/{token}"
 
     context = {"full_link": full_link, "email_adress": reset_password_token.user.email}
 
@@ -63,3 +66,13 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
 
     msg.attach_alternative(html_message, "text/html")
     msg.send()
+
+
+@receiver(user_logged_in)
+def generate_jwt_on_login(request, user, **kwargs):
+    refresh = RefreshToken.for_user(user)
+    request.session["jwt"] = {
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+    }
+    # print("JWT generated and stored in session:", request.session["jwt"])  # Debugging line
