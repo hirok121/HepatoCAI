@@ -13,18 +13,23 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
-import ForgotPassword from "../components/ForgotPassword";
-import AppTheme from "../theme/AppTheme";
-import ColorModeSelect from "../theme/ColorModeSelect";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { useLocation } from "react-router-dom";
+import ForgotPassword from "../../components/ForgotPassword";
+import AppTheme from "../../theme/AppTheme";
+import ColorModeSelect from "../../theme/ColorModeSelect";
 import {
   GoogleIcon,
   FacebookIcon,
   SitemarkIcon,
-} from "../components/CustomIcons";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+} from "../../components/CustomIcons";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
 import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import api from "../../api";
+import { CircularProgress } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -81,6 +86,22 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    severity: "success",
+    message: "",
+  });
+  React.useEffect(() => {
+    if (location.state?.message) {
+      setSnackbar({
+        open: true,
+        severity: "success",
+        message: location.state.message,
+      });
+    }
+  }, [location.state]);
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -92,26 +113,50 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    if (emailError || passwordError) {
-      event.preventDefault();
+
+    const data = new FormData(event.currentTarget);
+    const email = data.get("email") as string;
+    const password = data.get("password") as string;
+
+    if (!email || !password || emailError || passwordError) {
+      setLoading(false);
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
 
     try {
-      const res = await api.post("accounts/token/", {
-        email: data.get("email"),
-        password: data.get("password"),
-      });
-      localStorage.setItem(ACCESS_TOKEN, res.data.access);
-      localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-      navigate("/");
-    } catch (error) {
-      alert(error);
+      // Step 1: Check if user exists
+      const checkRes = await api.post("/users/check-email/", { email });
+
+      if (checkRes.data.exists) {
+        // Step 2: Try to log in
+        const res = await api.post("/accounts/token/", { email, password });
+
+        localStorage.setItem(ACCESS_TOKEN, res.data.access);
+        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+        navigate("/");
+      } else {
+        // Show error: user not found
+        setSnackbar({
+          open: true,
+          severity: "error",
+          message: "No account found with this email.",
+        });
+      }
+    } catch (err: any) {
+      // Incorrect password or auth error
+      if (err.response?.status === 401) {
+        setSnackbar({
+          open: true,
+          severity: "error",
+          message: "Incorrect password.",
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          severity: "error",
+          message: "An error occurred. Please try again.",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -136,8 +181,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
     let isValid = true;
 
-    // TODO pass all email without validation
-    if ((!email.value || !/\S+@\S+\.\S+/.test(email.value)) && false) {
+    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
       setEmailError(true);
       setEmailErrorMessage("Please enter a valid email address.");
       isValid = false;
@@ -146,8 +190,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       setEmailErrorMessage("");
     }
 
-    if ((!password.value || password.value.length < 6) && false) {
-      // TODO pass all password without validation
+    if (!password.value || password.value.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage("Password must be at least 6 characters long.");
       isValid = false;
@@ -229,12 +272,19 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               variant="contained"
               onClick={validateInputs}
             >
-              Sign in
+              {loading ? (
+                <CircularProgress
+                  size={24}
+                  sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                />
+              ) : (
+                "Sign In"
+              )}
             </Button>
             <Link
               component="button"
               type="button"
-              onClick={handleClickOpen}
+              onClick={() => navigate("/resetpassword")}
               variant="body2"
               sx={{ alignSelf: "center" }}
             >
@@ -251,14 +301,14 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             >
               Sign in with Google
             </Button>
-            <Button
+            {/* <Button
               fullWidth
               variant="outlined"
               onClick={() => {}}
               startIcon={<FacebookIcon />}
             >
               Sign in with Facebook
-            </Button>
+            </Button> */}
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
               <Link href="/signup" variant="body2" sx={{ alignSelf: "center" }}>
@@ -267,6 +317,21 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </Typography>
           </Box>
         </Card>
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          <Alert
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            severity={snackbar.severity as "success" | "error"}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </SignInContainer>
     </AppTheme>
   );

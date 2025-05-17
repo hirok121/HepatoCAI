@@ -2,54 +2,56 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Token Expired</title>
+    <title>Link Expired</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        justify-self: unset;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         display: flex;
-        justify-content: center;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         height: 100vh;
-        padding: 50px;
+        margin: 0;
+        padding: 40px;
+        background-color: #f8f9fa;
+        text-align: center;
       }
       h1 {
-        color: #c0392b;
+        color: #d63031;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
       }
       p {
-        font-size: 18px;
-      }
-      .btn-group {
-        margin-top: 30px;
+        font-size: 1.2rem;
+        color: #555;
+        max-width: 600px;
       }
       .btn {
-        background-color: #3498db;
+        display: inline-block;
+        margin-top: 30px;
+        background-color: #2d89ef;
         color: white;
-        padding: 12px 20px;
-        margin: 10px;
+        padding: 12px 24px;
+        font-size: 1rem;
         border: none;
         border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
         text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
       }
       .btn:hover {
-        background-color: #2980b9;
+        background-color: #1b6fc2;
       }
     </style>
   </head>
   <body>
-    <h1>Verification Link Expired</h1>
-    <p>Your email verification link has expired or is invalid.</p>
-
-    <div class="btn-group">
-      <a href="{{sendVerificationEmail}}" class="btn"
-        >Send Verification Email</a
-      >
-      <a href="{{login}}" class="btn">Login</a>
-      <a href="{register}" class="btn">Register</a>
-    </div>
+    <h1>Link Expired</h1>
+    <p>
+      The verification link you used is no longer valid. This may happen if the
+      link has expired or has already been used.
+      <br />
+      Please request a new one or return to the homepage.
+    </p>
+    <a href="{{home}}" class="btn">Go to Homepage</a>
   </body>
 </html>

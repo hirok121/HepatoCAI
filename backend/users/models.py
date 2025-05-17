@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django_rest_passwordreset.signals import reset_password_token_created
@@ -45,10 +46,10 @@ class CustomUser(AbstractUser):
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(reset_password_token, *args, **kwargs):
-    BaseURLForntend = os.getenv("BaseURLForntend", default="localhost:5173")
-    sitelink = f"http://{BaseURLForntend}/"
+    BaseURLForntend = os.getenv("BaseURLForntend", default="http://localhost:5173")
     token = "{}".format(reset_password_token.key)
-    full_link = f"{sitelink}password-reset/{token}"
+    full_link = f"http://localhost:5173/resetpassword/confirm?token={token}"
+    print(full_link)
 
     context = {"full_link": full_link, "email_adress": reset_password_token.user.email}
 
@@ -60,7 +61,8 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
             title=reset_password_token.user.email
         ),
         body=plain_message,
-        from_email="sender@example.com",
+        # from_email="sender@example.com",
+        from_email=f"HepatoCAI Team <{settings.EMAIL_HOST_USER}>",
         to=[reset_password_token.user.email],
     )
 

@@ -185,7 +185,7 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  # Your Gmail address
 EMAIL_HOST_PASSWORD = os.getenv(
     "EMAIL_HOST_PASSWORD"
 )  # Use app password, not your main password
-DEFAULT_FROM_EMAIL = f"HepatoCAI {os.getenv("EMAIL_HOST_USER")}"
+DEFAULT_FROM_EMAIL = f"HepatoCAI Team <{os.getenv('EMAIL_HOST_USER')}>"
 
 
 # Allauth settings
@@ -197,7 +197,7 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 2
 
 LOGIN_REDIRECT_URL = "/users/accounts/google/login/redirect/"  # or whatever view you want to handle the final step
-LOGOUT_REDIRECT_URL = "/users/glogin/"
+LOGOUT_REDIRECT_URL = "/"  # TODO do something
 
 # Optional: allauth settings
 ACCOUNT_LOGIN_METHODS = {"email"}
@@ -225,3 +225,9 @@ SOCIALACCOUNT_PROVIDERS = {
         "REDIRECT_URI": "http://127.0.0.1:8000/users/acounts/google/login/redirect/",
     }
 }
+
+# Custom social account adapter
+# this is used to link social accounts to existing users
+#  if a user create a account with email and password and then log in with google (its send us to a intermediate page)
+# this solve my problem
+SOCIALACCOUNT_ADAPTER = "users.adapters.MySocialAccountAdapter"

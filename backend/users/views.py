@@ -1,9 +1,15 @@
-from rest_framework import generics
-from rest_framework.decorators import action
-from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer
+from rest_framework import generics, status
+from rest_framework.views import APIView
+from rest_framework.decorators import action, api_view, permission_classes
+from .serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    ProfileSerializer,
+    EmailCheckSerializer,
+)
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model, logout
@@ -48,7 +54,7 @@ def verificationMail(name, verification_link, email):
     msg = EmailMultiAlternatives(
         subject="Request for Confirm your email {title}".format(title=email),
         body=plain_message,
-        from_email="noreply@hepatocai.com",
+        from_email=f"HepatoCAI Team <{settings.EMAIL_HOST_USER}>",
         to=[email],
     )
 
@@ -83,6 +89,7 @@ def login_redirect_view(request):
     )
 
 
+# TODO: this view is not used anywhere
 class SendVerificationEmailView(
     View
 ):  # TODO if email is not verified then verification email can be sent by this view
@@ -129,16 +136,14 @@ class VerifyEmailView(View):
             return render(
                 request,
                 "backend/confirmationDone.html",
-                context={"login": f"{BaseURLForntend}/login"},
+                context={"login_link": f"http://localhost:5173/signin"},
             )
         else:
             return render(
                 request,
                 "backend/expiredConfirmationToken.html",
                 context={
-                    "sendVerificationEmai": "www.example.com",
-                    "login": f"{BaseURLForntend}/login",
-                    "register": f"{BaseURLForntend}/register",
+                    "home": f"http://localhost:5173/",
                 },
             )
 
@@ -171,24 +176,56 @@ class LoginViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=400)
 
 
+class CheckEmailView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = EmailCheckSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            exists = User.objects.filter(email=email).exists()
+            return Response({"exists": exists})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class RegisterViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
     def create(self, request):
+        email = request.data.get("email")
+        existing_user = User.objects.filter(email=email).first()
+
+        if existing_user:
+            if not existing_user.has_usable_password() or not existing_user.is_active:
+                # Allow update for social login user or inactive account
+                serializer = self.serializer_class(
+                    existing_user, data=request.data, partial=True
+                )
+                if serializer.is_valid():
+                    user = serializer.save()
+                    user.set_password(request.data["password"])
+                    user.is_active = False  # Still require verification
+                    user.save()
+                    SendVerificationEmail(user)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            # Active user with usable password already exists
+            return Response(
+                {"email": "A user with this email already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Standard registration flow
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            user = serializer.save(is_active=False)  # Set is_active to False initially
-            # Send verification email
+            user = serializer.save(is_active=False)
             SendVerificationEmail(user)
-            messages.success(
-                request,
-                "Registration successful. Please verify your email to activate your account.",
-            )  # TODO what does the message do?
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewset(viewsets.ViewSet):
@@ -223,13 +260,7 @@ class ProfileViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=400)
 
 
-# TODO should be deleted after the frontend is done
-# create view for login.html
-def google_login_view(request):
-    return render(request, "backend/login.html")
-
-
 # logout
 def logout_view(request):
     logout(request)
-    return redirect("/users/glogin/")
+    return redirect("http://localhost:5173/signin")

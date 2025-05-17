@@ -7,7 +7,7 @@ from .views import (
     SendVerificationEmailView,
     VerifyEmailView,
     ProfileViewSet,
-    google_login_view,
+    CheckEmailView,
     logout_view,
     login_redirect_view,
 )
@@ -30,11 +30,11 @@ urlpatterns += [
         "verify-email/<uidb64>/<token>/", VerifyEmailView.as_view(), name="verify-email"
     ),
     path(
-        "password-reset/",
+        "reset-password/",
         include("django_rest_passwordreset.urls", namespace="password_reset"),
     ),
     path("accounts/google/login/redirect/", login_redirect_view, name="login-redirect"),
+    path("check-email/", CheckEmailView.as_view(), name="check-email"),
     # TODO: the login and logout page should not be here , it should be in frontend
-    path("glogin/", google_login_view),
     path("logout/", logout_view, name="logout"),
 ]
