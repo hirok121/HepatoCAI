@@ -6,6 +6,7 @@ from .views import (
     ExportHCVPatientsView,
     ExportHCVPatientsExcelView,
     DiagnosisAnalyticsView,
+    HCVPatientListView,
 )
 
 
@@ -18,6 +19,8 @@ urlpatterns = [
     ),
     # Get all diagnoses for authenticated user
     path("my-diagnoses/", UserDiagnosesListAPIView.as_view(), name="user-diagnoses"),
+    # List all patients for admin (debugging)
+    path("patients/", HCVPatientListView.as_view(), name="hcv-patients-list"),
     # Analytics endpoint for admin dashboard
     path("analytics/", DiagnosisAnalyticsView.as_view(), name="diagnosis-analytics"),
     # Export endpoints

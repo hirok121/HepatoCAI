@@ -27,6 +27,7 @@ import {
   Security,
   Help,
   BugReport,
+  MedicalServices,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../AuthContext";
@@ -55,12 +56,17 @@ function AdminNavbar() {
   const handleMainApp = () => {
     navigate("/");
   };
-
   const navigationItems = [
     { label: "Dashboard", path: "/admin", icon: Dashboard },
     { label: "Users", path: "/admin/users", icon: People },
+    {
+      label: "Diagnosis Management",
+      path: "/admin/diagnosis-management",
+      icon: MedicalServices,
+    },
     { label: "Analytics", path: "/admin/analytics", icon: Analytics },
     { label: "System", path: "/admin/system", icon: Settings },
+    { label: "Debug Console", path: "/admin/debug", icon: BugReport },
   ];
 
   const isActive = (path) => {

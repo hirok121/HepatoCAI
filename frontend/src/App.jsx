@@ -30,6 +30,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminSystem from "./pages/admin/AdminSystem";
+import AdminDebugConsole from "./pages/admin/AdminDebugConsole";
+import AdminDiagnosisManagement from "./pages/admin/AdminDiagnosisManagement";
 
 function Signout() {
   localStorage.clear();
@@ -50,7 +52,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Admin Section Routes */}
+        {/* Admin Section Routes */}{" "}
         <Route
           path="/admin"
           element={
@@ -63,6 +65,11 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="system" element={<AdminSystem />} />
+          <Route path="debug" element={<AdminDebugConsole />} />
+          <Route
+            path="diagnosis-management"
+            element={<AdminDiagnosisManagement />}
+          />
         </Route>
         <Route path="/ai-assistant" element={<AIAssistant />} />
         <Route path="/patient-education" element={<PatientEducation />} />
@@ -72,7 +79,6 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/methodology" element={<Methodology />} />
-
         {/* Authentication routes */}
         <Route path="/signin" element={<SingIn />} />
         <Route path="/signup" element={<Singup />} />

@@ -128,8 +128,9 @@ class UserDiagnosesListAPIView(generics.ListAPIView):
         return HCVPatient.objects.filter(created_by=self.request.user)
 
 
-@method_decorator(login_required, name="dispatch")
-class ExportHCVPatientsView(View):
+class ExportHCVPatientsView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         resource = HCVPatientResource()
 
@@ -146,8 +147,9 @@ class ExportHCVPatientsView(View):
         return response
 
 
-@method_decorator(login_required, name="dispatch")
-class ExportHCVPatientsExcelView(View):
+class ExportHCVPatientsExcelView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         resource = HCVPatientResource()
 
@@ -184,13 +186,13 @@ class DiagnosisAnalyticsView(APIView):
 
         # Get total counts
         total_diagnoses = HCVPatient.objects.count()
-        total_users = HCVPatient.objects.values("created_by").distinct().count()
-
-        # Get diagnoses by severity
-        severity_stats = {
-            "mild": HCVPatient.objects.filter(severity_level="mild").count(),
-            "moderate": HCVPatient.objects.filter(severity_level="moderate").count(),
-            "severe": HCVPatient.objects.filter(severity_level="severe").count(),
+        total_users = (
+            HCVPatient.objects.values("created_by").distinct().count()
+        )  # Get diagnoses by age groups (since severity_level doesn't exist yet)
+        age_stats = {
+            "young": HCVPatient.objects.filter(age__lt=30).count(),
+            "middle": HCVPatient.objects.filter(age__gte=30, age__lt=60).count(),
+            "elder": HCVPatient.objects.filter(age__gte=60).count(),
         }
 
         # Get recent diagnoses (last 30 days)
@@ -211,15 +213,11 @@ class DiagnosisAnalyticsView(APIView):
             ).count()
             monthly_trends.append(
                 {"month": start_date.strftime("%Y-%m"), "count": count}
-            )
-
-        # Get risk factor distribution
-        risk_factors = {}
-        for patient in HCVPatient.objects.all():
-            # Parse risk factors from patient data - adjust based on your model fields
-            if hasattr(patient, "risk_factors"):
-                for factor in patient.risk_factors:
-                    risk_factors[factor] = risk_factors.get(factor, 0) + 1
+            )  # Get gender distribution
+        gender_stats = {
+            "male": HCVPatient.objects.filter(sex="male").count(),
+            "female": HCVPatient.objects.filter(sex="female").count(),
+        }
 
         return Response(
             {
@@ -228,11 +226,58 @@ class DiagnosisAnalyticsView(APIView):
                     "total_diagnoses": total_diagnoses,
                     "total_users": total_users,
                     "recent_diagnoses": recent_diagnoses,
-                    "severity_distribution": severity_stats,
+                    "severity_distribution": age_stats,
                     "monthly_trends": monthly_trends,
-                    "risk_factors": risk_factors,
+                    "risk_factors": gender_stats,
                     "success_rate": 95.5,  # Placeholder - calculate based on your metrics
                     "average_diagnosis_time": "2.3 minutes",  # Placeholder
                 },
             }
+        )
+
+
+class HCVPatientListView(APIView):
+    """
+    API endpoint to list HCV patients for admin diagnosis management
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get list of HCV patients"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Only staff users can access patient list"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Get all HCV patients
+        patients = HCVPatient.objects.all().order_by("-created_at")
+
+        # Serialize the data
+        patient_data = []
+        for patient in patients:
+            hcv_prob = 0.0
+            if hasattr(patient, "hcv_result") and patient.hcv_result:
+                hcv_prob = float(patient.hcv_result)
+
+            patient_data.append(
+                {
+                    "id": patient.id,
+                    "patient_name": patient.patient_name,
+                    "age": patient.age,
+                    "sex": patient.sex,
+                    "created_at": (
+                        patient.created_at.isoformat() if patient.created_at else None
+                    ),
+                    "created_by": (
+                        patient.created_by.username if patient.created_by else "Unknown"
+                    ),
+                    "hcv_probability": hcv_prob,
+                    "stage": getattr(patient, "stage", "Unknown"),
+                }
+            )
+
+        return Response(
+            {"status": "success", "data": patient_data, "count": len(patient_data)}
         )
