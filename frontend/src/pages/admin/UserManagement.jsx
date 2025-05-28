@@ -68,13 +68,7 @@ function UserManagement() {
     message: "",
     action: null,
   });
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
-  useEffect(() => {
-    filterUsers();
-  }, [filterUsers]);
   const fetchUsers = useCallback(async () => {
     console.log("UserManagement: Starting fetchUsers");
     console.log("UserManagement: currentUser:", currentUser);
@@ -131,6 +125,14 @@ function UserManagement() {
     setFilteredUsers(filtered);
     setPage(1);
   }, [users, searchTerm, filterRole, filterStatus]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  useEffect(() => {
+    filterUsers();
+  }, [filterUsers]);
 
   const handleUserPermissionChange = async (userId, field, value) => {
     const targetUser = users.find((u) => u.id === userId);
