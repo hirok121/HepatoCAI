@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -39,4 +40,60 @@ class EmailCheckSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "username", "birthday", "full_name"]
+        fields = [
+            "id",
+            "email",
+            "username",
+            "birthday",
+            "full_name",
+            "first_name",
+            "last_name",
+            "profile_picture",
+            "is_social_user",
+            "social_provider",
+            "verified_email",
+        ]
+        read_only_fields = [
+            "email",
+            "is_social_user",
+            "social_provider",
+            "verified_email",
+        ]
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims to the token
+        token["is_staff"] = user.is_staff
+        token["is_superuser"] = user.is_superuser
+        token["email"] = user.email
+        token["full_name"] = user.full_name
+        token["first_name"] = user.first_name
+        token["last_name"] = user.last_name
+        token["profile_picture"] = user.profile_picture
+        token["is_social_user"] = user.is_social_user
+        token["social_provider"] = user.social_provider
+
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add extra data to the response
+        data["user"] = {
+            "id": self.user.id,
+            "email": self.user.email,
+            "is_staff": self.user.is_staff,
+            "is_superuser": self.user.is_superuser,
+            "full_name": self.user.full_name,
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "profile_picture": self.user.profile_picture,
+            "is_social_user": self.user.is_social_user,
+            "social_provider": self.user.social_provider,
+        }
+
+        return data

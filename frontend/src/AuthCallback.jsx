@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { useAuth } from "./AuthContext";
 
 const AuthCallback = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { checkAuth } = useAuth(); // Get checkAuth function from AuthContext
 
   useEffect(() => {
     const access = params.get("access");
@@ -17,15 +19,19 @@ const AuthCallback = () => {
       localStorage.setItem("access", access);
       localStorage.setItem("refresh", refresh);
       axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
-      axios
-        .get("http://localhost:8000/users/profile/me")
-        .then((response) => {
-          // console.log("User data:", response.data); // Uncomment this line to log the user data
-          navigate("/");
+
+      // Use checkAuth to properly update the AuthContext state
+      checkAuth()
+        .then((isValid) => {
+          if (isValid) {
+            navigate("/");
+          } else {
+            navigate("/signin");
+          }
         })
         .catch((error) => {
           console.error(
-            "Error verfiying token:",
+            "Error verifying token:",
             error.response ? error.response.data : error.message
           );
           navigate("/signin");
@@ -33,7 +39,7 @@ const AuthCallback = () => {
     } else {
       navigate("/signin?error=token_missing");
     }
-  }, [params, navigate]);
+  }, [params, navigate, checkAuth]);
 
   return (
     <Box

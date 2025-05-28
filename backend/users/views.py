@@ -6,11 +6,13 @@ from .serializers import (
     RegisterSerializer,
     ProfileSerializer,
     EmailCheckSerializer,
+    CustomTokenObtainPairSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions, status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model, logout
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -39,6 +41,10 @@ import os
 
 User = get_user_model()
 load_dotenv()
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 def verificationMail(name, verification_link, email):
@@ -264,3 +270,245 @@ class ProfileViewSet(viewsets.ViewSet):
 def logout_view(request):
     logout(request)
     return redirect("http://localhost:5173/signin")
+
+
+class UserManagementView(APIView):
+    """
+    API endpoints for user management - only accessible by superusers
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get list of all users for management"""
+        print(f"UserManagementView - request.user: {request.user}")
+        print(
+            f"UserManagementView - request.user.is_authenticated: {request.user.is_authenticated}"
+        )
+        print(
+            f"UserManagementView - request.user.is_superuser: {getattr(request.user, 'is_superuser', 'No attr')}"
+        )
+        print(
+            f"UserManagementView - Authorization header: {request.headers.get('Authorization', 'No header')}"
+        )
+
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "Only superusers can access user management"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        users = User.objects.all().order_by("-date_joined")
+        user_data = []
+
+        for user in users:
+            user_data.append(
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": user.full_name
+                    or f"{user.first_name} {user.last_name}".strip()
+                    or user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "username": user.username,
+                    "is_staff": user.is_staff,
+                    "is_superuser": user.is_superuser,
+                    "is_active": user.is_active,
+                    "is_social_user": user.is_social_user,
+                    "social_provider": user.social_provider,
+                    "date_joined": user.date_joined,
+                    "last_login": user.last_login,
+                    "profile_picture": user.profile_picture,
+                }
+            )
+
+        return Response(
+            {
+                "status": "success",
+                "data": user_data,
+                "total_users": len(user_data),
+                "permissions": {
+                    "can_promote_to_staff": request.user.is_superuser,
+                    "can_promote_to_superuser": request.user.is_superuser,
+                    "can_deactivate_users": request.user.is_superuser,
+                },
+            }
+        )
+
+    def patch(self, request, user_id=None):
+        """Update user permissions"""
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "Only superusers can modify user permissions"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if not user_id:
+            return Response(
+                {"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user_to_update = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Prevent users from removing their own superuser status
+        if user_to_update == request.user and request.data.get("is_superuser") == False:
+            return Response(
+                {"error": "You cannot remove your own superuser privileges"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update permissions
+        if "is_staff" in request.data:
+            user_to_update.is_staff = request.data["is_staff"]
+
+        if "is_superuser" in request.data:
+            user_to_update.is_superuser = request.data["is_superuser"]
+            # If promoting to superuser, also make them staff
+            if request.data["is_superuser"]:
+                user_to_update.is_staff = True
+
+        if "is_active" in request.data:
+            user_to_update.is_active = request.data["is_active"]
+
+        user_to_update.save()
+
+        return Response(
+            {
+                "status": "success",
+                "message": f"User permissions updated successfully",
+                "user": {
+                    "id": user_to_update.id,
+                    "email": user_to_update.email,
+                    "full_name": user_to_update.full_name
+                    or f"{user_to_update.first_name} {user_to_update.last_name}".strip()
+                    or user_to_update.username,
+                    "is_staff": user_to_update.is_staff,
+                    "is_superuser": user_to_update.is_superuser,
+                    "is_active": user_to_update.is_active,
+                },
+            }
+        )
+
+
+class StaffManagementView(APIView):
+    """
+    API endpoints for staff management - accessible by staff users
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get list of all users for staff management (limited permissions)"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Only staff members can access user management"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        users = User.objects.all().order_by("-date_joined")
+        user_data = []
+
+        for user in users:
+            user_data.append(
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": user.full_name
+                    or f"{user.first_name} {user.last_name}".strip()
+                    or user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "username": user.username,
+                    "is_staff": user.is_staff,
+                    "is_superuser": user.is_superuser,
+                    "is_active": user.is_active,
+                    "is_social_user": user.is_social_user,
+                    "social_provider": user.social_provider,
+                    "date_joined": user.date_joined,
+                    "last_login": user.last_login,
+                }
+            )
+
+        return Response(
+            {
+                "status": "success",
+                "data": user_data,
+                "total_users": len(user_data),
+                "permissions": {
+                    "can_promote_to_staff": request.user.is_superuser,
+                    "can_promote_to_superuser": request.user.is_superuser,
+                    "can_deactivate_users": request.user.is_superuser,
+                },
+            }
+        )
+
+    def patch(self, request, user_id=None):
+        """Update user staff status (limited permissions)"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Only staff members can modify user permissions"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if not user_id:
+            return Response(
+                {"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user_to_update = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Only superusers can promote to staff or superuser
+        if not request.user.is_superuser:
+            return Response(
+                {
+                    "error": "Only superusers can promote users to staff or superuser status"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Prevent users from removing their own superuser status
+        if user_to_update == request.user and request.data.get("is_superuser") == False:
+            return Response(
+                {"error": "You cannot remove your own superuser privileges"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Update permissions
+        if "is_staff" in request.data:
+            user_to_update.is_staff = request.data["is_staff"]
+
+        if "is_superuser" in request.data:
+            user_to_update.is_superuser = request.data["is_superuser"]
+            # If promoting to superuser, also make them staff
+            if request.data["is_superuser"]:
+                user_to_update.is_staff = True
+
+        user_to_update.save()
+
+        return Response(
+            {
+                "status": "success",
+                "message": f"User permissions updated successfully",
+                "user": {
+                    "id": user_to_update.id,
+                    "email": user_to_update.email,
+                    "full_name": user_to_update.full_name
+                    or f"{user_to_update.first_name} {user_to_update.last_name}".strip()
+                    or user_to_update.username,
+                    "is_staff": user_to_update.is_staff,
+                    "is_superuser": user_to_update.is_superuser,
+                    "is_active": user_to_update.is_active,
+                },
+            }
+        )

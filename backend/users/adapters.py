@@ -29,3 +29,67 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
 
         except User.DoesNotExist:
             pass  # Proceed with the default behavior (create new user)
+
+    def save_user(self, request, sociallogin, form=None):
+        """
+        Save user with additional information from Google OAuth
+        """
+        user = super().save_user(request, sociallogin, form)
+
+        # Get extra data from Google
+        if sociallogin.account.provider == "google":
+            extra_data = sociallogin.account.extra_data
+
+            # Populate user fields with Google data
+            user.google_id = extra_data.get("id")
+            user.first_name = extra_data.get("given_name", "")
+            user.last_name = extra_data.get("family_name", "")
+            user.profile_picture = extra_data.get("picture")
+            user.locale = extra_data.get("locale")
+            user.verified_email = extra_data.get("verified_email", False)
+            user.is_social_user = True
+            user.social_provider = "google"
+
+            # Auto-activate user since Google has verified the email
+            user.is_active = True
+
+            # Build full_name from Google data
+            if user.first_name or user.last_name:
+                user.full_name = f"{user.first_name} {user.last_name}".strip()
+            elif extra_data.get("name"):
+                user.full_name = extra_data.get("name")
+
+            # Set username from email if not provided
+            if not user.username:
+                user.username = user.email.split("@")[0]
+
+            user.save()
+
+        return user
+
+    def populate_user(self, request, sociallogin, data):
+        """
+        Populate user instance with data from social account
+        """
+        user = super().populate_user(request, sociallogin, data)
+
+        if sociallogin.account.provider == "google":
+            extra_data = sociallogin.account.extra_data
+
+            # Set additional fields during user creation
+            user.google_id = extra_data.get("id")
+            user.first_name = extra_data.get("given_name", "")
+            user.last_name = extra_data.get("family_name", "")
+            user.profile_picture = extra_data.get("picture")
+            user.locale = extra_data.get("locale")
+            user.verified_email = extra_data.get("verified_email", False)
+            user.is_social_user = True
+            user.social_provider = "google"
+
+            # Build full_name
+            if user.first_name or user.last_name:
+                user.full_name = f"{user.first_name} {user.last_name}".strip()
+            elif extra_data.get("name"):
+                user.full_name = extra_data.get("name")
+
+        return user

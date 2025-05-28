@@ -23,6 +23,7 @@ import {
   GoogleIcon,
   FacebookIcon,
   SitemarkIcon,
+  HepatoCAIIcon,
 } from "../../components/CustomIcons";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -171,6 +172,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
   const handlegoogleSignIn = () => {
     window.location.href = "http://127.0.0.1:8000/accounts/google/login/";
+    navigate("/"); // Redirect to home page after successful login
   };
 
   return (
@@ -178,7 +180,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <SitemarkIcon />
+          <HepatoCAIIcon />
           <Typography variant="h4" component="h1">
             Sign up
           </Typography>

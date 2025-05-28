@@ -55,8 +55,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "import_export",  # For data import/export functionality
     # "api",
     "users",
+    "diagnosis",
+    "aiassistant",
     "note",
     "rest_framework",
     "django_rest_passwordreset",
@@ -231,3 +234,49 @@ SOCIALACCOUNT_PROVIDERS = {
 #  if a user create a account with email and password and then log in with google (its send us to a intermediate page)
 # this solve my problem
 SOCIALACCOUNT_ADAPTER = "users.adapters.MySocialAccountAdapter"
+
+
+# Logging Configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "django.log",  # Creates log file in project root
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "diagnosis": {
+            "handlers": ["file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django": {
+            "handlers": ["file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

@@ -23,6 +23,7 @@ import {
   GoogleIcon,
   FacebookIcon,
   SitemarkIcon,
+  HepatoCAIIcon,
 } from "../../components/CustomIcons";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
 import { useState } from "react";
@@ -30,6 +31,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { CircularProgress } from "@mui/material";
+import { useAuth } from "../../AuthContext";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -85,6 +87,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // get login method from context
 
   const location = useLocation();
   const [snackbar, setSnackbar] = React.useState({
@@ -128,14 +131,19 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       const checkRes = await api.post("/users/check-email/", { email });
 
       if (checkRes.data.exists) {
-        // Step 2: Try to log in
-        const res = await api.post("/accounts/token/", { email, password });
+        // Step 2: Use login from AuthProvider
+        const loginResult = await login({ email, password }); // Assuming your API takes 'username'
 
-        localStorage.setItem(ACCESS_TOKEN, res.data.access);
-        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-        navigate("/");
+        if (loginResult.success) {
+          navigate("/"); // Navigate on successful login
+        } else {
+          setSnackbar({
+            open: true,
+            severity: "error",
+            message: "Incorrect password.",
+          });
+        }
       } else {
-        // Show error: user not found
         setSnackbar({
           open: true,
           severity: "error",
@@ -143,20 +151,11 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
         });
       }
     } catch (err: any) {
-      // Incorrect password or auth error
-      if (err.response?.status === 401) {
-        setSnackbar({
-          open: true,
-          severity: "error",
-          message: "Incorrect password.",
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          severity: "error",
-          message: "An error occurred. Please try again.",
-        });
-      }
+      setSnackbar({
+        open: true,
+        severity: "error",
+        message: "An error occurred. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -208,7 +207,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       <SignInContainer direction="column" justifyContent="space-between">
         {/* <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} /> */}
         <Card variant="outlined">
-          <SitemarkIcon />
+          <HepatoCAIIcon />
           <Typography
             component="h1"
             variant="h4"

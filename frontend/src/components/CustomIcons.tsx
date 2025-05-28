@@ -1,5 +1,61 @@
-import * as React from 'react';
-import SvgIcon from '@mui/material/SvgIcon';
+import * as React from "react";
+import SvgIcon from "@mui/material/SvgIcon";
+import { Box, createTheme, ThemeProvider } from "@mui/system";
+import { Typography } from "@mui/material";
+import styled from "@mui/system/styled";
+import HepatoCAIminiIcon from "../assets/HepatoCAIminiIcon.png";
+
+export function HepatoCAIIcon() {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      <HepatoCAIIconMini sx={{ marginRight: "0.5rem" }} />
+      <Typography
+        variant="h5"
+        component="span"
+        sx={{ fontWeight: "bold", color: "#000000" }} // Black for "Hepato"
+      >
+        Hepato
+      </Typography>
+      <Typography
+        variant="h5"
+        component="span"
+        sx={{
+          fontWeight: "bold",
+          color: "#4CAF50", // Green for "C" (using a common green shade)
+          // No marginLeft here to make "Hepato" and "C" feel closer
+        }}
+      >
+        C
+      </Typography>
+      <Typography
+        variant="h5"
+        component="span"
+        sx={{
+          fontWeight: "bold",
+          color: "#2563EB", // Blue for "AI" (using a common blue shade)
+          marginLeft: "0.2rem", // A small margin to separate "C" and "AI"
+        }}
+      >
+        AI
+      </Typography>
+    </Box>
+  );
+}
+
+export function HepatoCAIIconMini({ sx }) {
+  return (
+    <Box
+      component="img"
+      src={HepatoCAIminiIcon}
+      alt="HepatoCAI Logo"
+      sx={{
+        height: "40px",
+        width: "auto",
+        ...sx, // Allow style override
+      }}
+    />
+  );
+}
 
 export function SitemarkIcon() {
   return (

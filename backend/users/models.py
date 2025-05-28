@@ -37,11 +37,34 @@ class CustomUser(AbstractUser):
     birthday = models.DateField(null=True, blank=True)
     username = models.CharField(max_length=200, null=True, blank=True)
     full_name = models.CharField(max_length=200, null=True, blank=True)
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100, null=True, blank=True)
+    profile_picture = models.URLField(max_length=500, null=True, blank=True)
+    google_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
+    locale = models.CharField(
+        max_length=10, null=True, blank=True
+    )  # Language preference
+    verified_email = models.BooleanField(default=False)
+
+    # Social login tracking
+    is_social_user = models.BooleanField(default=False)
+    social_provider = models.CharField(max_length=50, null=True, blank=True)
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    def save(self, *args, **kwargs):
+        # Auto-populate full_name from first_name and last_name if not provided
+        if not self.full_name and (self.first_name or self.last_name):
+            self.full_name = f"{self.first_name or ''} {self.last_name or ''}".strip()
+
+        # Auto-populate username from email if not provided
+        if not self.username and self.email:
+            self.username = self.email.split("@")[0]
+
+        super().save(*args, **kwargs)
 
 
 @receiver(reset_password_token_created)
@@ -72,7 +95,11 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
 
 @receiver(user_logged_in)
 def generate_jwt_on_login(request, user, **kwargs):
-    refresh = RefreshToken.for_user(user)
+    # Import here to avoid circular import
+    from .serializers import CustomTokenObtainPairSerializer
+
+    # Use the custom token serializer to ensure is_staff is included
+    refresh = CustomTokenObtainPairSerializer.get_token(user)
     request.session["jwt"] = {
         "access": str(refresh.access_token),
         "refresh": str(refresh),
