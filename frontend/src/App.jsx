@@ -5,7 +5,11 @@ import { LazyComponents, PerformanceMonitor } from "./config/performance";
 
 // Critical components that should load immediately
 import ProtectedRoute from "./components/ProtectedRoute";
-import AuthCallback from "./AuthCallback";
+import AuthCallback from "./components/auth/AuthCallback";
+import AuthDebugPanel from "./components/auth/AuthDebugPanel";
+
+// add constants for API and AUTH configuration
+import { FEATURES } from "./config/constants";
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -23,10 +27,11 @@ function App() {
   useEffect(() => {
     PerformanceMonitor.init();
   }, []);
-
   return (
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
+        {/* Global AuthDebugPanel for development */}
+        {FEATURES.ENABLE_DEBUG_CONSOLE && <AuthDebugPanel />}
         <Routes>
           {/* Main application routes */}
           <Route path="/" element={<LazyComponents.Home />} />

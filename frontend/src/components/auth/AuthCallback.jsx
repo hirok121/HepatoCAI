@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../../hooks/AuthContext";
 
 const AuthCallback = () => {
   const [params] = useSearchParams();

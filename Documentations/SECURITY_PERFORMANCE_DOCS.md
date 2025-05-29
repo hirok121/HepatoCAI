@@ -46,15 +46,14 @@ Multiple rate limiting strategies are available:
 
 ```python
 from utils.security import RateLimitManager
-from utils.performance import RateLimiter
 
-# Class-based rate limiting
-@RateLimiter.rate_limit_view(limit=5, window=300)  # 5 requests per 5 minutes
+# Decorator-based rate limiting
+@RateLimitManager.rate_limit_decorator("login")  # Uses predefined login limits
 def login_view(request):
     pass
 
-# Manual rate limiting
-is_limited = RateLimitManager.is_rate_limited("user_123", limit=10, window=3600)
+# Manual rate limiting check
+is_allowed = RateLimitManager.check_rate_limit("user_123", "api")
 ```
 
 ### Security Headers

@@ -20,7 +20,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
 import { SitemarkIcon } from "../../components/ui/CustomIcons";
-import api from "../../api";
+import api from "../../services/api";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",

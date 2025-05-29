@@ -1,8 +1,7 @@
-import * as React from "react";
+import PropTypes from "prop-types";
 import SvgIcon from "@mui/material/SvgIcon";
-import { Box, createTheme, ThemeProvider } from "@mui/system";
+import { Box } from "@mui/system";
 import { Typography } from "@mui/material";
-import styled from "@mui/system/styled";
 import HepatoCAIminiIcon from "../../assets/HepatoCAIminiIcon.png";
 
 export function HepatoCAIIcon() {
@@ -56,6 +55,10 @@ export function HepatoCAIIconMini({ sx }) {
     />
   );
 }
+
+HepatoCAIIconMini.propTypes = {
+  sx: PropTypes.object,
+};
 
 export function SitemarkIcon() {
   return (

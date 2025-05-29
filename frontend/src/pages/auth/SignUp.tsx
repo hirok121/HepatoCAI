@@ -17,8 +17,8 @@ import {
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../../theme/AppTheme";
-import ColorModeSelect from "../../theme/ColorModeSelect";
-import api from "../../api";
+// import ColorModeSelect from "../../theme/ColorModeSelect";
+import api from "../../services/api";
 import {
   GoogleIcon,
   FacebookIcon,

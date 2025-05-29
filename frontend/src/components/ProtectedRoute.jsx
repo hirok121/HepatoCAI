@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../hooks/AuthContext";
 import { AUTH_CONFIG } from "../config/constants";
 
 const ProtectedRoute = ({ children, requireStaff = false }) => {

@@ -18,7 +18,7 @@ import Alert from "@mui/material/Alert";
 import { useLocation } from "react-router-dom";
 import ForgotPassword from "../../components/auth/ForgotPassword";
 import AppTheme from "../../theme/AppTheme";
-import ColorModeSelect from "../../theme/ColorModeSelect";
+// import ColorModeSelect from "../../theme/ColorModeSelect";
 import {
   GoogleIcon,
   FacebookIcon,
@@ -29,9 +29,9 @@ import { API_CONFIG, API_ENDPOINTS } from "../../config/constants";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api";
+import api from "../../services/api";
 import { CircularProgress } from "@mui/material";
-import { useAuth } from "../../AuthContext";
+import { useAuth } from "../../hooks/AuthContext";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -79,7 +79,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props: { disableCustomTheme?: boolean }) {
+export default function SignIn(props) {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);

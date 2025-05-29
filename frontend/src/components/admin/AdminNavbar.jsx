@@ -30,7 +30,7 @@ import {
   MedicalServices,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../AuthContext";
+import { useAuth } from "../../hooks/AuthContext";
 
 function AdminNavbar() {
   const { user, logout } = useAuth();

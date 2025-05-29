@@ -33,11 +33,12 @@ import {
   Code,
   Timeline,
 } from "@mui/icons-material";
-import { useAuth } from "../../AuthContext";
-import api from "../../api";
+import { useAuth } from "../../hooks/AuthContext";
+import api from "../../services/api";
 import axios from "axios";
 import { API_CONFIG, AUTH_CONFIG, API_ENDPOINTS } from "../../config/constants";
 import AdminNavbar from "../../components/admin/AdminNavbar";
+import AuthDebugPanel from "../../components/auth/AuthDebugPanel";
 
 // Create a test-only axios instance without interceptors
 const testApi = axios.create({
@@ -510,7 +511,7 @@ function AdminDebugConsole() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <AdminNavbar/>
+      <AdminNavbar />
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -745,7 +746,6 @@ function AdminDebugConsole() {
                   />
                 </Tabs>
               </Box>
-
               <CustomTabPanel value={activeTab} index={0}>
                 <Box sx={{ maxHeight: "500px", overflow: "auto" }}>
                   {testResults.slice(-20).map((result, index) => (
@@ -778,7 +778,6 @@ function AdminDebugConsole() {
                   ))}
                 </Box>
               </CustomTabPanel>
-
               {["auth", "api", "system"].map((category, index) => (
                 <CustomTabPanel
                   key={category}
@@ -826,7 +825,25 @@ function AdminDebugConsole() {
                     )}
                   </Box>
                 </CustomTabPanel>
-              ))}
+              ))}{" "}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Auth Debug Panel Integration */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                <Security sx={{ mr: 1 }} />
+                Live Authentication Debug
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                Real-time authentication status monitoring (Development only)
+              </Typography>
+              <Box sx={{ position: "relative", minHeight: "200px" }}>
+                <AuthDebugPanel />
+              </Box>
             </CardContent>
           </Card>
         </Grid>

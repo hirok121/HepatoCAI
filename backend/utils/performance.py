@@ -75,8 +75,23 @@ class PerformanceMonitor:
 
                 # Execute view and cache result
                 result = view_func(request, *args, **kwargs)
-                cache.set(cache_key, result, timeout)
-                logger.info(f"Cached result for {cache_key}")
+
+                # Handle DRF Response objects by rendering them before caching
+                if hasattr(result, "render"):
+                    try:
+                        # Render the response to ensure content is available for serialization
+                        result.render()
+                        cache.set(cache_key, result, timeout)
+                        logger.info(f"Cached rendered result for {cache_key}")
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to cache rendered response for {cache_key}: {e}"
+                        )
+                        # Don't cache if rendering fails, but still return the result
+                else:
+                    # For non-DRF responses, cache directly
+                    cache.set(cache_key, result, timeout)
+                    logger.info(f"Cached result for {cache_key}")
 
                 return result
 
@@ -152,65 +167,7 @@ class PerformanceMiddleware:
             logger.warning(
                 f"Request performance - {request.path}: "
                 f"{execution_time:.2f}s, {query_count} queries"
-            )
-
-        # Add performance headers to response
+            )  # Add performance headers to response
         response["X-Response-Time"] = f"{execution_time:.3f}s"
         response["X-Query-Count"] = str(query_count)
-
         return response
-
-
-# Rate limiting utilities
-class RateLimiter:
-    """Simple rate limiting using Django cache"""
-
-    @staticmethod
-    def is_rate_limited(identifier, limit=100, window=3600):
-        """Check if identifier is rate limited"""
-        cache_key = f"rate_limit:{identifier}"
-        current_count = cache.get(cache_key, 0)
-
-        if current_count >= limit:
-            return True  # Increment counter
-        cache.set(cache_key, current_count + 1, window)
-        return False
-
-    @staticmethod
-    def rate_limit_view(limit=100, window=3600):
-        """Decorator to add rate limiting to views and ViewSet methods"""
-
-        def decorator(view_func):
-            @wraps(view_func)
-            def wrapper(*args, **kwargs):
-                # Handle both function-based views and ViewSet methods
-                if len(args) > 0:
-                    # For ViewSet methods: args[0] is self, args[1] is request
-                    # For function-based views: args[0] is request
-                    request = (
-                        args[1]
-                        if hasattr(args[0], "__class__") and hasattr(args[0], "request")
-                        else args[0]
-                    )
-                    if not hasattr(request, "META"):
-                        # If args[0] is a ViewSet instance, request is args[1]
-                        request = args[1] if len(args) > 1 else None
-
-                if request and hasattr(request, "META"):
-                    # Use IP address as identifier
-                    identifier = request.META.get("REMOTE_ADDR", "unknown")
-
-                    if RateLimiter.is_rate_limited(identifier, limit, window):
-                        from rest_framework.response import Response
-                        from rest_framework import status
-
-                        return Response(
-                            {"error": "Rate limit exceeded"},
-                            status=status.HTTP_429_TOO_MANY_REQUESTS,
-                        )
-
-                return view_func(*args, **kwargs)
-
-            return wrapper
-
-        return decorator

@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import PropTypes from "prop-types";
 import App from "./App.jsx";
-import { AuthProvider } from "./AuthContext.jsx";
+import { AuthProvider } from "./hooks/AuthContext.jsx";
 import "./index.css";
 
 // Error boundary component

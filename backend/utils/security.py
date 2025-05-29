@@ -28,9 +28,7 @@ class SecurityValidator:
         r"<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>",
         r"<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>",
         r"<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>",
-    ]
-
-    # SQL injection patterns
+    ]  # SQL injection patterns
     SQL_PATTERNS = [
         r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)",
         r"(\'|\"|;|--|\*|\||&)",
@@ -58,6 +56,30 @@ class SecurityValidator:
         # Sanitize HTML
         sanitized = html.escape(data)
         return sanitized
+
+    @classmethod
+    def validate_input_data(cls, data):
+        """Validate entire request data for security"""
+        if not isinstance(data, dict):
+            return False
+
+        try:
+            for key, value in data.items():
+                if isinstance(value, str):
+                    cls.validate_input(value, key)
+            return True
+        except ValidationError:
+            return False
+
+    @classmethod
+    def validate_email_format(cls, email):
+        """Validate email format"""
+        import re
+
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not isinstance(email, str):
+            return False
+        return re.match(email_pattern, email) is not None
 
     @classmethod
     def validate_patient_data(cls, patient_data):
@@ -146,7 +168,24 @@ class RateLimitManager:
 
         def decorator(view_func):
             @wraps(view_func)
-            def wrapper(request, *args, **kwargs):
+            def wrapper(*args, **kwargs):
+                # Handle both function-based views and ViewSet methods
+                if len(args) > 0 and hasattr(args[0], "META"):
+                    # Function-based view: first arg is request
+                    request = args[0]
+                    view_args = args[1:]
+                elif len(args) > 1 and hasattr(args[1], "META"):
+                    # ViewSet method: first arg is self, second is request
+                    request = args[1]
+                    view_args = args
+                else:
+                    # Fallback - try to find request in kwargs
+                    request = kwargs.get("request")
+                    view_args = args
+                    if not request:
+                        # Cannot find request object, skip rate limiting
+                        return view_func(*args, **kwargs)
+
                 # Determine identifier
                 if get_identifier:
                     identifier = get_identifier(request)
@@ -163,7 +202,7 @@ class RateLimitManager:
                         status=429,
                     )
 
-                return view_func(request, *args, **kwargs)
+                return view_func(*view_args, **kwargs)
 
             return wrapper
 
@@ -236,7 +275,7 @@ class AuditLogger:
         if len(events) > 100:
             events = events[-100:]
 
-        cache.set(cache_key, events, 86400)  # 24 hours
+        cache.set(cache_key, events, 86400)  # 24 hours    @staticmethod
 
     @staticmethod
     def log_failed_login(username, ip_address, user_agent=None):
@@ -255,6 +294,16 @@ class AuditLogger:
         """Log suspicious activities"""
         AuditLogger.log_security_event(
             f"suspicious_{activity_type}",
+            user=user,
+            ip_address=ip_address,
+            details=details,
+        )
+
+    @staticmethod
+    def log_authentication_event(event_type, user=None, ip_address=None, details=None):
+        """Log authentication events"""
+        AuditLogger.log_security_event(
+            f"auth_{event_type}",
             user=user,
             ip_address=ip_address,
             details=details,

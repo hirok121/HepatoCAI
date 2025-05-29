@@ -15,7 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from .resources import HCVPatientResource
 from utils.responses import StandardResponse, handle_exceptions
-from utils.performance import PerformanceMonitor, DatabaseOptimizer, RateLimiter
+from utils.performance import PerformanceMonitor, DatabaseOptimizer
 import logging
 import csv
 

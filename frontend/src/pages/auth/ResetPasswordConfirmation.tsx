@@ -20,7 +20,7 @@ import {
 import { styled } from "@mui/material/styles";
 import AppTheme from "../../theme/AppTheme";
 import { SitemarkIcon } from "../../components/ui/CustomIcons";
-import api from "../../api";
+import api from "../../services/api";
 
 // Styled components
 const Card = styled(MuiCard)(({ theme }) => ({

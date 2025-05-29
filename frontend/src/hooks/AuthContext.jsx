@@ -7,8 +7,8 @@ import {
 } from "react";
 import PropTypes from "prop-types";
 import { jwtDecode } from "jwt-decode";
-import api from "./api"; // Assuming 'api' is your configured Axios or fetch instance
-import { AUTH_CONFIG } from "./config/constants";
+import api from "../services/api"; // Assuming 'api' is your configured Axios or fetch instance
+import { AUTH_CONFIG } from "../config/constants";
 
 // Create AuthContext with default values
 const AuthContext = createContext({
@@ -16,7 +16,8 @@ const AuthContext = createContext({
   user: null,
   isStaff: false,
   loading: false,
-  login: async () => ({
+  // eslint-disable-next-line no-unused-vars
+  login: async (_credentials) => ({
     success: false,
     error: "Provider not available",
   }),

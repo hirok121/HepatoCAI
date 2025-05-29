@@ -1,23 +1,14 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import type { ThemeOptions } from "@mui/material/styles";
 import { inputsCustomizations } from "./customizations/inputs";
 import { dataDisplayCustomizations } from "./customizations/dataDisplay";
 import { feedbackCustomizations } from "./customizations/feedback";
 import { navigationCustomizations } from "./customizations/navigation";
 import { surfacesCustomizations } from "./customizations/surfaces";
-import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
+import { typography, shadows, shape } from "./themePrimitives";
 
-interface AppThemeProps {
-  children: React.ReactNode;
-  /**
-   * This is for the docs site. You can ignore it or remove it.
-   */
-  disableCustomTheme?: boolean;
-  themeComponents?: ThemeOptions["components"];
-}
-
-export default function AppTheme(props: AppThemeProps) {
+export default function AppTheme(props) {
   const { children, disableCustomTheme, themeComponents } = props;
   const theme = React.useMemo(() => {
     return disableCustomTheme
@@ -53,3 +44,9 @@ export default function AppTheme(props: AppThemeProps) {
     </ThemeProvider>
   );
 }
+
+AppTheme.propTypes = {
+  children: PropTypes.node.isRequired,
+  disableCustomTheme: PropTypes.bool,
+  themeComponents: PropTypes.object,
+};

@@ -37,8 +37,8 @@ import {
   Storage,
   Memory,
 } from "@mui/icons-material";
-import { useAuth } from "../../AuthContext";
-import api from "../../api";
+import { useAuth } from "../../hooks/AuthContext";
+import api from "../../services/api";
 import AdminNavBar from "../../components/admin/AdminNavbar";
 
 function AdminDashboard() {

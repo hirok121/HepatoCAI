@@ -38,7 +38,6 @@ from .serializers import (
 )
 from utils.responses import StandardResponse, handle_exceptions
 from utils.security import SecurityValidator, RateLimitManager, AuditLogger
-from utils.performance import RateLimiter
 
 import json
 import logging
@@ -185,7 +184,7 @@ class LoginViewSet(viewsets.ViewSet):
     serializer_class = LoginSerializer
 
     @handle_exceptions
-    @RateLimiter.rate_limit_view(limit=5, window=300)  # 5 attempts per 5 minutes
+    @RateLimitManager.rate_limit_decorator("login")  # 5 attempts per 15 minutes
     def create(self, request):
         # Security validation for login attempt
         client_ip = request.META.get("REMOTE_ADDR")
@@ -276,7 +275,7 @@ class CheckEmailView(APIView):
     serializer_class = EmailCheckSerializer
 
     @handle_exceptions
-    @RateLimiter.rate_limit_view(limit=10, window=300)  # 10 checks per 5 minutes
+    @RateLimitManager.rate_limit_decorator("api")  # 100 requests per hour
     def post(self, request):
         client_ip = request.META.get("REMOTE_ADDR")
 
@@ -325,7 +324,7 @@ class RegisterViewset(viewsets.ViewSet):
     serializer_class = RegisterSerializer
 
     @handle_exceptions
-    @RateLimiter.rate_limit_view(limit=3, window=600)  # 3 registrations per 10 minutes
+    @RateLimitManager.rate_limit_decorator("api")  # 100 requests per hour
     def create(self, request):
         client_ip = request.META.get("REMOTE_ADDR")
 

@@ -18,7 +18,7 @@ from utils.security import (
     AuditLogger,
     TokenManager,
 )
-from utils.performance import PerformanceMonitor, DatabaseOptimizer, RateLimiter
+from utils.performance import PerformanceMonitor, DatabaseOptimizer
 from utils.responses import StandardResponse, handle_exceptions
 
 User = get_user_model()
@@ -309,38 +309,9 @@ class DatabaseOptimizerTests(TestCase):
 
         result = DatabaseOptimizer.optimize_queryset(
             mock_queryset, select_related=["profile"], prefetch_related=["groups"]
-        )
-
-        # Verify optimization methods were called
+        )  # Verify optimization methods were called
         mock_queryset.select_related.assert_called_with("profile")
         mock_queryset.prefetch_related.assert_called_with("groups")
-
-
-class RateLimiterTests(TestCase):
-    """Test simple rate limiter utilities"""
-
-    def setUp(self):
-        cache.clear()
-
-    def test_rate_limiter_allows_requests(self):
-        """Test rate limiter allows requests under limit"""
-        identifier = "test_user"
-
-        # Should not be rate limited initially
-        result = RateLimiter.is_rate_limited(identifier, limit=5, window=300)
-        self.assertFalse(result)
-
-    def test_rate_limiter_blocks_excess_requests(self):
-        """Test rate limiter blocks excess requests"""
-        identifier = "test_user"
-
-        # Make requests up to limit
-        for _ in range(3):
-            RateLimiter.is_rate_limited(identifier, limit=2, window=300)
-
-        # Next request should be blocked
-        result = RateLimiter.is_rate_limited(identifier, limit=2, window=300)
-        self.assertTrue(result)
 
 
 class AuditLoggerTests(TestCase):

@@ -44,7 +44,7 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LoginIcon from "@mui/icons-material/Login";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import { useAuth } from "../../AuthContext";
+import { useAuth } from "../../hooks/AuthContext";
 import { HepatoCAIIcon } from "../ui/CustomIcons";
 
 // Add LinkBehavior component before menuItems

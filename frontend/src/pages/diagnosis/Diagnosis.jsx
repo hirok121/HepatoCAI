@@ -15,7 +15,7 @@ import {
   NavigateBefore,
   Refresh,
 } from "@mui/icons-material";
-import api from "../../api";
+import api from "../../services/api";
 
 // Import components
 import DiagnosisHero from "../../components/diagnosis/DiagnosisHero";

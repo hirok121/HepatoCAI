@@ -29,8 +29,8 @@ import {
   Timeline,
   PieChart,
 } from "@mui/icons-material";
-import { useAuth } from "../../AuthContext";
-import api from "../../api";
+import { useAuth } from "../../hooks/AuthContext";
+import api from "../../services/api";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 
 function AdminAnalytics() {
