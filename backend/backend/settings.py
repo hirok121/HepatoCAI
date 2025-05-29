@@ -39,6 +39,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
 }
 
 SIMPLE_JWT = {
@@ -60,7 +61,6 @@ INSTALLED_APPS = [
     "users",
     "diagnosis",
     "aiassistant",
-    "note",
     "rest_framework",
     "django_rest_passwordreset",
     "corsheaders",
@@ -75,6 +75,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "utils.security.SecurityMiddleware",  # Custom security middleware
+    "utils.performance.PerformanceMiddleware",  # Performance monitoring
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -154,11 +156,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "UTC"  # Set to UTC for consistent timezone handling
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = True  # Ensure timezone support is enabled
 
 
 # Static files (CSS, JavaScript, Images)
@@ -214,8 +216,8 @@ SOCIALACCOUNT_AUTO_SIGNUP = True  # Automatically create a user account when a u
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
-            "client_id": "193538155468-mhf1k66uicqhuht696p8brg82i9ii7mt.apps.googleusercontent.com",
-            "secret": "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",
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
             "key": "",
         },
         "SCOPE": [
@@ -225,7 +227,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {
             "access_type": "online",
         },
-        "REDIRECT_URI": "http://127.0.0.1:8000/users/acounts/google/login/redirect/",
+        "REDIRECT_URI": "http://127.0.0.1:8000/accounts/google/login/callback/",
     }
 }
 
@@ -237,46 +239,89 @@ SOCIALACCOUNT_ADAPTER = "users.adapters.MySocialAccountAdapter"
 
 
 # Logging Configuration
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
+# Import logging configuration
+from .logging_config import LOGGING
+
+# =============================================================================
+# PERFORMANCE CONFIGURATION
+# =============================================================================
+
+# Cache configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+        "TIMEOUT": int(os.getenv("CACHE_TIMEOUT", 300)),
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000,
+            "CULL_FREQUENCY": 3,
         },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "django.log",  # Creates log file in project root
-            "formatter": "verbose",
-        },
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-    },
-    "root": {
-        "handlers": ["console", "file"],
-        "level": "INFO",
-    },
-    "loggers": {
-        "diagnosis": {
-            "handlers": ["file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "django": {
-            "handlers": ["file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
+    }
 }
+
+# Database connection settings
+if "default" in DATABASES:
+    DATABASES["default"]["CONN_MAX_AGE"] = int(os.getenv("DB_CONN_MAX_AGE", 0))
+
+# Performance monitoring settings
+PERFORMANCE_MONITORING = os.getenv("PERFORMANCE_MONITORING", "True").lower() == "true"
+SLOW_QUERY_THRESHOLD = float(os.getenv("SLOW_QUERY_THRESHOLD", 2.0))
+HIGH_QUERY_COUNT_THRESHOLD = int(os.getenv("HIGH_QUERY_COUNT_THRESHOLD", 10))
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+
+# Rate limiting settings
+RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "True").lower() == "true"
+
+# Security headers
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", 31536000))
+SECURE_CONTENT_TYPE_NOSNIFF = (
+    os.getenv("SECURE_CONTENT_TYPE_NOSNIFF", "True").lower() == "true"
+)
+SECURE_BROWSER_XSS_FILTER = (
+    os.getenv("SECURE_BROWSER_XSS_FILTER", "True").lower() == "true"
+)
+X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY")
+
+# CSRF and session security
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False").lower() == "true"
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"
+
+# Security monitoring
+SECURITY_AUDIT_ENABLED = os.getenv("SECURITY_AUDIT_ENABLED", "True").lower() == "true"
+SUSPICIOUS_ACTIVITY_THRESHOLD = int(os.getenv("SUSPICIOUS_ACTIVITY_THRESHOLD", 5))
+
+# =============================================================================
+# APPLICATION FEATURES
+# =============================================================================
+
+# AI Features
+AI_ASSISTANT_ENABLED = os.getenv("AI_ASSISTANT_ENABLED", "True").lower() == "true"
+AI_MODEL_TIMEOUT = int(os.getenv("AI_MODEL_TIMEOUT", 30))
+AI_MAX_REQUESTS_PER_USER = int(os.getenv("AI_MAX_REQUESTS_PER_USER", 50))
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 10485760))  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = FILE_UPLOAD_MAX_MEMORY_SIZE
+
+# Pagination
+REST_FRAMEWORK["PAGE_SIZE"] = int(os.getenv("DEFAULT_PAGE_SIZE", 20))
+
+# =============================================================================
+# DEVELOPMENT SETTINGS
+# =============================================================================
+
+# Development features
+DEV_BYPASS_EMAIL_VERIFICATION = (
+    os.getenv("DEV_BYPASS_EMAIL_VERIFICATION", "False").lower() == "true"
+)
+DEV_AUTO_LOGIN = os.getenv("DEV_AUTO_LOGIN", "False").lower() == "true"
+
+# Override CORS for development
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOW_ALL_ORIGINS = False

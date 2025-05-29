@@ -41,6 +41,7 @@ import {
   Upload,
   Settings,
 } from "@mui/icons-material";
+import AdminNavbar from "../../components/admin/AdminNavbar";
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -265,6 +266,7 @@ function AdminSystem() {
 
   return (
     <Box sx={{ p: 3 }}>
+      <AdminNavbar/>
       {/* Header */}
       <Box
         sx={{

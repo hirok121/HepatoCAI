@@ -44,6 +44,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../AuthContext";
 import api from "../../api";
+import AdminNavbar from "../../components/admin/AdminNavbar";
 
 function UserManagement() {
   console.log("UserManagement component rendered");
@@ -262,6 +263,7 @@ function UserManagement() {
 
   return (
     <Box sx={{ p: 3 }}>
+      <AdminNavbar />
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom>

@@ -8,23 +8,23 @@ import {
 import PropTypes from "prop-types";
 import { jwtDecode } from "jwt-decode";
 import api from "./api"; // Assuming 'api' is your configured Axios or fetch instance
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
+import { AUTH_CONFIG } from "./config/constants";
 
 // Create AuthContext with default values
 const AuthContext = createContext({
   isAuthorized: false,
   user: null,
-  isStaff: false, // Added isStaff state
-  loading: false, // Added loading state
-  login: async (credentials) => ({
+  isStaff: false,
+  loading: false,
+  login: async () => ({
     success: false,
     error: "Provider not available",
-  }), // Updated default
+  }),
   logout: () => {},
   refreshToken: async () => ({
     success: false,
     error: "Provider not available",
-  }), // Updated default
+  }),
 });
 
 // Helper to safely decode JWT
@@ -42,20 +42,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isStaff, setIsStaff] = useState(false); // Added isStaff state
   const [loading, setLoading] = useState(true); // Start as true during initial check
-
   // Logout method (using useCallback for stability)
   const logout = useCallback(() => {
-    localStorage.removeItem(ACCESS_TOKEN);
-    localStorage.removeItem(REFRESH_TOKEN);
+    localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
+    localStorage.removeItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
     setIsAuthorized(false);
     setUser(null);
     setIsStaff(false); // Reset isStaff on logout
   }, []);
-
   // Refresh access token using refresh token
   const refreshToken = useCallback(async () => {
     setLoading(true);
-    const refresh = localStorage.getItem(REFRESH_TOKEN);
+    const refresh = localStorage.getItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
     if (!refresh) {
       logout();
       setLoading(false);
@@ -68,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         const { access } = res.data;
         const decoded = safeDecode(access);
         if (decoded) {
-          localStorage.setItem(ACCESS_TOKEN, access);
+          localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, access);
           setIsAuthorized(true);
           setUser(decoded);
           setIsStaff(decoded.is_staff || false); // Set isStaff from token
@@ -88,11 +86,10 @@ export const AuthProvider = ({ children }) => {
       };
     }
   }, [logout]); // Added logout to dependency array
-
   // Validate token and update auth state (using useCallback)
   const checkAuth = useCallback(async () => {
     setLoading(true);
-    const token = localStorage.getItem(ACCESS_TOKEN);
+    const token = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
     const decoded = safeDecode(token);
 
     if (decoded) {
@@ -115,29 +112,36 @@ export const AuthProvider = ({ children }) => {
     logout();
     setLoading(false);
     return false;
-  }, [logout, refreshToken]); // Added dependencies
-
-  // Login method
+  }, [logout, refreshToken]); // Added dependencies  // Login method
   const login = async (credentials) => {
     setLoading(true);
+    console.log("AuthContext - login attempt with:", {
+      email: credentials.email,
+    }); // Debug log
     try {
       const res = await api.post("/accounts/token/", credentials);
+      console.log("AuthContext - login response status:", res.status); // Debug log
       const { access, refresh } = res.data;
 
-      localStorage.setItem(ACCESS_TOKEN, access);
-      if (refresh) localStorage.setItem(REFRESH_TOKEN, refresh);
+      localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, access);
+      if (refresh) localStorage.setItem(AUTH_CONFIG.REFRESH_TOKEN_KEY, refresh);
       const decoded = safeDecode(access);
       if (decoded) {
         setIsAuthorized(true);
         setUser(decoded);
         setIsStaff(decoded.is_staff || false); // Set isStaff from token
         setLoading(false);
+        console.log("AuthContext - login successful for user:", decoded.email); // Debug log
         return { success: true, user: decoded };
       } else {
         throw new Error("Failed to decode new token.");
       }
     } catch (error) {
-      console.error("Login failed", error);
+      console.error("AuthContext - Login failed:", error);
+      if (error.response) {
+        console.error("AuthContext - Error response:", error.response.data);
+        console.error("AuthContext - Error status:", error.response.status);
+      }
       logout(); // Ensure cleanup
       setLoading(false);
       return {
@@ -160,9 +164,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-
     const interval = setInterval(() => {
-      const token = localStorage.getItem(ACCESS_TOKEN);
+      const token = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
       const decoded = safeDecode(token);
 
       if (decoded) {

@@ -1,37 +1,18 @@
 // eslint-disable-next-line no-unused-vars
-import react from "react";
+import React, { Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { LazyComponents, PerformanceMonitor } from "./config/performance";
 
-// usersauth
-import SingIn from "./pages/usersauth/SignIn";
-import Singup from "./pages/usersauth/SignUp";
-import ResetPassword from "./pages/usersauth/ResetPassword";
-import ResetPasswordConfirm from "./pages/usersauth/ResetPasswordConfirmation";
-
-// Main pages
-import Home from "./pages/Home";
-import Diagnosis from "./pages/Diagnosis";
-import AIAssistant from "./pages/AIAssistant";
-import PatientEducation from "./pages/PatientEducation";
-import Research from "./pages/Research";
-import FAQ from "./pages/FAQ";
-import CommunityForum from "./pages/CommunityForum";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-
-import NotFound from "./pages/NotFound";
+// Critical components that should load immediately
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthCallback from "./AuthCallback";
-import Methodology from "./pages/Methodology";
 
-// Admin Pages
-import AdminLayout from "./pages/admin/components/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import UserManagement from "./pages/admin/UserManagement";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
-import AdminSystem from "./pages/admin/AdminSystem";
-import AdminDebugConsole from "./pages/admin/AdminDebugConsole";
-import AdminDiagnosisManagement from "./pages/admin/AdminDiagnosisManagement";
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+  </div>
+);
 
 function Signout() {
   localStorage.clear();
@@ -39,59 +20,107 @@ function Signout() {
 }
 
 function App() {
+  useEffect(() => {
+    PerformanceMonitor.init();
+  }, []);
+
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Main application routes */}
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/diagnosis"
-          element={
-            <ProtectedRoute>
-              <Diagnosis />
-            </ProtectedRoute>
-          }
-        />
-        {/* Admin Section Routes */}{" "}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
-          <Route path="system" element={<AdminSystem />} />
-          <Route path="debug" element={<AdminDebugConsole />} />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Main application routes */}
+          <Route path="/" element={<LazyComponents.Home />} />
           <Route
-            path="diagnosis-management"
-            element={<AdminDiagnosisManagement />}
+            path="/diagnosis"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.Diagnosis />
+              </ProtectedRoute>
+            }
+          />{" "}
+          {/* Admin Section Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.AdminDashboard />
+              </ProtectedRoute>
+            }
           />
-        </Route>
-        <Route path="/ai-assistant" element={<AIAssistant />} />
-        <Route path="/patient-education" element={<PatientEducation />} />
-        <Route path="/research" element={<Research />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/community" element={<CommunityForum />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/methodology" element={<Methodology />} />
-        {/* Authentication routes */}
-        <Route path="/signin" element={<SingIn />} />
-        <Route path="/signup" element={<Singup />} />
-        <Route path="/signout" element={<Signout />} />
-        <Route path="/resetpassword" element={<ResetPassword />} />
-        <Route
-          path="/resetpassword/confirm"
-          element={<ResetPasswordConfirm />}
-        />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        {/* 404 route */}
-        <Route path="*" element={<NotFound />}></Route>
-      </Routes>
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.AdminUserManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.AdminAnalytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/system"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.AdminSystem />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/debug"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.AdminDebugConsole />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/diagnosis-management"
+            element={
+              <ProtectedRoute>
+                <LazyComponents.AdminDiagnosisManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-assistant"
+            element={<LazyComponents.AIAssistant />}
+          />
+          <Route
+            path="/patient-education"
+            element={<LazyComponents.PatientEducation />}
+          />
+          <Route path="/research" element={<LazyComponents.Research />} />
+          <Route path="/faq" element={<LazyComponents.FAQ />} />
+          <Route
+            path="/community"
+            element={<LazyComponents.CommunityForum />}
+          />
+          <Route path="/about" element={<LazyComponents.About />} />
+          <Route path="/contact" element={<LazyComponents.Contact />} />
+          <Route path="/methodology" element={<LazyComponents.Methodology />} />
+          {/* Authentication routes */}
+          <Route path="/signin" element={<LazyComponents.SignIn />} />
+          <Route path="/signup" element={<LazyComponents.SignUp />} />
+          <Route path="/signout" element={<Signout />} />
+          <Route
+            path="/resetpassword"
+            element={<LazyComponents.ResetPassword />}
+          />
+          <Route
+            path="/resetpassword/confirm"
+            element={<LazyComponents.ResetPasswordConfirm />}
+          />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          {/* 404 route */}
+          <Route path="*" element={<LazyComponents.NotFound />}></Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

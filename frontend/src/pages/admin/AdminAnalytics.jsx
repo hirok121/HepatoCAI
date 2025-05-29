@@ -31,6 +31,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../AuthContext";
 import api from "../../api";
+import AdminNavbar from "../../components/admin/AdminNavbar";
 
 function AdminAnalytics() {
   const { user } = useAuth();
@@ -122,6 +123,7 @@ function AdminAnalytics() {
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
+      <AdminNavbar />
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h4" component="h1">
           Analytics Dashboard

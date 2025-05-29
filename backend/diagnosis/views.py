@@ -14,105 +14,116 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
 from .resources import HCVPatientResource
+from utils.responses import StandardResponse, handle_exceptions
+from utils.performance import PerformanceMonitor, DatabaseOptimizer, RateLimiter
 import logging
-import csv  # Add this import
+import csv
 
-logger = logging.getLogger(__name__)  # Uncomment this line
+logger = logging.getLogger(__name__)
 
 
 class DiagnoseAPIView(APIView):
     permission_classes = [AllowAny]
     serializer_class = HCVPatientSerializer
 
+    @handle_exceptions
+    @PerformanceMonitor.monitor_db_queries
+    # Removing the problematic rate limiter decorator
     def post(self, request):
-        # Debug: Print incoming data
-        # print(f"Received data: {request.data}")
-        logger.info(f"Received data: {request.data}")  # Uncomment
+        logger.info(f"Received diagnosis data: {request.data}")
 
-        try:
-            # Validate input data using serializer
-            serializer = self.serializer_class(data=request.data)
+        # Validate input data using serializer
+        serializer = self.serializer_class(data=request.data)
 
-            if not serializer.is_valid():
-                # Debug: Print validation errors
-                # print(f"Validation errors: {serializer.errors}")
-                logger.error(f"Validation errors: {serializer.errors}")  # Uncomment
+        if not serializer.is_valid():
+            logger.error(f"Validation errors: {serializer.errors}")
+            return StandardResponse.validation_error(
+                errors=serializer.errors, message="Invalid diagnosis data provided"
+            )  # Get a default user for anonymous submissions or use authenticated user
+        from django.contrib.auth import get_user_model
 
-                return Response(
-                    {
-                        "status": "error",
-                        "message": "Invalid data provided",
-                        "errors": serializer.errors,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+        User = get_user_model()
+
+        # Try to get a default system user, or the first admin, or create a system user
+        if request.user.is_authenticated:
+            user = request.user
+        else:
+            try:
+                # Try to get a system user or admin
+                user = (
+                    User.objects.filter(username="system").first()
+                    or User.objects.filter(is_staff=True).first()
                 )
 
-            # Save data to model
-            patient = serializer.save(
-                created_by=request.user if request.user.is_authenticated else None
-            )
+                # If no users exist, create a system user (this is a fallback)
+                if not user:
+                    user = User.objects.create(
+                        username="system",
+                        email="system@example.com",
+                        is_active=True,
+                        is_staff=True,
+                    )
+            except Exception as e:
+                logger.error(f"Failed to get or create system user: {str(e)}")
+                return StandardResponse.server_error(
+                    "Failed to associate diagnosis with a user"
+                )
 
-            # Generate diagnosis using AI tool
-            ai_result = AiDiagnosisTool(serializer.validated_data)
-            logger.info(f"AI Diagnosis Result: {ai_result}")  # Uncomment
+        # Save data to model with the user
+        patient = serializer.save(created_by=user)
 
-            return Response(
-                {
-                    "status": "success",
-                    "patient_id": patient.id,
-                    "patient_name": patient.patient_name,
-                    "diagnosis_result": ai_result,
-                    "timestamp": patient.created_at,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-
-        except Exception as e:
-            # print(f"Exception occurred: {str(e)}")
-            logger.error(f"Exception occurred: {str(e)}")  # Uncomment
-            return Response(
-                {"status": "error", "message": f"An error occurred: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-    def get(self, request):
-        """Optional: Get all diagnosis records"""
+        # Generate diagnosis using AI tool
         try:
-            diagnoses = HCVPatient.objects.all()
-            serializer = self.serializer_class(diagnoses, many=True)
-            return Response(
-                {"status": "success", "data": serializer.data},
-                status=status.HTTP_200_OK,
-            )
+            ai_result = AiDiagnosisTool(serializer.validated_data)
+            logger.info(f"AI Diagnosis Result: {ai_result}")
         except Exception as e:
-            return Response(
-                {"status": "error", "message": f"An error occurred: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            logger.error(f"AI diagnosis tool failed: {str(e)}")
+            return StandardResponse.server_error("AI diagnosis tool failed", e)
+
+        return StandardResponse.success(
+            data={
+                "patient_id": patient.id,
+                "patient_name": patient.patient_name,
+                "diagnosis_result": ai_result,
+                "timestamp": patient.created_at,
+            },
+            message="Diagnosis completed successfully",
+            status_code=status.HTTP_201_CREATED,
+        )
+
+    @handle_exceptions
+    @PerformanceMonitor.monitor_db_queries
+    @PerformanceMonitor.cache_result("diagnosis_list", timeout=300)
+    def get(self, request):
+        """Get all diagnosis records with performance optimization"""
+        # Optimize queryset with select_related for created_by user
+        queryset = HCVPatient.objects.select_related("created_by").all()
+
+        # Apply ordering for consistent pagination
+        queryset = queryset.order_by("-created_at")
+
+        serializer = self.serializer_class(queryset, many=True)
+
+        return StandardResponse.success(
+            data=serializer.data, message="Diagnoses retrieved successfully"
+        )
 
 
 # generate a view to get a specific diagnosis by ID
 class DiagnosisDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
+    permission_classes = [IsAuthenticated]
 
+    @handle_exceptions
     def get(self, request, pk):
         try:
             diagnosis = HCVPatient.objects.get(pk=pk)
-            serializer = HCVPatientSerializer(diagnosis)
-            return Response(
-                {"status": "success", "data": serializer.data},
-                status=status.HTTP_200_OK,
-            )
         except HCVPatient.DoesNotExist:
-            return Response(
-                {"status": "error", "message": "Diagnosis not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                {"status": "error", "message": f"An error occurred: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return StandardResponse.not_found("Diagnosis not found", "diagnosis")
+
+        serializer = HCVPatientSerializer(diagnosis)
+        return StandardResponse.success(
+            data=serializer.data, message="Diagnosis retrieved successfully"
+        )
 
 
 # This view allows authenticated users to retrieve a specific diagnosis by its ID.
@@ -120,12 +131,18 @@ class DiagnosisDetailAPIView(APIView):
 
 # generate a view get a list of all diagnoses for the authenticated user , use generic view
 class UserDiagnosesListAPIView(generics.ListAPIView):
+    """Optimized view to get user's diagnoses with performance monitoring"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HCVPatientSerializer
 
+    @PerformanceMonitor.monitor_db_queries
     def get_queryset(self):
-        # Return only the diagnoses created by the authenticated user
-        return HCVPatient.objects.filter(created_by=self.request.user)
+        # Optimize queryset with select_related and ordering
+        queryset = HCVPatient.objects.filter(created_by=self.request.user)
+        queryset = queryset.select_related("created_by")
+        queryset = queryset.order_by("-created_at")
+        return queryset
 
 
 class ExportHCVPatientsView(APIView):

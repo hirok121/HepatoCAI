@@ -1,44 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import PropTypes from "prop-types";
+import App from "./App.jsx";
+import { AuthProvider } from "./AuthContext.jsx";
 import "./index.css";
 
-// Simple loading component
-function LoadingSpinner() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        flexDirection: "column",
-      }}
-    >
-      <div
-        style={{
-          border: "4px solid #f3f3f3",
-          borderTop: "4px solid #3498db",
-          borderRadius: "50%",
-          width: "50px",
-          height: "50px",
-          animation: "spin 1s linear infinite",
-        }}
-      ></div>
-      <p style={{ marginTop: "20px" }}>Loading HepatoC AI...</p>
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-    </div>
-  );
-}
-
 // Error boundary component
-class ErrorBoundary extends React.Component {
+export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -94,22 +62,16 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Lazy load the main app components
-const App = React.lazy(() => import("./App.jsx"));
-const AuthProvider = React.lazy(() =>
-  import("./AuthContext.jsx").then((module) => ({
-    default: module.AuthProvider,
-  }))
-);
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
-// Main app component with loading
-function MainApp() {
+// Main app component
+export function MainApp() {
   return (
-    <React.Suspense fallback={<LoadingSpinner />}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </React.Suspense>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   );
 }
 

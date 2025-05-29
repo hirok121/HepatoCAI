@@ -47,6 +47,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../AuthContext";
 import api from "../../api";
+import AdminNavbar from "../../components/admin/AdminNavbar";
 
 function AdminDiagnosisManagement() {
   const { user } = useAuth();
@@ -230,6 +231,7 @@ function AdminDiagnosisManagement() {
 
   return (
     <Box sx={{ p: 3 }}>
+      <AdminNavbar />
       {/* Header */}
       <Box
         sx={{

@@ -1,8 +1,9 @@
 import axios from "axios";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
+import { API_CONFIG, AUTH_CONFIG, API_ENDPOINTS, ROUTES } from "./config/constants";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
 });
 
 let isRefreshing = false;
@@ -21,7 +22,7 @@ const processQueue = (error, token = null) => {
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(ACCESS_TOKEN);
+    const token = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,12 +34,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-
-    if (
+    const originalRequest = error.config;    if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      localStorage.getItem(REFRESH_TOKEN)
+      localStorage.getItem(AUTH_CONFIG.REFRESH_TOKEN_KEY)
     ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -52,24 +51,22 @@ api.interceptors.response.use(
       }
 
       originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-        const response = await axios.post("http://127.0.0.1:8000/accounts/token/refresh/", {
+      isRefreshing = true;      try {
+        const refreshToken = localStorage.getItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
+        const response = await axios.post(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`, {
           refresh: refreshToken,
         });
 
         const newAccessToken = response.data.access;
-        localStorage.setItem(ACCESS_TOKEN, newAccessToken);
+        localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, newAccessToken);
         api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        localStorage.removeItem(ACCESS_TOKEN);
-        localStorage.removeItem(REFRESH_TOKEN);
-        window.location.href = "/signin";
+        localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
+        localStorage.removeItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
+        window.location.href = ROUTES.SIGN_IN;
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

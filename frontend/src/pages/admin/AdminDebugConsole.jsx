@@ -36,11 +36,12 @@ import {
 import { useAuth } from "../../AuthContext";
 import api from "../../api";
 import axios from "axios";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
+import { API_CONFIG, AUTH_CONFIG, API_ENDPOINTS } from "../../config/constants";
+import AdminNavbar from "../../components/admin/AdminNavbar";
 
 // Create a test-only axios instance without interceptors
 const testApi = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: API_CONFIG.BASE_URL,
 });
 
 function CustomTabPanel({ children, value, index, ...other }) {
@@ -82,13 +83,12 @@ function AdminDebugConsole() {
     ]);
     console.log(`[${timestamp}] ${test}: ${result}`, details);
   };
-
   const checkSystemInfo = useCallback(() => {
     const info = {
-      localStorage_access: localStorage.getItem(ACCESS_TOKEN)
+      localStorage_access: localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY)
         ? "Present"
         : "Missing",
-      localStorage_refresh: localStorage.getItem(REFRESH_TOKEN)
+      localStorage_refresh: localStorage.getItem(AUTH_CONFIG.REFRESH_TOKEN_KEY)
         ? "Present"
         : "Missing",
       authContext_user: user
@@ -116,11 +116,13 @@ function AdminDebugConsole() {
       "STARTING",
       "Testing complete authentication flow using isolated API instance",
       "auth"
+    ); // Step 1: Check current auth state
+    const currentAccessToken = localStorage.getItem(
+      AUTH_CONFIG.ACCESS_TOKEN_KEY
     );
-
-    // Step 1: Check current auth state
-    const currentAccessToken = localStorage.getItem(ACCESS_TOKEN);
-    const currentRefreshToken = localStorage.getItem(REFRESH_TOKEN);
+    const currentRefreshToken = localStorage.getItem(
+      AUTH_CONFIG.REFRESH_TOKEN_KEY
+    );
 
     addResult(
       "1️⃣ Current Auth State Check",
@@ -216,8 +218,12 @@ function AdminDebugConsole() {
           "Verifying current session remains intact",
           "auth"
         );
-        const stillCurrentAccess = localStorage.getItem(ACCESS_TOKEN);
-        const stillCurrentRefresh = localStorage.getItem(REFRESH_TOKEN);
+        const stillCurrentAccess = localStorage.getItem(
+          AUTH_CONFIG.ACCESS_TOKEN_KEY
+        );
+        const stillCurrentRefresh = localStorage.getItem(
+          AUTH_CONFIG.REFRESH_TOKEN_KEY
+        );
 
         if (
           stillCurrentAccess === currentAccessToken &&
@@ -317,7 +323,7 @@ function AdminDebugConsole() {
       "api"
     );
     try {
-      const token = localStorage.getItem(ACCESS_TOKEN);
+      const token = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
       if (!token) {
         addResult(
           "🌐 Direct Fetch API Test",
@@ -328,12 +334,15 @@ function AdminDebugConsole() {
         return;
       }
 
-      const response = await fetch("http://127.0.0.1:8000/users/admin/users/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_ENDPOINTS.ADMIN.USERS}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
       addResult(
@@ -501,6 +510,7 @@ function AdminDebugConsole() {
 
   return (
     <Box sx={{ p: 3 }}>
+      <AdminNavbar/>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom>

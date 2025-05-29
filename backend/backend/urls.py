@@ -10,6 +10,5 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),  # allauth routes
     path("users/", include("users.urls")),
     path("diagnosis/", include("diagnosis.urls")),
-    path("note/", include("note.urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
