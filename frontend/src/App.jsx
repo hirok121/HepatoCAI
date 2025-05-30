@@ -65,12 +65,20 @@ function App() {
                   <LazyComponents.Analytics />
                 </ProtectedRoute>
               }
-            />
+            />{" "}
             <Route
               path="/my-health-dashboard"
               element={
                 <ProtectedRoute>
                   <LazyComponents.ProfileDashboard />
+                </ProtectedRoute>
+              }
+            />{" "}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.ProfilePage />
                 </ProtectedRoute>
               }
             />{" "}

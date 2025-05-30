@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import NavBar from "../components/layout/NavBar";
 
 function Research() {
   const researchPapers = [
@@ -51,91 +52,92 @@ function Research() {
     "Genetic factors in hepatitis susceptibility",
     "Community-based hepatitis prevention programs",
   ];
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Box sx={{ textAlign: "center", mb: 4 }}>
-          <LibraryBooksIcon
-            sx={{ fontSize: "4rem", color: "#2563EB", mb: 2 }}
-          />
-          <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
-            Research Hub
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Latest research findings and ongoing studies in hepatitis care
-          </Typography>
-        </Box>
-
-        <Grid container spacing={4}>
-          {/* Research Papers */}
-          <Grid item xs={12} lg={8}>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              Recent Publications
+    <Box>
+      <NavBar />
+      <Container maxWidth="lg">
+        <Box sx={{ py: 4 }}>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <LibraryBooksIcon
+              sx={{ fontSize: "4rem", color: "#2563EB", mb: 2 }}
+            />
+            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+              Research Hub
             </Typography>
-            {researchPapers.map((paper, index) => (
-              <Paper key={index} sx={{ p: 3, mb: 3, borderRadius: "16px" }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  {paper.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  {paper.authors} • {paper.journal} • {paper.year}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  {paper.abstract}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                  {paper.tags.map((tag, tagIndex) => (
-                    <Chip key={tagIndex} label={tag} size="small" />
-                  ))}
-                </Box>
-                <Button
-                  variant="outlined"
-                  startIcon={<OpenInNewIcon />}
-                  size="small"
-                  sx={{
-                    borderColor: "#2563EB",
-                    color: "#2563EB",
-                    "&:hover": {
-                      backgroundColor: "#2563EB",
-                      color: "white",
-                    },
-                  }}
-                >
-                  Read Full Paper
-                </Button>
-              </Paper>
-            ))}
-          </Grid>
+            <Typography variant="body1" color="text.secondary">
+              Latest research findings and ongoing studies in hepatitis care
+            </Typography>
+          </Box>
 
-          {/* Ongoing Studies */}
-          <Grid item xs={12} lg={4}>
-            <Paper sx={{ p: 3, borderRadius: "16px" }}>
-              <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
-                Ongoing Studies
+          <Grid container spacing={4}>
+            {/* Research Papers */}
+            <Grid item xs={12} lg={8}>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+                Recent Publications
               </Typography>
-              <List>
-                {ongoingStudies.map((study, index) => (
-                  <ListItem key={index} sx={{ px: 0 }}>
-                    <ListItemText
-                      primary={study}
-                      primaryTypographyProps={{
-                        fontSize: "0.9rem",
-                        fontWeight: 600,
-                      }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
+              {researchPapers.map((paper, index) => (
+                <Paper key={index} sx={{ p: 3, mb: 3, borderRadius: "16px" }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                    {paper.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    {paper.authors} • {paper.journal} • {paper.year}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    {paper.abstract}
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    {paper.tags.map((tag, tagIndex) => (
+                      <Chip key={tagIndex} label={tag} size="small" />
+                    ))}
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<OpenInNewIcon />}
+                    size="small"
+                    sx={{
+                      borderColor: "#2563EB",
+                      color: "#2563EB",
+                      "&:hover": {
+                        backgroundColor: "#2563EB",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    Read Full Paper
+                  </Button>
+                </Paper>
+              ))}
+            </Grid>
+            {/* Ongoing Studies */}
+            <Grid item xs={12} lg={4}>
+              <Paper sx={{ p: 3, borderRadius: "16px" }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
+                  Ongoing Studies
+                </Typography>
+                <List>
+                  {ongoingStudies.map((study, index) => (
+                    <ListItem key={index} sx={{ px: 0 }}>
+                      <ListItemText
+                        primary={study}
+                        primaryTypographyProps={{
+                          fontSize: "0.9rem",
+                          fontWeight: 600,
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Paper>
+            </Grid>{" "}
           </Grid>
-        </Grid>
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 

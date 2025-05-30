@@ -38,6 +38,8 @@ class EmailCheckSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    birthday = serializers.DateField(required=False, allow_null=True)
+
     class Meta:
         model = User
         fields = [
@@ -59,6 +61,12 @@ class ProfileSerializer(serializers.ModelSerializer):
             "social_provider",
             "verified_email",
         ]
+
+    def validate_birthday(self, value):
+        """Custom validation for birthday field"""
+        if value is None or value == "":
+            return None
+        return value
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

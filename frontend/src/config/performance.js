@@ -40,9 +40,9 @@ export const LazyComponents = {
   Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),
   Analytics: lazy(() => import('../pages/AnalyticsPage')),
   AIAssistant: lazy(() => import('../pages/AIAssistant')),
-  PatientEducation: lazy(() => import('../pages/PatientEducation')),
-  Research: lazy(() => import('../pages/Research')),
+  PatientEducation: lazy(() => import('../pages/PatientEducation')),  Research: lazy(() => import('../pages/Research')),
   ProfileDashboard: lazy(() => import('../pages/ProfileDashboard')),
+  ProfilePage: lazy(() => import('../pages/ProfilePage')),
   CommunityForum: lazy(() => import('../pages/public/CommunityForum')),
   
   // Public Pages

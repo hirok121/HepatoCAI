@@ -12,6 +12,7 @@ import {
 import HelpIcon from "@mui/icons-material/Help";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
+import NavBar from "../../components/layout/NavBar";
 
 function FAQ() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,80 +65,82 @@ function FAQ() {
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Box sx={{ textAlign: "center", mb: 4 }}>
-          <HelpIcon sx={{ fontSize: "4rem", color: "#2563EB", mb: 2 }} />
-          <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
-            Frequently Asked Questions
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Find answers to common questions about hepatitis
-          </Typography>
-        </Box>
-
-        {/* Search Box */}
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search FAQs..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ mb: 4 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        {/* FAQ Accordions */}
-        {filteredFAQs.map((faq, index) => (
-          <Accordion
-            key={index}
-            sx={{
-              mb: 2,
-              borderRadius: "12px",
-              "&:before": { display: "none" },
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            }}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              sx={{
-                backgroundColor: "#f8f9fa",
-                borderRadius: "12px",
-                "&.Mui-expanded": {
-                  borderBottomLeftRadius: 0,
-                  borderBottomRightRadius: 0,
-                },
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {faq.question}
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ p: 3 }}>
-              <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
-                {faq.answer}
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-        ))}
-
-        {filteredFAQs.length === 0 && (
-          <Box sx={{ textAlign: "center", py: 4 }}>
+    <Box>
+      <NavBar />
+      <Container maxWidth="lg">
+        <Box sx={{ py: 4 }}>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <HelpIcon sx={{ fontSize: "4rem", color: "#2563EB", mb: 2 }} />
+            <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+              Frequently Asked Questions
+            </Typography>
             <Typography variant="body1" color="text.secondary">
-              No FAQs found matching your search.
+              Find answers to common questions about hepatitis
             </Typography>
           </Box>
-        )}
-      </Box>
-    </Container>
+
+          {/* Search Box */}
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search FAQs..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ mb: 4 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          {/* FAQ Accordions */}
+          {filteredFAQs.map((faq, index) => (
+            <Accordion
+              key={index}
+              sx={{
+                mb: 2,
+                borderRadius: "12px",
+                "&:before": { display: "none" },
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "12px",
+                  "&.Mui-expanded": {
+                    borderBottomLeftRadius: 0,
+                    borderBottomRightRadius: 0,
+                  },
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {faq.question}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 3 }}>
+                <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                  {faq.answer}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+
+          {filteredFAQs.length === 0 && (
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <Typography variant="body1" color="text.secondary">
+                No FAQs found matching your search.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Container>
+    </Box>
   );
 }
 

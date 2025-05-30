@@ -432,6 +432,7 @@ class ProfileViewSet(viewsets.ViewSet):
 
         elif request.method == "PATCH":
             logger.info(f"Profile update attempted by: {request.user.email}")
+            logger.info(f"Profile update data received: {request.data}")
             serializer = ProfileSerializer(
                 request.user, data=request.data, partial=True
             )
@@ -446,6 +447,7 @@ class ProfileViewSet(viewsets.ViewSet):
             logger.warning(
                 f"Profile update validation failed for: {request.user.email}"
             )
+            logger.warning(f"Validation errors: {serializer.errors}")
             return StandardResponse.validation_error(
                 errors=serializer.errors, message="Invalid profile data"
             )
