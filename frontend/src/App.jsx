@@ -67,7 +67,7 @@ function App() {
               }
             />
             <Route
-              path="/dashboard"
+              path="/my-health-dashboard"
               element={
                 <ProtectedRoute>
                   <LazyComponents.ProfileDashboard />

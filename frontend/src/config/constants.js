@@ -46,7 +46,7 @@ export const ROUTES = {
   HOME: '/',
   SIGN_IN: '/signin',
   SIGN_UP: '/signup',
-  DASHBOARD: '/dashboard',
+  DASHBOARD: '/my-health-dashboard',
   DIAGNOSIS: '/diagnosis',
   AI_ASSISTANT: '/ai-assistant',
   ADMIN: '/admin',

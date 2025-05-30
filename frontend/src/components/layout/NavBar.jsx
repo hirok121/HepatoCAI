@@ -1,5 +1,5 @@
-import React, { useState, forwardRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, forwardRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -12,8 +12,6 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Box from "@mui/material/Box";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import Container from "@mui/material/Container";
@@ -53,15 +51,17 @@ const LinkBehavior = forwardRef((props, ref) => {
   // Map href (MUI standard) -> to (react-router standard)
   return <RouterLink ref={ref} to={href} {...other} />;
 });
+LinkBehavior.displayName = "LinkBehavior";
 
 function NavBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   // Destructure `loading` from useAuth
   const {
     isAuthorized,
     isStaff,
+    isSuperuser,
     logout: authLogout,
-    login: authLogin,
     user,
     loading,
   } = useAuth();
@@ -70,19 +70,15 @@ function NavBar() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [leftDrawerOpen, setLeftDrawerOpen] = useState(false);
-  const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
-  const [profileMenuAnchorEl, setProfileMenuAnchorEl] = useState(null);
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
 
   const handleLeftDrawerToggle = () => setLeftDrawerOpen(!leftDrawerOpen);
-  const handleRightDrawerToggle = () => setRightDrawerOpen(!rightDrawerOpen);
-  const handleProfileMenuOpen = (event) =>
-    setProfileMenuAnchorEl(event.currentTarget);
-  const handleProfileMenuClose = () => setProfileMenuAnchorEl(null);
+  const handleProfileDrawerToggle = () =>
+    setProfileDrawerOpen(!profileDrawerOpen);
 
   const handleLogout = () => {
     authLogout();
-    handleProfileMenuClose();
-    if (isMobile) handleRightDrawerToggle();
+    setProfileDrawerOpen(false);
     navigate("/");
   };
 
@@ -111,14 +107,7 @@ function NavBar() {
       { label: "Community Forum", path: "/community", icon: <ForumIcon /> },
       { label: "About Us", path: "/about", icon: <InfoIcon /> },
       { label: "Contact Us", path: "/contact", icon: <ContactSupportIcon /> },
-    ]; // Only add Admin Console if user is staff
-    if (isStaff) {
-      baseMenuItems.push({
-        label: "Admin Console",
-        path: "/admin",
-        icon: <AdminPanelSettingsIcon />,
-      });
-    }
+    ];
 
     return baseMenuItems;
   };
@@ -177,6 +166,10 @@ function NavBar() {
               sx={{
                 py: 1.2, // Reduced padding
                 px: 3,
+                backgroundColor:
+                  location.pathname === item.path
+                    ? "rgba(37, 99, 235, 0.08)"
+                    : "transparent",
                 "&:hover": {
                   backgroundColor:
                     item.label === "AI Assistant"
@@ -281,7 +274,6 @@ function NavBar() {
       </List>
     </Box>
   );
-
   // Enhanced profileMenuItems with improved styling
   const profileMenuItems = [
     {
@@ -291,11 +283,21 @@ function NavBar() {
       action: () => navigate("/profile"),
     },
     {
-      label: "Dashboard",
-      path: "/dashboard",
+      label: "My Health Dashboard",
+      path: "/my-health-dashboard",
       icon: <DashboardIcon />,
-      action: () => navigate("/dashboard"),
+      action: () => navigate("/my-health-dashboard"),
     },
+    ...(isSuperuser || isStaff
+      ? [
+          {
+            label: "Admin Console",
+            path: "/admin",
+            icon: <AdminPanelSettingsIcon />,
+            action: () => navigate("/admin"),
+          },
+        ]
+      : []),
     { label: "Logout", icon: <LogoutIcon />, action: handleLogout },
   ];
 
@@ -314,9 +316,10 @@ function NavBar() {
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
         }}
       >
+        {" "}
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 72 } }}>
-            {/* Left Menu Icon (Mobile) */}
+            {/* Left Menu Icon (All Devices) */}
             <IconButton
               size="large"
               edge="start"
@@ -324,7 +327,6 @@ function NavBar() {
               aria-label="open navigation drawer"
               sx={{
                 mr: 1,
-                display: { md: "none" },
                 color: "#000000",
                 borderRadius: "12px",
                 "&:hover": {
@@ -357,7 +359,7 @@ function NavBar() {
               }}
             >
               <HepatoCAIIcon />
-            </Button>
+            </Button>{" "}
             {/* Enhanced Desktop Navigation Links */}
             <Box
               sx={{
@@ -368,6 +370,7 @@ function NavBar() {
                 gap: 0.5,
               }}
             >
+              {" "}
               {menuItems.slice(0, 5).map((item) => (
                 <Box key={item.label} sx={{ position: "relative" }}>
                   <Button
@@ -383,6 +386,10 @@ function NavBar() {
                       fontWeight: 700,
                       fontSize: "0.9rem",
                       position: "relative",
+                      backgroundColor:
+                        location.pathname === item.path
+                          ? "rgba(37, 99, 235, 0.08)"
+                          : "transparent",
                       "&:hover": {
                         backgroundColor:
                           item.label === "AI Assistant"
@@ -415,7 +422,7 @@ function NavBar() {
                           fontWeight: 600,
                         }}
                       />
-                    )}
+                    )}{" "}
                     <Box
                       className="nav-underline"
                       sx={{
@@ -423,7 +430,7 @@ function NavBar() {
                         bottom: 0,
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 0,
+                        width: location.pathname === item.path ? "100%" : 0,
                         height: 2,
                         backgroundColor:
                           item.label === "AI Assistant"
@@ -436,27 +443,6 @@ function NavBar() {
                   </Button>
                 </Box>
               ))}
-              {menuItems.length > 5 && (
-                <Button
-                  sx={{
-                    color: "#000000",
-                    mx: 0.5,
-                    px: 2,
-                    py: 1,
-                    borderRadius: "12px",
-                    fontWeight: 700,
-                    fontSize: "0.9rem",
-                    "&:hover": {
-                      backgroundColor: "rgba(37, 99, 235, 0.08)",
-                      transform: "translateY(-2px)",
-                    },
-                    transition: "all 0.3s ease",
-                  }}
-                  onClick={handleLeftDrawerToggle}
-                >
-                  More...
-                </Button>
-              )}
             </Box>
             <Box sx={{ flexGrow: { xs: 1, md: 0 } }} />{" "}
             {/* Enhanced Right Side: Auth Buttons or User Icons */}
@@ -517,15 +503,10 @@ function NavBar() {
                       </Typography>
                     )}
                   </Box>
-
-                  {/* User Avatar */}
+                  {/* User Avatar */}{" "}
                   <Tooltip title="Open user settings">
                     <IconButton
-                      onClick={
-                        isMobile
-                          ? handleRightDrawerToggle
-                          : handleProfileMenuOpen
-                      }
+                      onClick={handleProfileDrawerToggle}
                       sx={{
                         p: 0.5,
                         borderRadius: "14px",
@@ -621,7 +602,6 @@ function NavBar() {
           </Toolbar>
         </Container>
       </AppBar>
-
       {/* Enhanced Loading Bar */}
       {loading && (
         <LinearProgress
@@ -638,7 +618,6 @@ function NavBar() {
           }}
         />
       )}
-
       {/* Left Drawer */}
       <Drawer
         anchor="left"
@@ -660,17 +639,16 @@ function NavBar() {
         }}
       >
         {listDrawerItems(menuItems, handleLeftDrawerToggle)}
-      </Drawer>
-
-      {/* Enhanced Right Drawer (Profile) */}
-      {isAuthorized && isMobile && (
+      </Drawer>{" "}
+      {/* Enhanced Profile Drawer (opens from right for all devices) */}
+      {isAuthorized && (
         <Drawer
           anchor="right"
-          open={rightDrawerOpen}
-          onClose={handleRightDrawerToggle}
+          open={profileDrawerOpen}
+          onClose={handleProfileDrawerToggle}
           PaperProps={{
             sx: {
-              width: 260,
+              width: 280,
               backgroundColor: theme.palette.background.paper,
               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
               border: "none",
@@ -697,16 +675,19 @@ function NavBar() {
               }}
             >
               <IconButton
-                onClick={handleRightDrawerToggle}
+                onClick={handleProfileDrawerToggle}
                 sx={{
                   position: "absolute",
                   top: 16,
                   right: 16,
                   color: "#000000",
+                  "&:hover": {
+                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                  },
                 }}
               >
                 <CloseIcon />
-              </IconButton>{" "}
+              </IconButton>
               <Avatar
                 sx={{
                   width: 72,
@@ -733,22 +714,62 @@ function NavBar() {
                 sx={{
                   fontWeight: 700,
                   mb: 0.5,
-                  fontSize: "1rem", // Reduced from 1.2rem
+                  fontSize: "1rem",
                   color: "#000000",
+                  textAlign: "center",
                 }}
               >
                 {user?.full_name || user?.email || "Welcome User"}
-              </Typography>
+              </Typography>{" "}
               <Typography
                 variant="body2"
                 sx={{
-                  color: "#000000",
-                  fontWeight: 600,
-                  fontSize: "0.8rem", // Added smaller font size
+                  color: "#666666",
+                  fontWeight: 500,
+                  fontSize: "0.85rem",
+                  textAlign: "center",
                 }}
               >
                 {user?.email || "user@example.com"}
               </Typography>
+              {/* Hierarchical role display: Super > Staff > User */}
+              {isSuperuser ? (
+                <Chip
+                  label="Super Admin"
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    backgroundColor: "#DC2626",
+                    color: "white",
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                  }}
+                />
+              ) : isStaff ? (
+                <Chip
+                  label="Staff"
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    backgroundColor: "#2563EB",
+                    color: "white",
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                  }}
+                />
+              ) : (
+                <Chip
+                  label="User"
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    backgroundColor: "#16A34A",
+                    color: "white",
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                  }}
+                />
+              )}
             </Box>
 
             {/* Enhanced Profile Menu Items */}
@@ -759,7 +780,7 @@ function NavBar() {
                   disablePadding
                   onClick={() => {
                     item.action();
-                    handleRightDrawerToggle();
+                    handleProfileDrawerToggle();
                   }}
                 >
                   <ListItemButton
@@ -770,13 +791,20 @@ function NavBar() {
                         backgroundColor:
                           item.label === "Logout"
                             ? "rgba(239, 68, 68, 0.08)"
+                            : item.label === "Admin Console"
+                            ? "rgba(37, 99, 235, 0.08)"
                             : "rgba(37, 99, 235, 0.08)",
                       },
                     }}
                   >
                     <ListItemIcon
                       sx={{
-                        color: item.label === "Logout" ? "#EF4444" : "#000000",
+                        color:
+                          item.label === "Logout"
+                            ? "#EF4444"
+                            : item.label === "Admin Console"
+                            ? "#2563EB"
+                            : "#000000",
                         minWidth: "44px",
                         "& .MuiSvgIcon-root": {
                           fontSize: "1.4rem",
@@ -789,104 +817,35 @@ function NavBar() {
                       primary={item.label}
                       primaryTypographyProps={{
                         fontWeight: 700,
-                        fontSize: "0.95rem", // Reduced from 1.1rem
-                        color: item.label === "Logout" ? "#EF4444" : "#000000",
+                        fontSize: "0.95rem",
+                        color:
+                          item.label === "Logout"
+                            ? "#EF4444"
+                            : item.label === "Admin Console"
+                            ? "#2563EB"
+                            : "#000000",
                       }}
-                    />
+                    />{" "}
+                    {item.label === "Admin Console" && (
+                      <Chip
+                        label={isSuperuser ? "Super" : "Admin"}
+                        size="small"
+                        sx={{
+                          height: 18,
+                          fontSize: "0.6rem",
+                          backgroundColor: isSuperuser ? "#DC2626" : "#2563EB",
+                          color: "white",
+                          fontWeight: 700,
+                        }}
+                      />
+                    )}
                   </ListItemButton>
                 </ListItem>
               ))}
             </List>
           </Box>
         </Drawer>
-      )}
-
-      {/* Enhanced Desktop Profile Menu */}
-      {isAuthorized && !isMobile && (
-        <Menu
-          id="profile-menu-appbar"
-          anchorEl={profileMenuAnchorEl}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          keepMounted
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          open={Boolean(profileMenuAnchorEl)}
-          onClose={handleProfileMenuClose}
-          sx={{ mt: "8px" }}
-          PaperProps={{
-            sx: {
-              borderRadius: "16px",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
-              border: `1px solid ${theme.palette.divider}`,
-              backdropFilter: "blur(10px)",
-              minWidth: 200,
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: -8,
-                right: 20,
-                width: 16,
-                height: 16,
-                backgroundColor: theme.palette.background.paper,
-                border: `1px solid ${theme.palette.divider}`,
-                borderBottom: "none",
-                borderRight: "none",
-                transform: "rotate(45deg)",
-              },
-            },
-          }}
-        >
-          {profileMenuItems.map((item) => (
-            <MenuItem
-              key={item.label}
-              onClick={() => {
-                item.action();
-                handleProfileMenuClose();
-              }}
-              sx={{
-                py: 1.5,
-                px: 2,
-                borderRadius: "8px",
-                mx: 1,
-                my: 0.5,
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  backgroundColor:
-                    item.label === "Logout"
-                      ? "rgba(239, 68, 68, 0.08)"
-                      : "rgba(37, 99, 235, 0.08)",
-                  transform: "scale(1.02)",
-                },
-                "&:first-of-type": {
-                  mt: 1,
-                },
-                "&:last-of-type": {
-                  mb: 1,
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "40px",
-                  color: item.label === "Logout" ? "#EF4444" : "#000000",
-                  "& .MuiSvgIcon-root": {
-                    fontSize: "1.3rem",
-                  },
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontWeight: 700,
-                  fontSize: "0.9rem", // Reduced from 1rem
-                  color: item.label === "Logout" ? "#EF4444" : "#000000",
-                }}
-              />
-            </MenuItem>
-          ))}
-        </Menu>
-      )}
+      )}{" "}
     </>
   );
 }

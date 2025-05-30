@@ -15,6 +15,7 @@ const AuthContext = createContext({
   isAuthorized: false,
   user: null,
   isStaff: false,
+  isSuperuser: false,
   loading: false,
   // eslint-disable-next-line no-unused-vars
   login: async (_credentials) => ({
@@ -42,14 +43,15 @@ export const AuthProvider = ({ children }) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [user, setUser] = useState(null);
   const [isStaff, setIsStaff] = useState(false); // Added isStaff state
-  const [loading, setLoading] = useState(true); // Start as true during initial check
-  // Logout method (using useCallback for stability)
+  const [isSuperuser, setIsSuperuser] = useState(false); // Added isSuper state
+  const [loading, setLoading] = useState(true); // Start as true during initial check  // Logout method (using useCallback for stability)
   const logout = useCallback(() => {
     localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
     localStorage.removeItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
     setIsAuthorized(false);
     setUser(null);
     setIsStaff(false); // Reset isStaff on logout
+    setIsSuperuser(false); // Reset isSuper on logout
   }, []);
   // Refresh access token using refresh token
   const refreshToken = useCallback(async () => {
@@ -71,6 +73,7 @@ export const AuthProvider = ({ children }) => {
           setIsAuthorized(true);
           setUser(decoded);
           setIsStaff(decoded.is_staff || false); // Set isStaff from token
+          setIsSuperuser(decoded.is_superuser || false); // Set isSuper from token
           setLoading(false);
           return { success: true, user: decoded };
         }
@@ -99,6 +102,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthorized(true);
         setUser(decoded);
         setIsStaff(decoded.is_staff || false); // Set isStaff from token
+        setIsSuperuser(decoded.is_superuser || false); // Set isSuper from token
         setLoading(false);
         return true; // Token is valid
       } else {
@@ -131,6 +135,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthorized(true);
         setUser(decoded);
         setIsStaff(decoded.is_staff || false); // Set isStaff from token
+        setIsSuperuser(decoded.is_superuser || false); // Set isSuper from token
         setLoading(false);
         console.log("AuthContext - login successful for user:", decoded.email); // Debug log
         return { success: true, user: decoded };
@@ -202,6 +207,7 @@ export const AuthProvider = ({ children }) => {
         isAuthorized,
         user,
         isStaff, // Provide isStaff state
+        isSuperuser, // Provide isSuper state
         loading, // Provide loading state
         login,
         logout,
