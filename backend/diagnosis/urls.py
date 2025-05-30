@@ -1,35 +1,37 @@
 from django.urls import path
 from .views import (
     DiagnoseAPIView,
-    DiagnosisDetailAPIView,
-    UserDiagnosesListAPIView,
-    ExportHCVPatientsView,
-    ExportHCVPatientsExcelView,
-    DiagnosisAnalyticsView,
-    HCVPatientListView,
+    ExportDiagnosisRecordsView,
+    ExportDiagnosisRecordsExcelView,
+    UserDiagnosisAnalyticsView,
+    AdminDiagnosisAnalyticsView,
+    DiagnosisRecordListView,
+    DiagnosisSearchView,
+    AdminDiagnosisSearchView,
 )
 
+app_name = "diagnosis"
 
 urlpatterns = [
-    # Main diagnosis endpoint
+    # Main diagnosis endpoint (POST: create, GET: list/get user's diagnoses, PUT: update, DELETE: delete)
     path("analyze-hcv/", DiagnoseAPIView.as_view(), name="diagnose"),
-    # Get specific diagnosis by ID
+    # Get specific diagnosis by ID (now handled by DiagnoseAPIView)
+    path("analyze-hcv/<int:pk>/", DiagnoseAPIView.as_view(), name="diagnose_detail"),
+    # Analytics endpoints - separated for user and admin
     path(
-        "diagnosis/<int:pk>/", DiagnosisDetailAPIView.as_view(), name="diagnosis-detail"
+        "analytics/user/", UserDiagnosisAnalyticsView.as_view(), name="user_analytics"
     ),
-    # Get all diagnoses for authenticated user
-    path("my-diagnoses/", UserDiagnosesListAPIView.as_view(), name="user-diagnoses"),
-    # List all patients for admin (debugging)
-    path("patients/", HCVPatientListView.as_view(), name="hcv-patients-list"),
-    # Analytics endpoint for admin dashboard
-    path("analytics/", DiagnosisAnalyticsView.as_view(), name="diagnosis-analytics"),
+    path(
+        "analytics/admin/",
+        AdminDiagnosisAnalyticsView.as_view(),
+        name="admin_analytics",    ),    # Advanced features
+    path("search/", DiagnosisSearchView.as_view(), name="diagnosis_search"),
+    path("admin/search/", AdminDiagnosisSearchView.as_view(), name="admin_diagnosis_search"),
+    # Admin management
+    path("records/", DiagnosisRecordListView.as_view(), name="diagnosis_records_list"),
     # Export endpoints
+    path("export/csv/", ExportDiagnosisRecordsView.as_view(), name="export_csv"),
     path(
-        "export/csv/", ExportHCVPatientsView.as_view(), name="export_hcv_patients_csv"
-    ),
-    path(
-        "export/excel/",
-        ExportHCVPatientsExcelView.as_view(),
-        name="export_hcv_patients_excel",
+        "export/excel/", ExportDiagnosisRecordsExcelView.as_view(), name="export_excel"
     ),
 ]

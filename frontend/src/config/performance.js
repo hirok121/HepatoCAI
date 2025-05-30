@@ -38,9 +38,11 @@ export const LazyComponents = {
   // Main Application Components
   Home: lazy(() => import('../pages/Home')),
   Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),
+  Analytics: lazy(() => import('../pages/AnalyticsPage')),
   AIAssistant: lazy(() => import('../pages/AIAssistant')),
   PatientEducation: lazy(() => import('../pages/PatientEducation')),
   Research: lazy(() => import('../pages/Research')),
+  ProfileDashboard: lazy(() => import('../pages/ProfileDashboard')),
   CommunityForum: lazy(() => import('../pages/public/CommunityForum')),
   
   // Public Pages

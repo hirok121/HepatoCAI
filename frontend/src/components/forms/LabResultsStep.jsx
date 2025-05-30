@@ -3,6 +3,18 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Box, Typography, TextField } from "@mui/material";
 import { Biotech } from "@mui/icons-material";
+import DebugFieldButton from "../debug/DebugFieldButton";
+import DebugSectionButton from "../debug/DebugSectionButton";
+import { FEATURES } from "../../config/constants";
+
+// Random value generators for lab results (based on medical reference ranges)
+const randomValueGenerators = {
+  alp: () => Math.floor(Math.random() * (150 - 30) + 30), // 30-150 U/L
+  ast: () => Math.floor(Math.random() * (60 - 10) + 10), // 10-60 U/L
+  che: () => Math.floor(Math.random() * (12000 - 3500) + 3500), // 3500-12000 U/L
+  crea: () => (Math.random() * (1.5 - 0.6) + 0.6).toFixed(2), // 0.6-1.5 mg/dL
+  ggt: () => Math.floor(Math.random() * (60 - 5) + 5), // 5-60 U/L
+};
 
 function LabResultsStep({ formData, handleChange }) {
   const requiredFields = [
@@ -20,6 +32,15 @@ function LabResultsStep({ formData, handleChange }) {
         <Typography variant="h4" sx={{ fontWeight: 600, color: "#1E293B" }}>
           Required Lab Results
         </Typography>
+        {FEATURES.ENABLE_DIAGNOSIS_DEBUG && (
+          <DebugSectionButton
+            sectionName="Lab Results"
+            fields={requiredFields.map((field) => field.name)}
+            handleChange={handleChange}
+            formData={formData}
+            randomValueGenerators={randomValueGenerators}
+          />
+        )}
       </Box>
 
       <Box
@@ -30,18 +51,24 @@ function LabResultsStep({ formData, handleChange }) {
         }}
       >
         {requiredFields.map((field) => (
-          <TextField
-            key={field.name}
-            fullWidth
-            label={`${field.label} *`}
-            type="number"
-            name={field.name}
-            value={formData[field.name]}
-            onChange={handleChange}
-            required
-            helperText={`Units: ${field.unit}`}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-          />
+          <Box key={field.name} sx={{ display: "flex", alignItems: "center" }}>
+            <TextField
+              fullWidth
+              label={`${field.label} *`}
+              type="number"
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              required
+              helperText={`Units: ${field.unit}`}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+            <DebugFieldButton
+              fieldName={field.name}
+              handleChange={handleChange}
+              formData={formData}
+            />
+          </Box>
         ))}
       </Box>
     </Box>

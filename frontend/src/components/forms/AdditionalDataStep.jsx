@@ -3,6 +3,49 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Box, Typography, TextField, Chip } from "@mui/material";
 import { Science, Psychology } from "@mui/icons-material";
+import DebugFieldButton from "../debug/DebugFieldButton";
+import DebugSectionButton from "../debug/DebugSectionButton";
+import { FEATURES } from "../../config/constants";
+
+// Random value generators for optional parameters and symptoms
+const randomValueGenerators = {
+  alb: () => (Math.random() * (5.0 - 3.5) + 3.5).toFixed(1), // 3.5-5.0 g/dL
+  bil: () => (Math.random() * (1.2 - 0.2) + 0.2).toFixed(2), // 0.2-1.2 mg/dL
+  chol: () => Math.floor(Math.random() * (300 - 120) + 120), // 120-300 mg/dL
+  prot: () => (Math.random() * (8.5 - 6.0) + 6.0).toFixed(1), // 6.0-8.5 g/dL
+  alt: () => Math.floor(Math.random() * (60 - 7) + 7), // 7-60 U/L
+  symptoms: () => {
+    const allSymptoms = [
+      "Fatigue",
+      "Nausea",
+      "Abdominal Pain",
+      "Jaundice",
+      "Dark Urine",
+      "Loss of Appetite",
+      "Weight Loss",
+      "Fever",
+      "Joint Pain",
+      "Clay-colored Stools",
+    ];
+    const numSymptoms = Math.floor(Math.random() * 4); // 0-3 symptoms
+    const selectedSymptoms = [];
+
+    for (let i = 0; i < numSymptoms; i++) {
+      const availableSymptoms = allSymptoms.filter(
+        (s) => !selectedSymptoms.includes(s)
+      );
+      if (availableSymptoms.length > 0) {
+        const randomSymptom =
+          availableSymptoms[
+            Math.floor(Math.random() * availableSymptoms.length)
+          ];
+        selectedSymptoms.push(randomSymptom);
+      }
+    }
+
+    return selectedSymptoms;
+  },
+};
 
 function AdditionalDataStep({ formData, handleChange, handleSymptomToggle }) {
   const optionalFields = [
@@ -25,7 +68,6 @@ function AdditionalDataStep({ formData, handleChange, handleSymptomToggle }) {
     "Joint Pain",
     "Clay-colored Stools",
   ];
-
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto" }}>
       {/* Optional Parameters Section */}
@@ -35,6 +77,15 @@ function AdditionalDataStep({ formData, handleChange, handleSymptomToggle }) {
           <Typography variant="h4" sx={{ fontWeight: 600, color: "#1E293B" }}>
             Optional Parameters
           </Typography>
+          {FEATURES.ENABLE_DIAGNOSIS_DEBUG && (
+            <DebugSectionButton
+              sectionName="Optional Parameters"
+              fields={optionalFields.map((field) => field.name)}
+              handleChange={handleChange}
+              formData={formData}
+              randomValueGenerators={randomValueGenerators}
+            />
+          )}
         </Box>
 
         <Box
@@ -49,17 +100,26 @@ function AdditionalDataStep({ formData, handleChange, handleSymptomToggle }) {
           }}
         >
           {optionalFields.map((field) => (
-            <TextField
+            <Box
               key={field.name}
-              fullWidth
-              label={field.label}
-              type="number"
-              name={field.name}
-              value={formData[field.name]}
-              onChange={handleChange}
-              helperText={`Units: ${field.unit}`}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <TextField
+                fullWidth
+                label={field.label}
+                type="number"
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleChange}
+                helperText={`Units: ${field.unit}`}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
+              <DebugFieldButton
+                fieldName={field.name}
+                handleChange={handleChange}
+                formData={formData}
+              />
+            </Box>
           ))}
         </Box>
       </Box>
@@ -71,6 +131,14 @@ function AdditionalDataStep({ formData, handleChange, handleSymptomToggle }) {
           <Typography variant="h4" sx={{ fontWeight: 600, color: "#1E293B" }}>
             Clinical Symptoms
           </Typography>
+          {FEATURES.ENABLE_DIAGNOSIS_DEBUG && (
+            <DebugFieldButton
+              fieldName="symptoms"
+              handleChange={handleChange}
+              handleSymptomToggle={handleSymptomToggle}
+              formData={formData}
+            />
+          )}
         </Box>
 
         <Typography variant="body1" sx={{ mb: 3, color: "#475569" }}>

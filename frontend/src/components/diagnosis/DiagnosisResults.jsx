@@ -1,40 +1,104 @@
 // eslint-disable-next-line no-unused-vars
 import React from "react";
 import PropTypes from "prop-types";
-import { Box, Typography, Card, LinearProgress, Alert } from "@mui/material";
-import { Psychology, Warning } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  Card,
+  LinearProgress,
+  Chip,
+  Paper,
+  Container,
+} from "@mui/material";
+import { Psychology, Assessment } from "@mui/icons-material";
+import HcvStatusRiskStage from "./HcvStatusRiskStage";
 import PatientInfo from "./PatientInfo";
-import HCVAnalysis from "./HCVAnalysis";
-import StagePredictions from "./StagePredictions";
+import HCVAnalysis from "./HCVAnalysisCompact";
 import FeatureImportance from "./FeatureImportance";
+import MedicalDisclaimer from "./MedicalDisclaimer";
 
 function DiagnosisResults({ results, loading }) {
   if (loading) {
     return (
-      <Card sx={{ p: 4, textAlign: "center" }}>
-        <Box sx={{ mb: 3 }}>
-          <Psychology sx={{ fontSize: "3rem", color: "#2563EB", mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            AI Analysis in Progress...
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Our AI is analyzing your data using advanced machine learning
-            algorithms
-          </Typography>
-          <LinearProgress sx={{ borderRadius: 1 }} />
-        </Box>
-      </Card>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Card
+          sx={{
+            p: 4,
+            textAlign: "center",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            borderRadius: 4,
+            boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+          }}
+        >
+          <Box sx={{ mb: 3 }}>
+            <Psychology
+              sx={{
+                fontSize: "4rem",
+                mb: 2,
+                animation: "pulse 2s ease-in-out infinite",
+                "@keyframes pulse": {
+                  "0%, 100%": { transform: "scale(1)", opacity: 1 },
+                  "50%": { transform: "scale(1.05)", opacity: 0.8 },
+                },
+              }}
+            />
+            <Typography variant="h4" gutterBottom fontWeight="bold">
+              AI Analysis in Progress
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 3, opacity: 0.9 }}>
+              Our advanced machine learning algorithms are analyzing your
+              hepatitis data
+            </Typography>
+            <LinearProgress
+              sx={{
+                borderRadius: 1,
+                height: 8,
+                backgroundColor: "rgba(255,255,255,0.3)",
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: "rgba(255,255,255,0.8)",
+                },
+              }}
+            />
+          </Box>
+        </Card>
+      </Container>
     );
   }
-
   if (!results) return null;
-
-  const getProbabilityColor = (prob) => {
+  // Extract data from results - handle both nested and direct structure
+  const diagnosisData = results.diagnosis_result;
+  const hcvProbability = diagnosisData.hcv_status_probability || 0;
+  const confidence = diagnosisData.confidence || 0;
+  const stagePredictions = diagnosisData.stage_predictions;
+  const featureImportance = diagnosisData.feature_importance;
+  const recommendation =
+    diagnosisData.recommendation || "No recommendation provided";
+  // Extract HCV status, risk, and stage for new components
+  const hcvStatus = diagnosisData.hcv_status;
+  const hcvRisk = diagnosisData.hcv_risk;
+  const hcvStage = diagnosisData.hcv_stage;
+  const getProbabilityColor = (prob, risk) => {
+    // Use risk-based colors if risk is provided
+    if (risk) {
+      switch (risk.toLowerCase()) {
+        case "high":
+          return "#EF4444"; // Red for high risk
+        case "medium":
+          return "#F59E0B"; // Orange for medium risk
+        case "moderate":
+          return "#F59E0B"; // Orange for medium/moderate risk
+        case "low":
+          return "#10B981"; // Green for low risk
+        default:
+          break;
+      }
+    }
+    // Fallback to probability-based colors
     if (prob > 0.7) return "#EF4444";
     if (prob > 0.4) return "#F59E0B";
     return "#10B981";
   };
-
   const getStageColor = (stage) => {
     const colors = {
       "Class 0 (Blood Donors)": "#10B981",
@@ -44,92 +108,258 @@ function DiagnosisResults({ results, loading }) {
     };
     return colors[stage] || "#6B7280";
   };
-
   return (
-    <Box sx={{ mt: 4 }}>
-      <PatientInfo results={results} />
-
-      <HCVAnalysis
-        results={results}
-        getProbabilityColor={getProbabilityColor}
-      />
-
-      <StagePredictions results={results} getStageColor={getStageColor} />
-
-      {/* Recommendation */}
-      <Alert
-        severity={
-          results.hcv_probability > 0.7
-            ? "error"
-            : results.hcv_probability > 0.4
-            ? "warning"
-            : "success"
-        }
-        icon={<Warning />}
-        sx={{ mb: 3 }}
+    <Container sx={{ py: 2, height: "120vh" }}>
+      {/* Compact Header Section */}
+      <Paper
+        elevation={4}
+        sx={{
+          p: 2,
+          mb: 2,
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          color: "white",
+          borderRadius: 2,
+          boxShadow: "0 8px 24px rgba(102, 126, 234, 0.2)",
+        }}
       >
-        <Typography variant="h6" gutterBottom>
-          Clinical Recommendation
-        </Typography>
-        <Typography>{results.recommendation}</Typography>
-      </Alert>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Assessment sx={{ fontSize: "1.8rem" }} />
+            <Box>
+              <Typography variant="h5" fontWeight="bold">
+                HCV Diagnosis Results
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                AI-Powered Hepatitis C Analysis
+              </Typography>
+            </Box>
+          </Box>
+          <Chip
+            label={`${(confidence * 100).toFixed(1)}% Confidence`}
+            sx={{
+              backgroundColor: "rgba(255,255,255,0.2)",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "0.9rem",
+              padding: "4px 12px",
+            }}
+          />
+        </Box>
+      </Paper>
 
-      <FeatureImportance results={results} />
-    </Box>
+      {/* Optimized Grid Layout for One Screen */}
+      <Box
+        sx={{
+          flex: 1,
+          gap: 2,
+          height: "100vh",
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Row 1: Patient Info */}
+          <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
+            <PatientInfo results={results} />
+          </Box>{" "}
+          {/* Row 2: HCV Analysis, HCV Status, Risk, and Stage fetures impotance */}
+          <Box sx={{ display: "flex", width: "100%", gap: 2, height: "60vh" }}>
+            {/* colunm 1: HCV Analysis */}
+            <Box
+              sx={{
+                width: "50%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <HCVAnalysis
+                results={{
+                  hcv_status_probability: hcvProbability,
+                  confidence: confidence,
+                  stage_predictions: stagePredictions,
+                }}
+                getProbabilityColor={(prob) =>
+                  getProbabilityColor(prob, hcvRisk)
+                }
+                getStageColor={getStageColor}
+              />
+            </Box>
+            {/* colunm 2: HCV Status, Risk, and Stage , fetures impotance*/}
+            <Box
+              sx={{
+                width: "50%",
+                flexDirection: "column",
+                display: "flex",
+                gap: 2,
+              }}
+            >
+              {/* Row 1: HCV Status, Risk, and Stage */}
+              <Box
+                sx={{
+                  height: "30%",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                  width: "100%",
+                }}
+              >
+                <HcvStatusRiskStage
+                  status={hcvStatus}
+                  risk={hcvRisk}
+                  stage={hcvStage}
+                  probability={hcvProbability}
+                />
+              </Box>
+              {/* Row 2: Feature Importance */}
+              {Object.keys(featureImportance).length > 0 && (
+                <Box sx={{ height: "70%", width: "100%" }}>
+                  <FeatureImportance
+                    results={{
+                      feature_importance: featureImportance,
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+          </Box>{" "}
+        </Box>{" "}
+        {/* Row 3: Medical Recommendation - Full Width */}
+        <Box sx={{ mt: 2 }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              background: hcvRisk
+                ? hcvRisk.toLowerCase() === "high"
+                  ? "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)"
+                  : hcvRisk.toLowerCase() === "medium" ||
+                    hcvRisk.toLowerCase() === "moderate"
+                  ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)"
+                  : "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"
+                : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+              border: hcvRisk
+                ? hcvRisk.toLowerCase() === "high"
+                  ? "1px solid #fecaca"
+                  : hcvRisk.toLowerCase() === "medium" ||
+                    hcvRisk.toLowerCase() === "moderate"
+                  ? "1px solid #fde68a"
+                  : "1px solid #bbf7d0"
+                : "1px solid #e2e8f0",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <Psychology
+                sx={{
+                  fontSize: "1.5rem",
+                  color: hcvRisk
+                    ? hcvRisk.toLowerCase() === "high"
+                      ? "#dc2626"
+                      : hcvRisk.toLowerCase() === "medium" ||
+                        hcvRisk.toLowerCase() === "moderate"
+                      ? "#d97706"
+                      : "#059669"
+                    : "#667eea",
+                  mr: 1,
+                }}
+              />
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                color={
+                  hcvRisk
+                    ? hcvRisk.toLowerCase() === "high"
+                      ? "#dc2626"
+                      : hcvRisk.toLowerCase() === "medium" ||
+                        hcvRisk.toLowerCase() === "moderate"
+                      ? "#d97706"
+                      : "#059669"
+                    : "#374151"
+                }
+              >
+                Medical Recommendation
+              </Typography>
+            </Box>
+            <Typography
+              variant="body1"
+              sx={{
+                lineHeight: 1.6,
+                color: hcvRisk
+                  ? hcvRisk.toLowerCase() === "high"
+                    ? "#7f1d1d"
+                    : hcvRisk.toLowerCase() === "medium" ||
+                      hcvRisk.toLowerCase() === "moderate"
+                    ? "#92400e"
+                    : "#14532d"
+                  : "#4B5563",
+                backgroundColor: "white",
+                p: 2,
+                borderRadius: 1,
+                border: hcvRisk
+                  ? hcvRisk.toLowerCase() === "high"
+                    ? "1px solid #fecaca"
+                    : hcvRisk.toLowerCase() === "medium" ||
+                      hcvRisk.toLowerCase() === "moderate"
+                    ? "1px solid #fde68a"
+                    : "1px solid #bbf7d0"
+                  : "1px solid #E5E7EB",
+              }}
+            >
+              {recommendation}
+            </Typography>
+          </Paper>
+        </Box>
+      </Box>
+    </Container>
   );
 }
-
-//       const dummyResults = {
-//         hcv_probability: 0.96, // Overall framework accuracy is 96.7% [cite: 7]
-//         stage_predictions: {
-//           "Class 0 (Blood Donors)": 0.05,
-//           "Class 1 (Hepatitis)": 0.15,
-//           "Class 2 (Fibrosis)": 0.6, // F1-score for Class 2 (Fibrosis) increased from 0.73 to 0.89 with SDV [cite: 109, 106]
-//           "Class 3 (Cirrhosis)": 0.2, // F1-score for Class 3 (Cirrhosis) is 0.80 with SDV [cite: 106]
-//         },
-//         feature_importance: {
-//           Age: 0.25, // Age is one of the 6 selected features by RFE [cite: 79]
-//           ALP: 0.3, // ALP is one of the 6 selected features by RFE and a major indicator of liver diseases [cite: 79, 82]
-//           AST: 0.2, // AST is one of the 6 selected features by RFE and a major indicator of liver diseases [cite: 79, 82]
-//           CHE: 0.35, // CHE is one of the 6 selected features by RFE and a major indicator of liver diseases, showing strong contributions [cite: 79, 82, 85]
-//           CREA: 0.1, // CREA is one of the 6 selected features by RFE [cite: 79]
-//           GGT: 0.15, // GGT is one of the 6 selected features by RFE [cite: 79]
-//         },
-//         confidence: 0.95, // The Logistic Regression model achieved high ROC-AUC values (>=0.98) and an overall accuracy of 96.73% [cite: 107, 116]
-//         recommendation:
-//           "High probability of Hepatitis C Virus (HCV) infection detected. The AI analysis suggests Class 2 (Fibrosis) as the most likely liver disease stage. Immediate consultation with a hepatologist is strongly recommended for comprehensive evaluation and treatment planning, leveraging the insights from key indicators like CHE, ALP, and Age.",
-//         patient_name: formData.patientName,
-//         age: formData.age, // Assuming formData.age is available from your form
-//         sex: formData.sex, // Assuming formData.sex is available from your form (e.g., "Male" or "Female")
-//         // Include other lab values if you are collecting them, based on the 6 selected features:
-//         ALP: formData.ALP,
-//         AST: formData.AST,
-//         CHE: formData.CHE,
-//         CREA: formData.CREA,
-//         GGT: formData.GGT,
-//       };
 
 DiagnosisResults.propTypes = {
   loading: PropTypes.bool.isRequired,
   results: PropTypes.shape({
-    hcv_probability: PropTypes.number.isRequired,
-    recommendation: PropTypes.string.isRequired,
-    stage_predictions: PropTypes.objectOf(PropTypes.number).isRequired,
-    feature_importance: PropTypes.objectOf(PropTypes.number).isRequired,
-    confidence: PropTypes.number.isRequired,
+    // Patient information
+    patient_id: PropTypes.number,
     patient_name: PropTypes.string,
     age: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     sex: PropTypes.string,
+
+    // Lab values
     ALP: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     AST: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     CHE: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     CREA: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     GGT: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    // Add other properties that your results object contains
-    // For example:
-    // patient_info: PropTypes.object,
-    // stage_predictions: PropTypes.array,
-    // feature_importance: PropTypes.array,
+
+    // Direct fields from API response
+    hcv_status: PropTypes.string,
+    hcv_status_probability: PropTypes.number,
+    hcv_risk: PropTypes.string,
+    hcv_stage: PropTypes.string,
+    confidence: PropTypes.number,
+    recommendation: PropTypes.string,
+    stage_predictions: PropTypes.objectOf(PropTypes.number),
+    feature_importance: PropTypes.objectOf(PropTypes.number),
+
+    // Nested diagnosis_result object (for compatibility)
+    diagnosis_result: PropTypes.shape({
+      hcv_status: PropTypes.string,
+      hcv_status_probability: PropTypes.number,
+      hcv_risk: PropTypes.string,
+      hcv_stage: PropTypes.string,
+      confidence: PropTypes.number,
+      recommendation: PropTypes.string,
+      stage_predictions: PropTypes.objectOf(PropTypes.number),
+      feature_importance: PropTypes.objectOf(PropTypes.number),
+    }),
+
+    // Metadata
+    timestamp: PropTypes.string,
   }),
 };
 

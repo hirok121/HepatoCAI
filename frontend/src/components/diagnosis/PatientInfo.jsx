@@ -6,103 +6,58 @@ import { Person } from "@mui/icons-material";
 
 function PatientInfo({ results }) {
   return (
-    <Card sx={{ mb: 3, border: "1px solid #E2E8F0" }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <Person sx={{ color: "#2563EB", mr: 2 }} />
-          <Typography variant="h6">Patient Information</Typography>
-        </Box>
-
-        {/* Basic Patient Info */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, mb: 3 }}>
-          <Box sx={{ minWidth: 200 }}>
-            <Typography variant="body2" color="text.secondary">
-              Name
-            </Typography>
-            <Typography variant="body1" fontWeight={600}>
-              {results.patient_name}
-            </Typography>
-          </Box>
-          <Box sx={{ minWidth: 120 }}>
-            <Typography variant="body2" color="text.secondary">
-              Age
-            </Typography>
-            <Typography variant="body1" fontWeight={600}>
-              {results.age} years
-            </Typography>
-          </Box>
-          <Box sx={{ minWidth: 100 }}>
-            <Typography variant="body2" color="text.secondary">
-              Sex
-            </Typography>
-            <Typography variant="body1" fontWeight={600}>
-              {results.sex}
-            </Typography>
-          </Box>
-          <Box sx={{ minWidth: 150 }}>
-            <Typography variant="body2" color="text.secondary">
-              Analysis Date
-            </Typography>
-            <Typography variant="body1" fontWeight={600}>
-              {new Date().toLocaleDateString()}
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Lab Values */}
-        <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="subtitle2"
-            color="text.primary"
-            sx={{ mb: 2, fontWeight: 600 }}
-          >
-            Laboratory Values
+    <Card sx={{ width: "100%", border: "1px solid #E2E8F0" }}>
+      <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+          <Person sx={{ color: "#2563EB", mr: 0.5, fontSize: "1rem" }} />
+          <Typography variant="h6" fontSize="0.9rem">
+            Patient Information
           </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-            <Box sx={{ minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                ALP
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
-                {results.ALP || "N/A"}
-              </Typography>
-            </Box>
-            <Box sx={{ minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                AST
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
-                {results.AST || "N/A"}
-              </Typography>
-            </Box>
-            <Box sx={{ minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                CHE
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
-                {results.CHE || "N/A"}
-              </Typography>
-            </Box>
-            <Box sx={{ minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                CREA
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
-                {results.CREA || "N/A"}
-              </Typography>
-            </Box>
-            <Box sx={{ minWidth: 120 }}>
-              <Typography variant="body2" color="text.secondary">
-                GGT
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
-                {results.GGT || "N/A"}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+        </Box>{" "}
+        {/* Patient Info Inline Format */}
+        <Typography
+          variant="body2"
+          fontWeight={600}
+          sx={{
+            mb: 0.5,
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
+          <span>Name: {results.patient_name}</span>
+          <span>Sex: {results.sex}</span>
+          <span>Age: {results.age}</span>
+          <span>Date: {new Date().toLocaleDateString()}</span>
+        </Typography>
+        <Divider sx={{ my: 0.5 }} />
+        {/* Compact Lab Values Grid */}
+        <Typography
+          variant="body2"
+          fontWeight={600}
+          color="text.primary"
+          mb={0.5}
+        >
+          Laboratory Values
+        </Typography>{" "}
+        <Typography
+          variant="body2"
+          fontWeight={600}
+          sx={{
+            mb: 0.5,
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
+          <span>ALP: {results.ALP} U/L</span>
+          <span>AST: {results.AST} U/L</span>
+          <span>CHE: {results.CHE} kU/L</span>
+          <span>CREA: {results.CREA} mg/dL</span>
+          <span>GGT: {results.GGT} U/L</span>
+        </Typography>
       </CardContent>
     </Card>
   );

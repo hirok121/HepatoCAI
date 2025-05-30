@@ -30,6 +30,7 @@ export const OAUTH_CONFIG = {
 // Feature Flags
 export const FEATURES = {
   ENABLE_DEBUG_CONSOLE: import.meta.env.VITE_ENABLE_DEBUG_CONSOLE === 'true' || 'false',
+  ENABLE_DIAGNOSIS_DEBUG: import.meta.env.VITE_ENABLE_DIAGNOSIS_DEBUG === 'true' || false,
   ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true' || 'true',
 };
 

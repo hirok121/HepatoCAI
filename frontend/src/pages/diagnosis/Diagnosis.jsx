@@ -127,7 +127,7 @@ function Diagnosis() {
       // console.log("Full API Response:", response.data); // Add this for debugging
 
       // Extract the diagnosis_result from the correct nested structure
-      setAnalysisResults(response.data.data.diagnosis_result);
+      setAnalysisResults(response.data.data);
     } catch (error) {
       console.error("Analysis failed:", error);
       // Handle error appropriately
@@ -315,40 +315,45 @@ function Diagnosis() {
             </Paper>
           </>
         )}
-
         {/* Analysis Results */}
         {(loading || analysisResults) && (
           <DiagnosisResults results={analysisResults} loading={loading} />
-        )}
-
+        )}{" "}
         {/* Resubmit Button - Show only when analysis is complete */}
         {isSubmitted && !loading && analysisResults && (
           <Box sx={{ textAlign: "center", mt: 4 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleResubmit}
               startIcon={<Refresh />}
               sx={{
-                px: 6,
-                py: 2,
-                fontSize: "1.1rem",
-                borderRadius: 3,
-                borderColor: "#2563EB",
-                color: "#2563EB",
+                px: 8,
+                py: 2.5,
+                fontSize: "1.2rem",
+                fontWeight: 600,
+                borderRadius: 5,
+                backgroundColor: "#059669",
+                color: "white",
+                textTransform: "none",
                 "&:hover": {
-                  backgroundColor: "#2563EB",
-                  color: "white",
-                  transform: "translateY(-2px)",
+                  backgroundColor: "#047857",
+                  transform: "translateY(-3px)",
+                  boxShadow: "0 8px 25px rgba(5, 150, 105, 0.4)",
                 },
-                transition: "all 0.3s ease",
-                boxShadow: "0 4px 12px rgba(37, 99, 235, 0.2)",
+                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                boxShadow: "0 6px 20px rgba(5, 150, 105, 0.3)",
+                border: "2px solid transparent",
+                "&:focus": {
+                  outline: "none",
+                  borderColor: "#10B981",
+                  boxShadow: "0 0 0 3px rgba(16, 185, 129, 0.2)",
+                },
               }}
             >
               Analyze Another Patient
             </Button>
           </Box>
         )}
-
         {/* Medical Disclaimer */}
         <MedicalDisclaimer />
       </Container>
