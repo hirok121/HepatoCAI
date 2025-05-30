@@ -69,6 +69,10 @@ function UserManagement() {
     message: "",
     action: null,
   });
+  const [detailDialog, setDetailDialog] = useState({
+    open: false,
+    user: null,
+  });
 
   const fetchUsers = useCallback(async () => {
     console.log("UserManagement: Starting fetchUsers");
@@ -197,10 +201,14 @@ function UserManagement() {
     setSelectedUser(user);
     setActionMenuAnchor(event.currentTarget);
   };
-
   const handleActionMenuClose = () => {
     setActionMenuAnchor(null);
     setSelectedUser(null);
+  };
+
+  const handleViewDetails = (user) => {
+    setDetailDialog({ open: true, user });
+    handleActionMenuClose();
   };
 
   const exportUsers = async () => {
@@ -381,9 +389,14 @@ function UserManagement() {
               <TableContainer>
                 <Table>
                   <TableHead>
+                    {" "}
                     <TableRow sx={{ bgcolor: "grey.50" }}>
                       <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Contact</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>
+                        Location
+                      </TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Joined</TableCell>
@@ -453,9 +466,58 @@ function UserManagement() {
                               )}
                             </Box>
                           </Box>
-                        </TableCell>
+                        </TableCell>{" "}
                         <TableCell>
                           <Typography variant="body2">{user.email}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Box>
+                            {user.phone_number && (
+                              <Typography variant="body2">
+                                📞 {user.phone_number}
+                                {user.phone_verified_at && (
+                                  <Chip
+                                    label="✓"
+                                    size="small"
+                                    color="success"
+                                    sx={{
+                                      ml: 0.5,
+                                      height: 16,
+                                      fontSize: "0.6rem",
+                                    }}
+                                  />
+                                )}
+                              </Typography>
+                            )}
+                            {user.login_count !== undefined && (
+                              <Typography
+                                variant="caption"
+                                color="textSecondary"
+                              >
+                                {user.login_count} logins
+                              </Typography>
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Box>
+                            {(user.city || user.country) && (
+                              <Typography variant="body2">
+                                🌍{" "}
+                                {[user.city, user.country]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </Typography>
+                            )}
+                            {user.timezone && (
+                              <Typography
+                                variant="caption"
+                                color="textSecondary"
+                              >
+                                🕒 {user.timezone}
+                              </Typography>
+                            )}
+                          </Box>
                         </TableCell>
                         <TableCell>{getUserRoleChip(user)}</TableCell>
                         <TableCell>{getStatusChip(user)}</TableCell>
@@ -522,8 +584,13 @@ function UserManagement() {
         open={Boolean(actionMenuAnchor)}
         onClose={handleActionMenuClose}
       >
+        {" "}
         {selectedUser && (
           <>
+            <MenuItem onClick={() => handleViewDetails(selectedUser)}>
+              <People sx={{ mr: 1 }} />
+              View Details
+            </MenuItem>
             <MenuItem
               onClick={() => {
                 handleUserPermissionChange(
@@ -610,6 +677,249 @@ function UserManagement() {
             color="primary"
           >
             Confirm
+          </Button>{" "}
+        </DialogActions>
+      </Dialog>
+
+      {/* User Details Dialog */}
+      <Dialog
+        open={detailDialog.open}
+        onClose={() => setDetailDialog({ open: false, user: null })}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar
+              src={detailDialog.user?.profile_picture}
+              sx={{ width: 56, height: 56 }}
+            >
+              {(
+                detailDialog.user?.full_name ||
+                detailDialog.user?.username ||
+                detailDialog.user?.email
+              )
+                ?.charAt(0)
+                ?.toUpperCase()}
+            </Avatar>
+            <Box>
+              <Typography variant="h6">
+                {detailDialog.user?.full_name ||
+                  `${detailDialog.user?.first_name} ${detailDialog.user?.last_name}`.trim() ||
+                  detailDialog.user?.username}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {detailDialog.user?.email}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {detailDialog.user && (
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              {/* Basic Information */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Basic Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      First Name
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.first_name || "Not provided"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Last Name
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.last_name || "Not provided"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Username
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.username || "Not provided"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Account Type
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {getUserRoleChip(detailDialog.user)}
+                      {getStatusChip(detailDialog.user)}
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Contact Information */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Contact Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Email
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.email}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Phone Number
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography variant="body1">
+                        {detailDialog.user.phone_number || "Not provided"}
+                      </Typography>
+                      {detailDialog.user.phone_verified_at && (
+                        <Chip
+                          label="Verified"
+                          color="success"
+                          size="small"
+                          icon={<CheckCircle />}
+                        />
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Location Information */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Location Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="textSecondary">
+                      Country
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.country || "Not provided"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="textSecondary">
+                      City
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.city || "Not provided"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="textSecondary">
+                      Timezone
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.timezone || "Not provided"}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Activity Information */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Activity Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Date Joined
+                    </Typography>
+                    <Typography variant="body1">
+                      {new Date(detailDialog.user.date_joined).toLocaleString()}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Last Login
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.last_login
+                        ? new Date(
+                            detailDialog.user.last_login
+                          ).toLocaleString()
+                        : "Never"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Login Count
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.login_count !== undefined
+                        ? `${detailDialog.user.login_count} logins`
+                        : "Not tracked"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Last Login IP
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ fontFamily: "monospace" }}
+                    >
+                      {detailDialog.user.last_login_ip || "Not available"}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Terms & Social Information */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary">
+                  Additional Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Social Provider
+                    </Typography>
+                    <Typography variant="body1">
+                      {detailDialog.user.is_social_user
+                        ? detailDialog.user.social_provider || "Social Account"
+                        : "Local Account"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Terms Accepted
+                    </Typography>
+                    <Box>
+                      <Typography variant="body1">
+                        {detailDialog.user.terms_accepted_at
+                          ? new Date(
+                              detailDialog.user.terms_accepted_at
+                            ).toLocaleDateString()
+                          : "Not accepted"}
+                      </Typography>
+                      {detailDialog.user.terms_version && (
+                        <Typography variant="caption" color="textSecondary">
+                          Version: {detailDialog.user.terms_version}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDetailDialog({ open: false, user: null })}>
+            Close
           </Button>
         </DialogActions>
       </Dialog>

@@ -54,18 +54,72 @@ class ProfileSerializer(serializers.ModelSerializer):
             "is_social_user",
             "social_provider",
             "verified_email",
+            # Contact & Location Information
+            "phone_number",
+            "country",
+            "city",
+            "timezone",
+            # Account Status & Verification
+            "phone_verified_at",
+            # Activity Tracking (read-only)
+            "last_login_ip",
+            "login_count",
+            "terms_accepted_at",
+            "terms_version",
         ]
         read_only_fields = [
             "email",
             "is_social_user",
             "social_provider",
             "verified_email",
+            # Activity tracking fields are read-only
+            "last_login_ip",
+            "login_count",
+            "phone_verified_at",  # Should be updated through verification process
+            "terms_accepted_at",
+            "terms_version",
         ]
 
     def validate_birthday(self, value):
         """Custom validation for birthday field"""
         if value is None or value == "":
             return None
+        return value
+
+    def validate_phone_number(self, value):
+        """Custom validation for phone number field"""
+        if value and len(value) > 20:
+            raise serializers.ValidationError(
+                "Phone number cannot exceed 20 characters"
+            )
+        return value
+
+    def validate_country(self, value):
+        """Custom validation for country field"""
+        if value and len(value) > 100:
+            raise serializers.ValidationError(
+                "Country name cannot exceed 100 characters"
+            )
+        return value
+
+    def validate_city(self, value):
+        """Custom validation for city field"""
+        if value and len(value) > 100:
+            raise serializers.ValidationError("City name cannot exceed 100 characters")
+        return value
+
+    def validate_timezone(self, value):
+        """Custom validation for timezone field"""
+        if value and len(value) > 50:
+            raise serializers.ValidationError("Timezone cannot exceed 50 characters")
+        return value
+
+    def validate_terms_version(self, value):
+        """Custom validation for terms version field"""
+        if value and len(value) > 10:
+            raise serializers.ValidationError(
+                "Terms version cannot exceed 10 characters"
+            )
         return value
 
 
@@ -84,6 +138,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["profile_picture"] = user.profile_picture
         token["is_social_user"] = user.is_social_user
         token["social_provider"] = user.social_provider
+        # Add location and contact info for convenience
+        token["country"] = user.country
+        token["city"] = user.city
+        token["timezone"] = user.timezone
 
         return token
 
@@ -102,6 +160,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "profile_picture": self.user.profile_picture,
             "is_social_user": self.user.is_social_user,
             "social_provider": self.user.social_provider,
+            # Contact & Location Information
+            "phone_number": self.user.phone_number,
+            "country": self.user.country,
+            "city": self.user.city,
+            "timezone": self.user.timezone,
         }
 
         return data

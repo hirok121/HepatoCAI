@@ -90,7 +90,11 @@ class CustomUser(AbstractUser):
         Otherwise, concatenate first_name and last_name to create full_name.
         """
         # If full_name is provided and either first_name or last_name is empty/different
-        if self.full_name and self.full_name.strip():
+        if (
+            self.full_name
+            and self.full_name.strip()
+            and (not self.first_name or not self.last_name)
+        ):
             # Split full_name into components
             name_parts = self.full_name.strip().split()
 
