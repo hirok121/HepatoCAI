@@ -15,6 +15,11 @@ import os
 load_dotenv()
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -44,11 +49,24 @@ class CustomUser(AbstractUser):
     locale = models.CharField(
         max_length=10, null=True, blank=True
     )  # Language preference
-    verified_email = models.BooleanField(default=False)
-
-    # Social login tracking
+    verified_email = models.BooleanField(default=False)  # Social login tracking
     is_social_user = models.BooleanField(default=False)
     social_provider = models.CharField(max_length=50, null=True, blank=True)
+
+    # Contact & Location Information
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    timezone = models.CharField(max_length=50, null=True, blank=True)
+
+    # Account Status & Verification
+    phone_verified_at = models.DateTimeField(null=True, blank=True)
+
+    # Activity Tracking
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    login_count = models.PositiveIntegerField(default=0)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
+    terms_version = models.CharField(max_length=10, null=True, blank=True)
 
     objects = CustomUserManager()
 
@@ -56,15 +74,53 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
 
     def save(self, *args, **kwargs):
-        # Auto-populate full_name from first_name and last_name if not provided
-        if not self.full_name and (self.first_name or self.last_name):
-            self.full_name = f"{self.first_name or ''} {self.last_name or ''}".strip()
+        # Handle bidirectional relationship between full_name, first_name, and last_name
+        self._sync_name_fields()
 
         # Auto-populate username from email if not provided
         if not self.username and self.email:
             self.username = self.email.split("@")[0]
 
         super().save(*args, **kwargs)
+
+    def _sync_name_fields(self):
+        """
+        Synchronizes full_name, first_name, and last_name fields bidirectionally.
+        Priority: If full_name is provided, split it into first_name and last_name.
+        Otherwise, concatenate first_name and last_name to create full_name.
+        """
+        # If full_name is provided and either first_name or last_name is empty/different
+        if self.full_name and self.full_name.strip():
+            # Split full_name into components
+            name_parts = self.full_name.strip().split()
+
+            if len(name_parts) >= 2:
+                # First name: all words except the last one
+                self.first_name = " ".join(name_parts[:-1])
+                # Last name: the last word
+                self.last_name = name_parts[-1]
+            elif len(name_parts) == 1:
+                # Only one word provided, treat as first name
+                self.first_name = name_parts[0]
+                self.last_name = ""
+            else:
+                # Empty full_name after strip
+                self.first_name = ""
+                self.last_name = ""
+
+        # If full_name is empty but first_name or last_name is provided
+        elif (self.first_name and self.first_name.strip()) or (
+            self.last_name and self.last_name.strip()
+        ):
+            # Concatenate first_name and last_name to create full_name
+            first_part = self.first_name.strip() if self.first_name else ""
+            last_part = self.last_name.strip() if self.last_name else ""
+            self.full_name = f"{first_part} {last_part}".strip()
+
+        # Ensure all fields are properly cleaned
+        self.full_name = self.full_name.strip() if self.full_name else ""
+        self.first_name = self.first_name.strip() if self.first_name else ""
+        self.last_name = self.last_name.strip() if self.last_name else ""
 
 
 @receiver(reset_password_token_created)
@@ -97,6 +153,7 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
 def generate_jwt_on_login(request, user, **kwargs):
     # Import here to avoid circular import
     from .serializers import CustomTokenObtainPairSerializer
+    from utils.ip_utils import update_user_login_tracking
 
     # Use the custom token serializer to ensure is_staff is included
     refresh = CustomTokenObtainPairSerializer.get_token(user)
@@ -104,4 +161,11 @@ def generate_jwt_on_login(request, user, **kwargs):
         "access": str(refresh.access_token),
         "refresh": str(refresh),
     }
+
+    # Update login tracking when user logs in via social auth
+    # This is the central place where we track all social auth logins
+    if hasattr(user, "socialaccount_set") and user.socialaccount_set.exists():
+        update_user_login_tracking(user, request)
+        logger.info(f"Login tracking updated for social auth user: {user.email}")
+
     # print("JWT generated and stored in session:", request.session["jwt"])  # Debugging line

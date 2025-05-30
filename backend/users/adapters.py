@@ -3,13 +3,21 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
 from allauth.account.utils import user_email, user_username
 from django.contrib.auth import get_user_model
+from utils.ip_utils import update_user_login_tracking
+import logging
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         if sociallogin.is_existing:
+            # We no longer update login tracking here to avoid multiple counts
+            # This is now handled in the generate_jwt_on_login signal
+            logger.info(
+                f"Google OAuth existing user detected: {sociallogin.user.email}"
+            )
             return
 
         email = user_email(sociallogin.user)
@@ -26,6 +34,9 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
 
             # Connect social account to existing user
             sociallogin.connect(request, user)
+
+            # We no longer update login tracking here to avoid multiple counts
+            logger.info(f"Google OAuth connected to existing user: {user.email}")
 
         except User.DoesNotExist:
             pass  # Proceed with the default behavior (create new user)
@@ -59,11 +70,14 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             elif extra_data.get("name"):
                 user.full_name = extra_data.get("name")
 
-            # Set username from email if not provided
-            if not user.username:
+                # Set username from email if not provided            if not user.username:
                 user.username = user.email.split("@")[0]
 
             user.save()
+
+            # We no longer update login tracking here to avoid multiple counts
+            # Login tracking will be handled by generate_jwt_on_login signal
+            logger.info(f"Google OAuth new user created: {user.email}")
 
         return user
 

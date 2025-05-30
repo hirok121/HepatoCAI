@@ -38,6 +38,7 @@ from .serializers import (
 )
 from utils.responses import StandardResponse, handle_exceptions
 from utils.security import SecurityValidator, RateLimitManager, AuditLogger
+from utils.ip_utils import update_user_login_tracking
 
 import json
 import logging
@@ -51,6 +52,24 @@ logger = logging.getLogger(__name__)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        # Call the parent post method to handle authentication
+        response = super().post(request, *args, **kwargs)
+
+        # If authentication was successful, update login tracking
+        if response.status_code == 200:
+            # Extract user from the serializer
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                user = serializer.user
+                # Update login tracking for email/password authentication
+                update_user_login_tracking(user, request)
+                logger.info(
+                    f"Login tracking updated for user {user.email} via /accounts/token/"
+                )
+
+        return response
 
 
 def verificationMail(name, verification_link, email):
@@ -91,6 +110,11 @@ def login_redirect_view(request):
     if jwt_data:
         access = jwt_data["access"]
         refresh = jwt_data["refresh"]
+
+        # We're no longer updating login tracking here
+        # Login tracking is now handled in the generate_jwt_on_login signal
+        logger.info(f"Google OAuth redirect for user: {request.user.email}")
+
         # print("JWT data (from login redirect view):", jwt_data) # Debugging line
         return HttpResponseRedirect(
             f"{frontend_url}/auth/callback?access={access}&refresh={refresh}"
@@ -241,6 +265,10 @@ class LoginViewSet(viewsets.ViewSet):
 
             refresh = RefreshToken.for_user(user)
             logger.info(f"Successful login for user: {email}")
+
+            # Update login tracking information
+            update_user_login_tracking(user, request)
+
             AuditLogger.log_authentication_event(
                 "successful_login", user=user, ip_address=client_ip
             )
@@ -506,6 +534,17 @@ class UserManagementView(APIView):
                         "date_joined": user.date_joined,
                         "last_login": user.last_login,
                         "profile_picture": user.profile_picture,
+                        # Contact & Location Information
+                        "phone_number": user.phone_number,
+                        "country": user.country,
+                        "city": user.city,
+                        "timezone": user.timezone,
+                        # Activity Tracking
+                        "last_login_ip": user.last_login_ip,
+                        "login_count": user.login_count,
+                        "phone_verified_at": user.phone_verified_at,
+                        "terms_accepted_at": user.terms_accepted_at,
+                        "terms_version": user.terms_version,
                     }
                 )
 
@@ -519,12 +558,10 @@ class UserManagementView(APIView):
                     "can_deactivate_users": request.user.is_superuser,
                 },
             )
+
         except Exception as e:
             logger.error(f"Error in UserManagementView.get: {str(e)}")
-            return (
-                StandardResponse.server_error("Failed to retrieve users", e)
-                @ handle_exceptions
-            )
+            return StandardResponse.server_error("Failed to retrieve users", e)
 
     def patch(self, request, user_id=None):
         """Update user permissions"""
@@ -623,6 +660,18 @@ class StaffManagementView(APIView):
                     "social_provider": user.social_provider,
                     "date_joined": user.date_joined,
                     "last_login": user.last_login,
+                    "profile_picture": user.profile_picture,
+                    # Contact & Location Information
+                    "phone_number": user.phone_number,
+                    "country": user.country,
+                    "city": user.city,
+                    "timezone": user.timezone,
+                    # Activity Tracking
+                    "last_login_ip": user.last_login_ip,
+                    "login_count": user.login_count,
+                    "phone_verified_at": user.phone_verified_at,
+                    "terms_accepted_at": user.terms_accepted_at,
+                    "terms_version": user.terms_version,
                 }
             )
 
