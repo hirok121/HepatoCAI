@@ -270,659 +270,683 @@ function UserManagement() {
   );
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Admin Navbar */}
       <AdminNavbar />
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          <People sx={{ fontSize: "inherit", mr: 1, color: "primary.main" }} />
-          User Management
-        </Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          Manage system users, roles, and permissions
-        </Typography>
-      </Box>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            <People
+              sx={{ fontSize: "inherit", mr: 1, color: "primary.main" }}
+            />
+            User Management
+          </Typography>
+          <Typography variant="subtitle1" color="textSecondary">
+            Manage system users, roles, and permissions
+          </Typography>
+        </Box>
 
-      {/* Messages */}
-      {message && (
-        <Alert
-          severity={messageType}
-          sx={{ mb: 3, borderRadius: 2 }}
-          onClose={() => setMessage("")}
-        >
-          {message}
-        </Alert>
-      )}
+        {/* Messages */}
+        {message && (
+          <Alert
+            severity={messageType}
+            sx={{ mb: 3, borderRadius: 2 }}
+            onClose={() => setMessage("")}
+          >
+            {message}
+          </Alert>
+        )}
 
-      {/* Controls */}
-      <Card sx={{ mb: 3, borderRadius: 2 }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ borderRadius: 2 }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  value={filterRole}
-                  label="Role"
-                  onChange={(e) => setFilterRole(e.target.value)}
-                >
-                  <MenuItem value="all">All Roles</MenuItem>
-                  <MenuItem value="superuser">Superuser</MenuItem>
-                  <MenuItem value="staff">Staff</MenuItem>
-                  <MenuItem value="user">User</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filterStatus}
-                  label="Status"
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <MenuItem value="all">All Status</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<Refresh />}
-                  onClick={fetchUsers}
-                  disabled={loading}
-                >
-                  Refresh
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<Download />}
-                  onClick={exportUsers}
-                >
-                  Export
-                </Button>
-                {permissions.can_promote_to_staff && (
-                  <Button
-                    variant="contained"
-                    startIcon={<PersonAdd />}
-                    onClick={() => {
-                      /* Add user functionality */
-                    }}
+        {/* Controls */}
+        <Card sx={{ mb: 3, borderRadius: 2 }}>
+          <CardContent>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ borderRadius: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth>
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    value={filterRole}
+                    label="Role"
+                    onChange={(e) => setFilterRole(e.target.value)}
                   >
-                    Add User
+                    <MenuItem value="all">All Roles</MenuItem>
+                    <MenuItem value="superuser">Superuser</MenuItem>
+                    <MenuItem value="staff">Staff</MenuItem>
+                    <MenuItem value="user">User</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={filterStatus}
+                    label="Status"
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <MenuItem value="all">All Status</MenuItem>
+                    <MenuItem value="active">Active</MenuItem>
+                    <MenuItem value="inactive">Inactive</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Refresh />}
+                    onClick={fetchUsers}
+                    disabled={loading}
+                  >
+                    Refresh
                   </Button>
-                )}
-              </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Download />}
+                    onClick={exportUsers}
+                  >
+                    Export
+                  </Button>
+                  {permissions.can_promote_to_staff && (
+                    <Button
+                      variant="contained"
+                      startIcon={<PersonAdd />}
+                      onClick={() => {
+                        /* Add user functionality */
+                      }}
+                    >
+                      Add User
+                    </Button>
+                  )}
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Users Table */}
-      <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 0 }}>
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    {" "}
-                    <TableRow sx={{ bgcolor: "grey.50" }}>
-                      <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Contact</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Location
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Joined</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Last Login
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {paginatedUsers.map((user) => (
-                      <TableRow
-                        key={user.id}
-                        hover
-                        sx={{
-                          bgcolor:
-                            user.id === currentUser?.id
-                              ? "primary.50"
-                              : "inherit",
-                          borderLeft:
-                            user.id === currentUser?.id ? "4px solid" : "none",
-                          borderLeftColor: "primary.main",
-                        }}
-                      >
-                        <TableCell>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 2,
-                            }}
-                          >
-                            <Avatar
-                              src={user.profile_picture}
-                              sx={{ width: 40, height: 40 }}
+        {/* Users Table */}
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 0 }}>
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      {" "}
+                      <TableRow sx={{ bgcolor: "grey.50" }}>
+                        <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Contact
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Location
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Role</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Status
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Joined
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Last Login
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Actions
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {paginatedUsers.map((user) => (
+                        <TableRow
+                          key={user.id}
+                          hover
+                          sx={{
+                            bgcolor:
+                              user.id === currentUser?.id
+                                ? "primary.50"
+                                : "inherit",
+                            borderLeft:
+                              user.id === currentUser?.id
+                                ? "4px solid"
+                                : "none",
+                            borderLeftColor: "primary.main",
+                          }}
+                        >
+                          <TableCell>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 2,
+                              }}
                             >
-                              {(user.full_name || user.username || user.email)
-                                .charAt(0)
-                                .toUpperCase()}
-                            </Avatar>
-                            <Box>
-                              <Typography variant="body1" fontWeight="medium">
-                                {user.full_name ||
-                                  `${user.first_name} ${user.last_name}`.trim() ||
-                                  user.username}
-                                {user.id === currentUser?.id && (
-                                  <Chip
-                                    label="You"
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                    sx={{
-                                      ml: 1,
-                                      fontSize: "0.7rem",
-                                      height: 20,
-                                    }}
-                                  />
+                              <Avatar
+                                src={user.profile_picture}
+                                sx={{ width: 40, height: 40 }}
+                              >
+                                {(user.full_name || user.username || user.email)
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="body1" fontWeight="medium">
+                                  {user.full_name ||
+                                    `${user.first_name} ${user.last_name}`.trim() ||
+                                    user.username}
+                                  {user.id === currentUser?.id && (
+                                    <Chip
+                                      label="You"
+                                      size="small"
+                                      color="primary"
+                                      variant="outlined"
+                                      sx={{
+                                        ml: 1,
+                                        fontSize: "0.7rem",
+                                        height: 20,
+                                      }}
+                                    />
+                                  )}
+                                </Typography>
+                                {user.is_social_user && (
+                                  <Typography
+                                    variant="caption"
+                                    color="textSecondary"
+                                  >
+                                    {user.social_provider} Login
+                                  </Typography>
                                 )}
-                              </Typography>
-                              {user.is_social_user && (
+                              </Box>
+                            </Box>
+                          </TableCell>{" "}
+                          <TableCell>
+                            <Typography variant="body2">
+                              {user.email}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Box>
+                              {user.phone_number && (
+                                <Typography variant="body2">
+                                  📞 {user.phone_number}
+                                  {user.phone_verified_at && (
+                                    <Chip
+                                      label="✓"
+                                      size="small"
+                                      color="success"
+                                      sx={{
+                                        ml: 0.5,
+                                        height: 16,
+                                        fontSize: "0.6rem",
+                                      }}
+                                    />
+                                  )}
+                                </Typography>
+                              )}
+                              {user.login_count !== undefined && (
                                 <Typography
                                   variant="caption"
                                   color="textSecondary"
                                 >
-                                  {user.social_provider} Login
+                                  {user.login_count} logins
                                 </Typography>
                               )}
                             </Box>
-                          </Box>
-                        </TableCell>{" "}
-                        <TableCell>
-                          <Typography variant="body2">{user.email}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box>
-                            {user.phone_number && (
-                              <Typography variant="body2">
-                                📞 {user.phone_number}
-                                {user.phone_verified_at && (
-                                  <Chip
-                                    label="✓"
-                                    size="small"
-                                    color="success"
-                                    sx={{
-                                      ml: 0.5,
-                                      height: 16,
-                                      fontSize: "0.6rem",
-                                    }}
-                                  />
-                                )}
-                              </Typography>
-                            )}
-                            {user.login_count !== undefined && (
-                              <Typography
-                                variant="caption"
-                                color="textSecondary"
-                              >
-                                {user.login_count} logins
-                              </Typography>
-                            )}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box>
-                            {(user.city || user.country) && (
-                              <Typography variant="body2">
-                                🌍{" "}
-                                {[user.city, user.country]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </Typography>
-                            )}
-                            {user.timezone && (
-                              <Typography
-                                variant="caption"
-                                color="textSecondary"
-                              >
-                                🕒 {user.timezone}
-                              </Typography>
-                            )}
-                          </Box>
-                        </TableCell>
-                        <TableCell>{getUserRoleChip(user)}</TableCell>
-                        <TableCell>{getStatusChip(user)}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {new Date(user.date_joined).toLocaleDateString()}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {user.last_login
-                              ? new Date(user.last_login).toLocaleDateString()
-                              : "Never"}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            onClick={(e) => handleActionMenuOpen(e, user)}
-                            disabled={user.id === currentUser?.id}
-                          >
-                            <MoreVert />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                          </TableCell>
+                          <TableCell>
+                            <Box>
+                              {(user.city || user.country) && (
+                                <Typography variant="body2">
+                                  🌍{" "}
+                                  {[user.city, user.country]
+                                    .filter(Boolean)
+                                    .join(", ")}
+                                </Typography>
+                              )}
+                              {user.timezone && (
+                                <Typography
+                                  variant="caption"
+                                  color="textSecondary"
+                                >
+                                  🕒 {user.timezone}
+                                </Typography>
+                              )}
+                            </Box>
+                          </TableCell>
+                          <TableCell>{getUserRoleChip(user)}</TableCell>
+                          <TableCell>{getStatusChip(user)}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {new Date(user.date_joined).toLocaleDateString()}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {user.last_login
+                                ? new Date(user.last_login).toLocaleDateString()
+                                : "Never"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              onClick={(e) => handleActionMenuOpen(e, user)}
+                              disabled={user.id === currentUser?.id}
+                            >
+                              <MoreVert />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
 
-              {/* Pagination */}
-              {filteredUsers.length > rowsPerPage && (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-                  <Pagination
-                    count={Math.ceil(filteredUsers.length / rowsPerPage)}
-                    page={page}
-                    onChange={(e, newPage) => setPage(newPage)}
-                    color="primary"
-                  />
-                </Box>
-              )}
+                {/* Pagination */}
+                {filteredUsers.length > rowsPerPage && (
+                  <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+                    <Pagination
+                      count={Math.ceil(filteredUsers.length / rowsPerPage)}
+                      page={page}
+                      onChange={(e, newPage) => setPage(newPage)}
+                      color="primary"
+                    />
+                  </Box>
+                )}
 
-              {/* No users found */}
-              {filteredUsers.length === 0 && !loading && (
-                <Box sx={{ textAlign: "center", py: 4 }}>
-                  <People sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
-                  <Typography variant="h6" color="textSecondary" gutterBottom>
-                    No users found
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {searchTerm
-                      ? "Try adjusting your search filters"
-                      : "No users in the system"}
-                  </Typography>
-                </Box>
-              )}
+                {/* No users found */}
+                {filteredUsers.length === 0 && !loading && (
+                  <Box sx={{ textAlign: "center", py: 4 }}>
+                    <People sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
+                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                      No users found
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {searchTerm
+                        ? "Try adjusting your search filters"
+                        : "No users in the system"}
+                    </Typography>
+                  </Box>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Action Menu */}
+        <Menu
+          anchorEl={actionMenuAnchor}
+          open={Boolean(actionMenuAnchor)}
+          onClose={handleActionMenuClose}
+        >
+          {" "}
+          {selectedUser && (
+            <>
+              <MenuItem onClick={() => handleViewDetails(selectedUser)}>
+                <People sx={{ mr: 1 }} />
+                View Details
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleUserPermissionChange(
+                    selectedUser.id,
+                    "is_active",
+                    !selectedUser.is_active
+                  );
+                }}
+                disabled={!permissions.can_deactivate_users}
+              >
+                {selectedUser.is_active ? (
+                  <Block sx={{ mr: 1 }} />
+                ) : (
+                  <CheckCircle sx={{ mr: 1 }} />
+                )}
+                {selectedUser.is_active ? "Deactivate" : "Activate"}
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleUserPermissionChange(
+                    selectedUser.id,
+                    "is_staff",
+                    !selectedUser.is_staff
+                  );
+                }}
+                disabled={!permissions.can_promote_to_staff}
+              >
+                <Security sx={{ mr: 1 }} />
+                {selectedUser.is_staff ? "Remove Staff" : "Make Staff"}
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleUserPermissionChange(
+                    selectedUser.id,
+                    "is_superuser",
+                    !selectedUser.is_superuser
+                  );
+                }}
+                disabled={!permissions.can_promote_to_superuser}
+              >
+                <AdminPanelSettings sx={{ mr: 1 }} />
+                {selectedUser.is_superuser
+                  ? "Remove Superuser"
+                  : "Make Superuser"}
+              </MenuItem>
             </>
           )}
-        </CardContent>
-      </Card>
+        </Menu>
 
-      {/* Action Menu */}
-      <Menu
-        anchorEl={actionMenuAnchor}
-        open={Boolean(actionMenuAnchor)}
-        onClose={handleActionMenuClose}
-      >
-        {" "}
-        {selectedUser && (
-          <>
-            <MenuItem onClick={() => handleViewDetails(selectedUser)}>
-              <People sx={{ mr: 1 }} />
-              View Details
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleUserPermissionChange(
-                  selectedUser.id,
-                  "is_active",
-                  !selectedUser.is_active
-                );
-              }}
-              disabled={!permissions.can_deactivate_users}
+        {/* Confirmation Dialog */}
+        <Dialog
+          open={confirmDialog.open}
+          onClose={() =>
+            setConfirmDialog({
+              open: false,
+              title: "",
+              message: "",
+              action: null,
+            })
+          }
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>{confirmDialog.title}</DialogTitle>
+          <DialogContent>
+            <Typography>{confirmDialog.message}</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() =>
+                setConfirmDialog({
+                  open: false,
+                  title: "",
+                  message: "",
+                  action: null,
+                })
+              }
             >
-              {selectedUser.is_active ? (
-                <Block sx={{ mr: 1 }} />
-              ) : (
-                <CheckCircle sx={{ mr: 1 }} />
-              )}
-              {selectedUser.is_active ? "Deactivate" : "Activate"}
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleUserPermissionChange(
-                  selectedUser.id,
-                  "is_staff",
-                  !selectedUser.is_staff
-                );
-              }}
-              disabled={!permissions.can_promote_to_staff}
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDialog.action}
+              variant="contained"
+              color="primary"
             >
-              <Security sx={{ mr: 1 }} />
-              {selectedUser.is_staff ? "Remove Staff" : "Make Staff"}
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleUserPermissionChange(
-                  selectedUser.id,
-                  "is_superuser",
-                  !selectedUser.is_superuser
-                );
-              }}
-              disabled={!permissions.can_promote_to_superuser}
-            >
-              <AdminPanelSettings sx={{ mr: 1 }} />
-              {selectedUser.is_superuser
-                ? "Remove Superuser"
-                : "Make Superuser"}
-            </MenuItem>
-          </>
-        )}
-      </Menu>
+              Confirm
+            </Button>{" "}
+          </DialogActions>
+        </Dialog>
 
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={confirmDialog.open}
-        onClose={() =>
-          setConfirmDialog({
-            open: false,
-            title: "",
-            message: "",
-            action: null,
-          })
-        }
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>{confirmDialog.title}</DialogTitle>
-        <DialogContent>
-          <Typography>{confirmDialog.message}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() =>
-              setConfirmDialog({
-                open: false,
-                title: "",
-                message: "",
-                action: null,
-              })
-            }
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmDialog.action}
-            variant="contained"
-            color="primary"
-          >
-            Confirm
-          </Button>{" "}
-        </DialogActions>
-      </Dialog>
-
-      {/* User Details Dialog */}
-      <Dialog
-        open={detailDialog.open}
-        onClose={() => setDetailDialog({ open: false, user: null })}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar
-              src={detailDialog.user?.profile_picture}
-              sx={{ width: 56, height: 56 }}
-            >
-              {(
-                detailDialog.user?.full_name ||
-                detailDialog.user?.username ||
-                detailDialog.user?.email
-              )
-                ?.charAt(0)
-                ?.toUpperCase()}
-            </Avatar>
-            <Box>
-              <Typography variant="h6">
-                {detailDialog.user?.full_name ||
-                  `${detailDialog.user?.first_name} ${detailDialog.user?.last_name}`.trim() ||
-                  detailDialog.user?.username}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {detailDialog.user?.email}
-              </Typography>
+        {/* User Details Dialog */}
+        <Dialog
+          open={detailDialog.open}
+          onClose={() => setDetailDialog({ open: false, user: null })}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar
+                src={detailDialog.user?.profile_picture}
+                sx={{ width: 56, height: 56 }}
+              >
+                {(
+                  detailDialog.user?.full_name ||
+                  detailDialog.user?.username ||
+                  detailDialog.user?.email
+                )
+                  ?.charAt(0)
+                  ?.toUpperCase()}
+              </Avatar>
+              <Box>
+                <Typography variant="h6">
+                  {detailDialog.user?.full_name ||
+                    `${detailDialog.user?.first_name} ${detailDialog.user?.last_name}`.trim() ||
+                    detailDialog.user?.username}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {detailDialog.user?.email}
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {detailDialog.user && (
-            <Grid container spacing={3} sx={{ mt: 1 }}>
-              {/* Basic Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary">
-                  Basic Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      First Name
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.first_name || "Not provided"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Last Name
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.last_name || "Not provided"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Username
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.username || "Not provided"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Account Type
-                    </Typography>
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      {getUserRoleChip(detailDialog.user)}
-                      {getStatusChip(detailDialog.user)}
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Contact Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary">
-                  Contact Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Email
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.email}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Phone Number
-                    </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Typography variant="body1">
-                        {detailDialog.user.phone_number || "Not provided"}
+          </DialogTitle>
+          <DialogContent>
+            {detailDialog.user && (
+              <Grid container spacing={3} sx={{ mt: 1 }}>
+                {/* Basic Information */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    Basic Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        First Name
                       </Typography>
-                      {detailDialog.user.phone_verified_at && (
-                        <Chip
-                          label="Verified"
-                          color="success"
-                          size="small"
-                          icon={<CheckCircle />}
-                        />
-                      )}
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Location Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary">
-                  Location Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={4}>
-                    <Typography variant="body2" color="textSecondary">
-                      Country
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.country || "Not provided"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="body2" color="textSecondary">
-                      City
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.city || "Not provided"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="body2" color="textSecondary">
-                      Timezone
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.timezone || "Not provided"}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Activity Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary">
-                  Activity Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Date Joined
-                    </Typography>
-                    <Typography variant="body1">
-                      {new Date(detailDialog.user.date_joined).toLocaleString()}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Last Login
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.last_login
-                        ? new Date(
-                            detailDialog.user.last_login
-                          ).toLocaleString()
-                        : "Never"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Login Count
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.login_count !== undefined
-                        ? `${detailDialog.user.login_count} logins`
-                        : "Not tracked"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Last Login IP
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ fontFamily: "monospace" }}
-                    >
-                      {detailDialog.user.last_login_ip || "Not available"}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Terms & Social Information */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom color="primary">
-                  Additional Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Social Provider
-                    </Typography>
-                    <Typography variant="body1">
-                      {detailDialog.user.is_social_user
-                        ? detailDialog.user.social_provider || "Social Account"
-                        : "Local Account"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="textSecondary">
-                      Terms Accepted
-                    </Typography>
-                    <Box>
                       <Typography variant="body1">
-                        {detailDialog.user.terms_accepted_at
-                          ? new Date(
-                              detailDialog.user.terms_accepted_at
-                            ).toLocaleDateString()
-                          : "Not accepted"}
+                        {detailDialog.user.first_name || "Not provided"}
                       </Typography>
-                      {detailDialog.user.terms_version && (
-                        <Typography variant="caption" color="textSecondary">
-                          Version: {detailDialog.user.terms_version}
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Last Name
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.last_name || "Not provided"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Username
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.username || "Not provided"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Account Type
+                      </Typography>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        {getUserRoleChip(detailDialog.user)}
+                        {getStatusChip(detailDialog.user)}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Contact Information */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    Contact Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Email
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.email}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Phone Number
+                      </Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Typography variant="body1">
+                          {detailDialog.user.phone_number || "Not provided"}
                         </Typography>
-                      )}
-                    </Box>
+                        {detailDialog.user.phone_verified_at && (
+                          <Chip
+                            label="Verified"
+                            color="success"
+                            size="small"
+                            icon={<CheckCircle />}
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Location Information */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    Location Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <Typography variant="body2" color="textSecondary">
+                        Country
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.country || "Not provided"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="body2" color="textSecondary">
+                        City
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.city || "Not provided"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="body2" color="textSecondary">
+                        Timezone
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.timezone || "Not provided"}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Activity Information */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    Activity Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Date Joined
+                      </Typography>
+                      <Typography variant="body1">
+                        {new Date(
+                          detailDialog.user.date_joined
+                        ).toLocaleString()}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Last Login
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.last_login
+                          ? new Date(
+                              detailDialog.user.last_login
+                            ).toLocaleString()
+                          : "Never"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Login Count
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.login_count !== undefined
+                          ? `${detailDialog.user.login_count} logins`
+                          : "Not tracked"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Last Login IP
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontFamily: "monospace" }}
+                      >
+                        {detailDialog.user.last_login_ip || "Not available"}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Terms & Social Information */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    Additional Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Social Provider
+                      </Typography>
+                      <Typography variant="body1">
+                        {detailDialog.user.is_social_user
+                          ? detailDialog.user.social_provider ||
+                            "Social Account"
+                          : "Local Account"}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="textSecondary">
+                        Terms Accepted
+                      </Typography>
+                      <Box>
+                        <Typography variant="body1">
+                          {detailDialog.user.terms_accepted_at
+                            ? new Date(
+                                detailDialog.user.terms_accepted_at
+                              ).toLocaleDateString()
+                            : "Not accepted"}
+                        </Typography>
+                        {detailDialog.user.terms_version && (
+                          <Typography variant="caption" color="textSecondary">
+                            Version: {detailDialog.user.terms_version}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDetailDialog({ open: false, user: null })}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setDetailDialog({ open: false, user: null })}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   );
 }

@@ -130,316 +130,334 @@ function AdminDashboard() {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Admin Navigation Bar */}
       <AdminNavBar />
-      {/* Header */}
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Box>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            <AdminPanelSettings
-              sx={{ fontSize: "inherit", mr: 1, color: "primary.main" }}
-            />
-            Admin Dashboard
-          </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            Welcome back, {user?.full_name || user?.first_name || user?.email}
-          </Typography>
-        </Box>{" "}
-        <Box sx={{ display: "flex", gap: 1 }}>
-          {" "}
-          <Button
-            variant="outlined"
-            startIcon={<BugReport />}
-            onClick={() => navigate("/admin/debug")}
-            color="secondary"
-          >
-            Debug Console
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<Storage />}
-            onClick={() => navigate("/admin/diagnosis-management")}
-            color="primary"
-          >
-            Diagnosis Management
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<Refresh />}
-            onClick={fetchDashboardData}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-        </Box>
-      </Box>
-
-      {/* Messages */}
-      {message && (
-        <Alert
-          severity={messageType}
-          sx={{ mb: 3, borderRadius: 2 }}
-          onClose={() => setMessage("")}
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Box
+          sx={{
+            mb: 4,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          {message}
-        </Alert>
-      )}
+          <Box>
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+              <AdminPanelSettings
+                sx={{ fontSize: "inherit", mr: 1, color: "primary.main" }}
+              />
+              Admin Dashboard
+            </Typography>
+            <Typography variant="subtitle1" color="textSecondary">
+              Welcome back, {user?.full_name || user?.first_name || user?.email}
+            </Typography>
+          </Box>{" "}
+          <Box sx={{ display: "flex", gap: 1 }}>
+            {" "}
+            <Button
+              variant="outlined"
+              startIcon={<BugReport />}
+              onClick={() => navigate("/admin/debug")}
+              color="secondary"
+            >
+              Debug Console
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Storage />}
+              onClick={() => navigate("/admin/diagnosis-management")}
+              color="primary"
+            >
+              Diagnosis Management
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Refresh />}
+              onClick={fetchDashboardData}
+              disabled={loading}
+            >
+              Refresh
+            </Button>
+          </Box>
+        </Box>
 
-      <Grid container spacing={3}>
-        {/* Statistics Cards */}
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers}
-            icon={People}
-            color="primary"
-            subtitle={`${stats.activeUsers} active`}
-            trend={
-              stats.totalUsers > 0
-                ? `+${stats.totalUsers - stats.activeUsers}`
-                : "0"
-            }
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Staff Members"
-            value={stats.staffUsers}
-            icon={SupervisorAccount}
-            color="warning"
-            subtitle={`${stats.superUsers} superusers`}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="System Health"
-            value={`${stats.systemHealth}%`}
-            icon={Speed}
-            color="success"
-            subtitle="All systems operational"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Active Sessions"
-            value={stats.activeUsers}
-            icon={Security}
-            color="info"
-            subtitle="Current online users"
-          />
-        </Grid>
+        {/* Messages */}
+        {message && (
+          <Alert
+            severity={messageType}
+            sx={{ mb: 3, borderRadius: 2 }}
+            onClose={() => setMessage("")}
+          >
+            {message}
+          </Alert>
+        )}
 
-        {/* Admin Users Section */}
-        <Grid item xs={12} lg={8}>
-          <Card sx={{ height: "100%" }}>
-            <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  <Badge sx={{ mr: 1 }} />
-                  Administrative Users ({adminUsers.length})
-                </Typography>{" "}
-                <Button
-                  size="small"
-                  startIcon={<PersonAdd />}
-                  onClick={() => navigate("/admin/users")}
-                  variant="outlined"
+        <Grid container spacing={3}>
+          {/* Statistics Cards */}
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Total Users"
+              value={stats.totalUsers}
+              icon={People}
+              color="primary"
+              subtitle={`${stats.activeUsers} active`}
+              trend={
+                stats.totalUsers > 0
+                  ? `+${stats.totalUsers - stats.activeUsers}`
+                  : "0"
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Staff Members"
+              value={stats.staffUsers}
+              icon={SupervisorAccount}
+              color="warning"
+              subtitle={`${stats.superUsers} superusers`}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="System Health"
+              value={`${stats.systemHealth}%`}
+              icon={Speed}
+              color="success"
+              subtitle="All systems operational"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Active Sessions"
+              value={stats.activeUsers}
+              icon={Security}
+              color="info"
+              subtitle="Current online users"
+            />
+          </Grid>
+
+          {/* Admin Users Section */}
+          <Grid item xs={12} lg={8}>
+            <Card sx={{ height: "100%" }}>
+              <CardContent>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
                 >
-                  Manage Users
-                </Button>
-              </Box>
-              <Box sx={{ maxHeight: 400, overflow: "auto" }}>
-                {adminUsers.length > 0 ? (
-                  adminUsers.map((admin) => (
-                    <AdminUserCard
-                      key={admin.id}
-                      admin={admin}
-                      currentUser={user}
-                    />
-                  ))
-                ) : (
-                  <Typography color="textSecondary" textAlign="center" py={4}>
-                    No administrative users found
-                  </Typography>
-                )}
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* System Information */}
-        <Grid item xs={12} lg={4}>
-          <Card sx={{ height: "100%" }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Storage sx={{ mr: 1 }} />
-                System Information
-              </Typography>
-              <List dense>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{ bgcolor: "primary.100", color: "primary.600" }}
-                    >
-                      <Memory />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary="Database"
-                    secondary={systemInfo.database_status || "Connected"}
-                  />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{ bgcolor: "success.100", color: "success.600" }}
-                    >
-                      <Security />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary="Authentication"
-                    secondary={systemInfo.auth_status || "Active"}
-                  />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: "info.100", color: "info.600" }}>
-                      <TrendingUp />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary="API Status"
-                    secondary={systemInfo.api_status || "Operational"}
-                  />
-                </ListItem>
-              </List>
-
-              {/* System Health Progress */}
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Overall System Health
-                </Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={stats.systemHealth}
-                  sx={{ height: 8, borderRadius: 4 }}
-                  color={
-                    stats.systemHealth > 80
-                      ? "success"
-                      : stats.systemHealth > 60
-                      ? "warning"
-                      : "error"
-                  }
-                />
-                <Typography
-                  variant="caption"
-                  color="textSecondary"
-                  sx={{ mt: 1, display: "block" }}
-                >
-                  {stats.systemHealth}% -{" "}
-                  {stats.systemHealth > 80
-                    ? "Excellent"
-                    : stats.systemHealth > 60
-                    ? "Good"
-                    : "Needs Attention"}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Recent User Activity */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Schedule sx={{ mr: 1 }} />
-                Recent User Activity
-              </Typography>
-              <List>
-                {recentUsers.length > 0 ? (
-                  recentUsers.map((user, index) => (
-                    <ListItem
-                      key={user.id}
-                      divider={index < recentUsers.length - 1}
-                    >
-                      <ListItemAvatar>
-                        <Avatar src={user.profile_picture}>
-                          {(user.full_name || user.email)
-                            .charAt(0)
-                            .toUpperCase()}
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          user.full_name ||
-                          `${user.first_name} ${user.last_name}`.trim() ||
-                          user.username
-                        }
-                        secondary={
-                          <Box>
-                            <Typography variant="body2">
-                              {user.email}
-                            </Typography>
-                            <Typography variant="caption" color="textSecondary">
-                              Joined:{" "}
-                              {new Date(user.date_joined).toLocaleDateString()}{" "}
-                              • Last login:{" "}
-                              {user.last_login
-                                ? new Date(user.last_login).toLocaleDateString()
-                                : "Never"}
-                            </Typography>
-                          </Box>
-                        }
+                  <Typography variant="h6" gutterBottom>
+                    <Badge sx={{ mr: 1 }} />
+                    Administrative Users ({adminUsers.length})
+                  </Typography>{" "}
+                  <Button
+                    size="small"
+                    startIcon={<PersonAdd />}
+                    onClick={() => navigate("/admin/users")}
+                    variant="outlined"
+                  >
+                    Manage Users
+                  </Button>
+                </Box>
+                <Box sx={{ maxHeight: 400, overflow: "auto" }}>
+                  {adminUsers.length > 0 ? (
+                    adminUsers.map((admin) => (
+                      <AdminUserCard
+                        key={admin.id}
+                        admin={admin}
+                        currentUser={user}
                       />
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 0.5,
-                        }}
+                    ))
+                  ) : (
+                    <Typography color="textSecondary" textAlign="center" py={4}>
+                      No administrative users found
+                    </Typography>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* System Information */}
+          <Grid item xs={12} lg={4}>
+            <Card sx={{ height: "100%" }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <Storage sx={{ mr: 1 }} />
+                  System Information
+                </Typography>
+                <List dense>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar
+                        sx={{ bgcolor: "primary.100", color: "primary.600" }}
                       >
-                        {user.is_superuser && (
-                          <Chip label="Superuser" color="error" size="small" />
-                        )}
-                        {user.is_staff && !user.is_superuser && (
-                          <Chip label="Staff" color="warning" size="small" />
-                        )}
-                        <Chip
-                          label={user.is_active ? "Active" : "Inactive"}
-                          color={user.is_active ? "success" : "default"}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </Box>
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography color="textSecondary" textAlign="center" py={4}>
-                    No recent user activity
+                        <Memory />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary="Database"
+                      secondary={systemInfo.database_status || "Connected"}
+                    />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar
+                        sx={{ bgcolor: "success.100", color: "success.600" }}
+                      >
+                        <Security />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary="Authentication"
+                      secondary={systemInfo.auth_status || "Active"}
+                    />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: "info.100", color: "info.600" }}>
+                        <TrendingUp />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary="API Status"
+                      secondary={systemInfo.api_status || "Operational"}
+                    />
+                  </ListItem>
+                </List>
+
+                {/* System Health Progress */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    Overall System Health
                   </Typography>
-                )}
-              </List>
-            </CardContent>
-          </Card>{" "}
+                  <LinearProgress
+                    variant="determinate"
+                    value={stats.systemHealth}
+                    sx={{ height: 8, borderRadius: 4 }}
+                    color={
+                      stats.systemHealth > 80
+                        ? "success"
+                        : stats.systemHealth > 60
+                        ? "warning"
+                        : "error"
+                    }
+                  />
+                  <Typography
+                    variant="caption"
+                    color="textSecondary"
+                    sx={{ mt: 1, display: "block" }}
+                  >
+                    {stats.systemHealth}% -{" "}
+                    {stats.systemHealth > 80
+                      ? "Excellent"
+                      : stats.systemHealth > 60
+                      ? "Good"
+                      : "Needs Attention"}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Recent User Activity */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <Schedule sx={{ mr: 1 }} />
+                  Recent User Activity
+                </Typography>
+                <List>
+                  {recentUsers.length > 0 ? (
+                    recentUsers.map((user, index) => (
+                      <ListItem
+                        key={user.id}
+                        divider={index < recentUsers.length - 1}
+                      >
+                        <ListItemAvatar>
+                          <Avatar src={user.profile_picture}>
+                            {(user.full_name || user.email)
+                              .charAt(0)
+                              .toUpperCase()}
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            user.full_name ||
+                            `${user.first_name} ${user.last_name}`.trim() ||
+                            user.username
+                          }
+                          secondary={
+                            <Box>
+                              <Typography variant="body2">
+                                {user.email}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="textSecondary"
+                              >
+                                Joined:{" "}
+                                {new Date(
+                                  user.date_joined
+                                ).toLocaleDateString()}{" "}
+                                • Last login:{" "}
+                                {user.last_login
+                                  ? new Date(
+                                      user.last_login
+                                    ).toLocaleDateString()
+                                  : "Never"}
+                              </Typography>
+                            </Box>
+                          }
+                        />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.5,
+                          }}
+                        >
+                          {user.is_superuser && (
+                            <Chip
+                              label="Superuser"
+                              color="error"
+                              size="small"
+                            />
+                          )}
+                          {user.is_staff && !user.is_superuser && (
+                            <Chip label="Staff" color="warning" size="small" />
+                          )}
+                          <Chip
+                            label={user.is_active ? "Active" : "Inactive"}
+                            color={user.is_active ? "success" : "default"}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </Box>
+                      </ListItem>
+                    ))
+                  ) : (
+                    <Typography color="textSecondary" textAlign="center" py={4}>
+                      No recent user activity
+                    </Typography>
+                  )}
+                </List>
+              </CardContent>
+            </Card>{" "}
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 }

@@ -510,344 +510,356 @@ function AdminDebugConsole() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <AdminNavbar />
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          <BugReport
-            sx={{ fontSize: "inherit", mr: 1, color: "secondary.main" }}
-          />
-          Advanced Debug Console
-        </Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          Comprehensive authentication and system testing toolkit
-        </Typography>
-      </Box>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            <BugReport
+              sx={{ fontSize: "inherit", mr: 1, color: "secondary.main" }}
+            />
+            Advanced Debug Console
+          </Typography>
+          <Typography variant="subtitle1" color="textSecondary">
+            Comprehensive authentication and system testing toolkit
+          </Typography>
+        </Box>
 
-      <Grid container spacing={3}>
-        {/* System Status Card */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Storage sx={{ mr: 1 }} />
-                System Status
-              </Typography>
-              {Object.entries(systemInfo).map(([key, value]) => (
+        <Grid container spacing={3}>
+          {/* System Status Card */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <Storage sx={{ mr: 1 }} />
+                  System Status
+                </Typography>
+                {Object.entries(systemInfo).map(([key, value]) => (
+                  <Box
+                    key={key}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="body2" color="textSecondary">
+                      {key
+                        .replace(/_/g, " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      :
+                    </Typography>
+                    <Typography variant="body2" fontWeight="medium">
+                      {String(value)}
+                    </Typography>
+                  </Box>
+                ))}
+                <Button
+                  onClick={checkSystemInfo}
+                  size="small"
+                  sx={{ mt: 2 }}
+                  variant="outlined"
+                >
+                  <Refresh sx={{ mr: 1 }} />
+                  Refresh Status
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Test Controls */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <Security sx={{ mr: 1 }} />
+                  Test Credentials
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <TextField
+                    label="Email"
+                    value={credentials.email}
+                    onChange={(e) =>
+                      setCredentials((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                    size="small"
+                    fullWidth
+                  />
+                  <TextField
+                    label="Password"
+                    type="password"
+                    value={credentials.password}
+                    onChange={(e) =>
+                      setCredentials((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Test Descriptions */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <Code sx={{ mr: 1 }} />
+                  Available Tests
+                </Typography>
+
+                {Object.entries(testDescriptions).map(([key, test]) => (
+                  <Accordion key={key}>
+                    <AccordionSummary expandIcon={<ExpandMore />}>
+                      <Typography variant="subtitle1" fontWeight="medium">
+                        {test.title}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        paragraph
+                      >
+                        {test.description}
+                      </Typography>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Test Steps:
+                      </Typography>
+                      <Box component="ol" sx={{ pl: 2 }}>
+                        {test.steps.map((step, index) => (
+                          <Typography
+                            key={index}
+                            component="li"
+                            variant="body2"
+                            sx={{ mb: 0.5 }}
+                          >
+                            {step}
+                          </Typography>
+                        ))}
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ mt: 2, fontStyle: "italic" }}
+                      >
+                        <strong>Purpose:</strong> {test.purpose}
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Action Buttons */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <PlayArrow sx={{ mr: 1 }} />
+                  Test Controls
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                  <Button
+                    onClick={testFullAuthFlow}
+                    variant="contained"
+                    color="primary"
+                    disabled={testRunning}
+                    startIcon={testRunning ? <Stop /> : <Security />}
+                  >
+                    {testRunning
+                      ? "Running..."
+                      : "🔄 Test Full Auth Flow (Safe)"}
+                  </Button>
+                  <Button
+                    onClick={testCurrentSession}
+                    variant="contained"
+                    color="secondary"
+                    disabled={testRunning}
+                    startIcon={<Api />}
+                  >
+                    🛡️ Test Current Session
+                  </Button>
+                  <Button
+                    onClick={testDirectAPI}
+                    variant="contained"
+                    color="info"
+                    disabled={testRunning}
+                    startIcon={<NetworkCheck />}
+                  >
+                    🌐 Test Direct API
+                  </Button>
+                  <Button
+                    onClick={testSystemHealth}
+                    variant="contained"
+                    color="success"
+                    disabled={testRunning}
+                    startIcon={<Timeline />}
+                  >
+                    🏥 System Health Check
+                  </Button>
+                  <Button
+                    onClick={clearResults}
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Refresh />}
+                  >
+                    🗑️ Clear Results
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Test Results */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
                 <Box
-                  key={key}
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    mb: 1,
+                    alignItems: "center",
+                    mb: 2,
                   }}
                 >
-                  <Typography variant="body2" color="textSecondary">
-                    {key
-                      .replace(/_/g, " ")
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
-                    :
+                  <Typography variant="h6">
+                    📝 Test Results ({testResults.length})
                   </Typography>
-                  <Typography variant="body2" fontWeight="medium">
-                    {String(value)}
-                  </Typography>
+                  <Tabs
+                    value={activeTab}
+                    onChange={(e, newValue) => setActiveTab(newValue)}
+                    size="small"
+                  >
+                    <Tab label={`All (${testResults.length})`} />
+                    <Tab
+                      label={`Auth (${filterResultsByCategory("auth").length})`}
+                    />
+                    <Tab
+                      label={`API (${filterResultsByCategory("api").length})`}
+                    />
+                    <Tab
+                      label={`System (${
+                        filterResultsByCategory("system").length
+                      })`}
+                    />
+                  </Tabs>
                 </Box>
-              ))}
-              <Button
-                onClick={checkSystemInfo}
-                size="small"
-                sx={{ mt: 2 }}
-                variant="outlined"
-              >
-                <Refresh sx={{ mr: 1 }} />
-                Refresh Status
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Test Controls */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Security sx={{ mr: 1 }} />
-                Test Credentials
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <TextField
-                  label="Email"
-                  value={credentials.email}
-                  onChange={(e) =>
-                    setCredentials((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                />
-                <TextField
-                  label="Password"
-                  type="password"
-                  value={credentials.password}
-                  onChange={(e) =>
-                    setCredentials((prev) => ({
-                      ...prev,
-                      password: e.target.value,
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Test Descriptions */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Code sx={{ mr: 1 }} />
-                Available Tests
-              </Typography>
-
-              {Object.entries(testDescriptions).map(([key, test]) => (
-                <Accordion key={key}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="subtitle1" fontWeight="medium">
-                      {test.title}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography variant="body2" color="textSecondary" paragraph>
-                      {test.description}
-                    </Typography>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Test Steps:
-                    </Typography>
-                    <Box component="ol" sx={{ pl: 2 }}>
-                      {test.steps.map((step, index) => (
-                        <Typography
-                          key={index}
-                          component="li"
-                          variant="body2"
-                          sx={{ mb: 0.5 }}
-                        >
-                          {step}
-                        </Typography>
-                      ))}
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ mt: 2, fontStyle: "italic" }}
-                    >
-                      <strong>Purpose:</strong> {test.purpose}
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Action Buttons */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <PlayArrow sx={{ mr: 1 }} />
-                Test Controls
-              </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                <Button
-                  onClick={testFullAuthFlow}
-                  variant="contained"
-                  color="primary"
-                  disabled={testRunning}
-                  startIcon={testRunning ? <Stop /> : <Security />}
-                >
-                  {testRunning ? "Running..." : "🔄 Test Full Auth Flow (Safe)"}
-                </Button>
-                <Button
-                  onClick={testCurrentSession}
-                  variant="contained"
-                  color="secondary"
-                  disabled={testRunning}
-                  startIcon={<Api />}
-                >
-                  🛡️ Test Current Session
-                </Button>
-                <Button
-                  onClick={testDirectAPI}
-                  variant="contained"
-                  color="info"
-                  disabled={testRunning}
-                  startIcon={<NetworkCheck />}
-                >
-                  🌐 Test Direct API
-                </Button>
-                <Button
-                  onClick={testSystemHealth}
-                  variant="contained"
-                  color="success"
-                  disabled={testRunning}
-                  startIcon={<Timeline />}
-                >
-                  🏥 System Health Check
-                </Button>
-                <Button
-                  onClick={clearResults}
-                  variant="outlined"
-                  color="error"
-                  startIcon={<Refresh />}
-                >
-                  🗑️ Clear Results
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Test Results */}
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6">
-                  📝 Test Results ({testResults.length})
-                </Typography>
-                <Tabs
-                  value={activeTab}
-                  onChange={(e, newValue) => setActiveTab(newValue)}
-                  size="small"
-                >
-                  <Tab label={`All (${testResults.length})`} />
-                  <Tab
-                    label={`Auth (${filterResultsByCategory("auth").length})`}
-                  />
-                  <Tab
-                    label={`API (${filterResultsByCategory("api").length})`}
-                  />
-                  <Tab
-                    label={`System (${
-                      filterResultsByCategory("system").length
-                    })`}
-                  />
-                </Tabs>
-              </Box>
-              <CustomTabPanel value={activeTab} index={0}>
-                <Box sx={{ maxHeight: "500px", overflow: "auto" }}>
-                  {testResults.slice(-20).map((result, index) => (
-                    <Alert
-                      key={index}
-                      severity={getSeverityColor(result.result)}
-                      icon={getSeverityIcon(result.result)}
-                      sx={{ my: 1, fontSize: "0.8rem" }}
-                    >
-                      <Box>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ fontSize: "0.9rem" }}
-                        >
-                          [{result.timestamp}] {result.test}: {result.result}
-                          <Chip
-                            label={result.category}
-                            size="small"
-                            sx={{ ml: 1, height: 16, fontSize: "0.6rem" }}
-                          />
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{ whiteSpace: "pre-wrap", fontSize: "0.75rem" }}
-                        >
-                          {result.details}
-                        </Typography>
-                      </Box>
-                    </Alert>
-                  ))}
-                </Box>
-              </CustomTabPanel>
-              {["auth", "api", "system"].map((category, index) => (
-                <CustomTabPanel
-                  key={category}
-                  value={activeTab}
-                  index={index + 1}
-                >
+                <CustomTabPanel value={activeTab} index={0}>
                   <Box sx={{ maxHeight: "500px", overflow: "auto" }}>
-                    {filterResultsByCategory(category)
-                      .slice(-20)
-                      .map((result, idx) => (
-                        <Alert
-                          key={idx}
-                          severity={getSeverityColor(result.result)}
-                          icon={getSeverityIcon(result.result)}
-                          sx={{ my: 1, fontSize: "0.8rem" }}
-                        >
-                          <Box>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ fontSize: "0.9rem" }}
-                            >
-                              [{result.timestamp}] {result.test}:{" "}
-                              {result.result}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                whiteSpace: "pre-wrap",
-                                fontSize: "0.75rem",
-                              }}
-                            >
-                              {result.details}
-                            </Typography>
-                          </Box>
-                        </Alert>
-                      ))}
-                    {filterResultsByCategory(category).length === 0 && (
-                      <Typography
-                        color="textSecondary"
-                        textAlign="center"
-                        py={4}
+                    {testResults.slice(-20).map((result, index) => (
+                      <Alert
+                        key={index}
+                        severity={getSeverityColor(result.result)}
+                        icon={getSeverityIcon(result.result)}
+                        sx={{ my: 1, fontSize: "0.8rem" }}
                       >
-                        No {category} test results yet
-                      </Typography>
-                    )}
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ fontSize: "0.9rem" }}
+                          >
+                            [{result.timestamp}] {result.test}: {result.result}
+                            <Chip
+                              label={result.category}
+                              size="small"
+                              sx={{ ml: 1, height: 16, fontSize: "0.6rem" }}
+                            />
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ whiteSpace: "pre-wrap", fontSize: "0.75rem" }}
+                          >
+                            {result.details}
+                          </Typography>
+                        </Box>
+                      </Alert>
+                    ))}
                   </Box>
                 </CustomTabPanel>
-              ))}{" "}
-            </CardContent>
-          </Card>
-        </Grid>
+                {["auth", "api", "system"].map((category, index) => (
+                  <CustomTabPanel
+                    key={category}
+                    value={activeTab}
+                    index={index + 1}
+                  >
+                    <Box sx={{ maxHeight: "500px", overflow: "auto" }}>
+                      {filterResultsByCategory(category)
+                        .slice(-20)
+                        .map((result, idx) => (
+                          <Alert
+                            key={idx}
+                            severity={getSeverityColor(result.result)}
+                            icon={getSeverityIcon(result.result)}
+                            sx={{ my: 1, fontSize: "0.8rem" }}
+                          >
+                            <Box>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontSize: "0.9rem" }}
+                              >
+                                [{result.timestamp}] {result.test}:{" "}
+                                {result.result}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  whiteSpace: "pre-wrap",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                {result.details}
+                              </Typography>
+                            </Box>
+                          </Alert>
+                        ))}
+                      {filterResultsByCategory(category).length === 0 && (
+                        <Typography
+                          color="textSecondary"
+                          textAlign="center"
+                          py={4}
+                        >
+                          No {category} test results yet
+                        </Typography>
+                      )}
+                    </Box>
+                  </CustomTabPanel>
+                ))}{" "}
+              </CardContent>
+            </Card>
+          </Grid>
 
-        {/* Auth Debug Panel Integration */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Security sx={{ mr: 1 }} />
-                Live Authentication Debug
-              </Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                Real-time authentication status monitoring (Development only)
-              </Typography>
-              <Box sx={{ position: "relative", minHeight: "200px" }}>
-                <AuthDebugPanel />
-              </Box>
-            </CardContent>
-          </Card>
+          {/* Auth Debug Panel Integration */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  <Security sx={{ mr: 1 }} />
+                  Live Authentication Debug
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mb: 2 }}
+                >
+                  Real-time authentication status monitoring (Development only)
+                </Typography>
+                <Box sx={{ position: "relative", minHeight: "200px" }}>
+                  <AuthDebugPanel />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 }

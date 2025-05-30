@@ -137,117 +137,105 @@ const AuthDebugPanel = () => {
       sx={{
         position: "fixed",
         bottom: 16,
-        right: 16,
+        left: 16,
         zIndex: 9999,
-        maxWidth: isMinimized ? 250 : 450,
+        maxWidth: isMinimized ? 56 : 450,
         transition: "all 0.3s ease-in-out",
       }}
     >
-      <Card
-        elevation={8}
-        sx={{
-          bgcolor: "grey.900",
-          color: "white",
-          borderRadius: 2,
-          "& .MuiCardContent-root": {
-            "&:last-child": { pb: 2 },
-          },
-        }}
-      >
-        <CardContent sx={{ p: isMinimized ? 1.5 : 2 }}>
-          {/* Header with minimize button */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: isMinimized ? 0 : 2,
-            }}
-          >
-            <Typography
-              variant={isMinimized ? "body2" : "h6"}
+      {isMinimized ? (
+        // Minimized circle view
+        <Box
+          onClick={handleToggleMinimize}
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            bgcolor: "grey.900",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            transition: "all 0.3s ease-in-out",
+            "&:hover": {
+              transform: "scale(1.1)",
+              boxShadow: "0 6px 25px rgba(0,0,0,0.4)",
+            },
+          }}
+        >
+          <Security fontSize="medium" />
+        </Box>
+      ) : (
+        // Expanded card view
+        <Card
+          elevation={8}
+          sx={{
+            bgcolor: "grey.900",
+            color: "white",
+            borderRadius: 2,
+            "& .MuiCardContent-root": {
+              "&:last-child": { pb: 2 },
+            },
+          }}
+        >
+          <CardContent sx={{ p: 2 }}>
+            {/* Header with minimize button */}
+            <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
-                fontWeight: 600,
+                justifyContent: "space-between",
+                mb: isMinimized ? 0 : 2,
               }}
             >
-              <Security fontSize="small" />
-              {!isMinimized && "Auth Debug Panel"}
-            </Typography>
-            <Tooltip title={isMinimized ? "Maximize" : "Minimize"}>
-              <IconButton
-                onClick={handleToggleMinimize}
-                size="small"
-                sx={{ color: "white", ml: 1 }}
+              <Typography
+                variant={isMinimized ? "body2" : "h6"}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  fontWeight: 600,
+                }}
               >
-                {isMinimized ? <Maximize /> : <Minimize />}
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          <Collapse in={!isMinimized}>
-            <Stack spacing={2}>
-              {/* Authentication Status */}
-              <Box>
-                <Typography variant="body2" color="grey.300" gutterBottom>
-                  Authentication Status
-                </Typography>
-                <Chip
-                  icon={isAuthorized ? <Security /> : <Person />}
-                  label={isAuthorized ? "Authenticated" : "Not Authenticated"}
-                  color={isAuthorized ? "success" : "error"}
+                <Security fontSize="small" />
+                {!isMinimized && "Auth Debug Panel"}
+              </Typography>
+              <Tooltip title={isMinimized ? "Maximize" : "Minimize"}>
+                <IconButton
+                  onClick={handleToggleMinimize}
                   size="small"
-                />
-              </Box>
+                  sx={{ color: "white", ml: 1 }}
+                >
+                  {isMinimized ? <Maximize /> : <Minimize />}
+                </IconButton>
+              </Tooltip>
+            </Box>
 
-              {/* Enhanced User Information */}
-              {user && (
+            <Collapse in={!isMinimized}>
+              <Stack spacing={2}>
+                {/* Authentication Status */}
                 <Box>
                   <Typography variant="body2" color="grey.300" gutterBottom>
-                    User Information
+                    Authentication Status
                   </Typography>
+                  <Chip
+                    icon={isAuthorized ? <Security /> : <Person />}
+                    label={isAuthorized ? "Authenticated" : "Not Authenticated"}
+                    color={isAuthorized ? "success" : "error"}
+                    size="small"
+                  />
+                </Box>
 
-                  <Grid container spacing={1} sx={{ mb: 1.5 }}>
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          mb: 1,
-                        }}
-                      >
-                        <AccountCircle fontSize="small" />
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {user.first_name && user.last_name
-                            ? `${user.first_name} ${user.last_name}`
-                            : user.full_name || user.username || "Unknown User"}
-                        </Typography>
-                      </Box>
-                    </Grid>
+                {/* Enhanced User Information */}
+                {user && (
+                  <Box>
+                    <Typography variant="body2" color="grey.300" gutterBottom>
+                      User Information
+                    </Typography>
 
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          mb: 1,
-                        }}
-                      >
-                        <Email fontSize="small" />
-                        <Typography
-                          variant="body2"
-                          sx={{ fontFamily: "monospace", fontSize: "0.8rem" }}
-                        >
-                          {user.email || "No email"}
-                        </Typography>
-                      </Box>
-                    </Grid>
-
-                    {user.user_id && (
+                    <Grid container spacing={1} sx={{ mb: 1.5 }}>
                       <Grid item xs={12}>
                         <Box
                           sx={{
@@ -257,199 +245,231 @@ const AuthDebugPanel = () => {
                             mb: 1,
                           }}
                         >
-                          <Badge fontSize="small" />
+                          <AccountCircle fontSize="small" />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {user.first_name && user.last_name
+                              ? `${user.first_name} ${user.last_name}`
+                              : user.full_name ||
+                                user.username ||
+                                "Unknown User"}
+                          </Typography>
+                        </Box>
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
+                          <Email fontSize="small" />
                           <Typography
                             variant="body2"
                             sx={{ fontFamily: "monospace", fontSize: "0.8rem" }}
                           >
-                            ID: {user.user_id}
+                            {user.email || "No email"}
                           </Typography>
                         </Box>
                       </Grid>
-                    )}
 
-                    {(user.iat || user.exp) && (
-                      <Grid item xs={12}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                            mb: 1,
-                          }}
-                        >
-                          <CalendarToday fontSize="small" />
+                      {user.user_id && (
+                        <Grid item xs={12}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              mb: 1,
+                            }}
+                          >
+                            <Badge fontSize="small" />
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontFamily: "monospace",
+                                fontSize: "0.8rem",
+                              }}
+                            >
+                              ID: {user.user_id}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+
+                      {(user.iat || user.exp) && (
+                        <Grid item xs={12}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              mb: 1,
+                            }}
+                          >
+                            <CalendarToday fontSize="small" />
+                            <Typography
+                              variant="body2"
+                              sx={{ fontSize: "0.8rem" }}
+                            >
+                              {user.iat &&
+                                `Login: ${new Date(
+                                  user.iat * 1000
+                                ).toLocaleString()}`}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+
+                    {/* User Badges */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                        mt: 1,
+                      }}
+                    >
+                      {getUserBadges()}
+                    </Box>
+                  </Box>
+                )}
+
+                <Divider sx={{ bgcolor: "grey.700" }} />
+
+                {/* Token Details Accordion */}
+                <Accordion
+                  elevation={0}
+                  sx={{
+                    bgcolor: "transparent",
+                    color: "white",
+                    "&::before": { display: "none" },
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ExpandMore sx={{ color: "white" }} />}
+                    sx={{ p: 0, minHeight: "auto" }}
+                  >
+                    <Typography variant="body2">Token Details</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ p: 0, pt: 1 }}>
+                    <Stack spacing={1}>
+                      {token && (
+                        <Box>
+                          <Typography variant="caption" color="grey.400">
+                            Access Token
+                          </Typography>
                           <Typography
                             variant="body2"
-                            sx={{ fontSize: "0.8rem" }}
+                            sx={{
+                              fontFamily: "monospace",
+                              fontSize: "0.7rem",
+                              wordBreak: "break-all",
+                              bgcolor: "grey.800",
+                              p: 1,
+                              borderRadius: 1,
+                            }}
                           >
-                            {user.iat &&
-                              `Login: ${new Date(
-                                user.iat * 1000
-                              ).toLocaleString()}`}
+                            {token.substring(0, 60)}...
                           </Typography>
                         </Box>
-                      </Grid>
-                    )}
-                  </Grid>
+                      )}
 
-                  {/* User Badges */}
-                  <Box
-                    sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}
-                  >
-                    {getUserBadges()}
-                  </Box>
-                </Box>
-              )}
+                      {refreshToken && (
+                        <Box>
+                          <Typography variant="caption" color="grey.400">
+                            Refresh Token
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                              fontSize: "0.7rem",
+                              wordBreak: "break-all",
+                              bgcolor: "grey.800",
+                              p: 1,
+                              borderRadius: 1,
+                            }}
+                          >
+                            {refreshToken.substring(0, 60)}...
+                          </Typography>
+                        </Box>
+                      )}
 
-              <Divider sx={{ bgcolor: "grey.700" }} />
+                      {decodedToken && (
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            color="grey.400"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
+                          >
+                            <AccessTime fontSize="small" />
+                            Token Expiry
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            {new Date(decodedToken.exp * 1000).toLocaleString()}
+                          </Typography>
 
-              {/* Token Details Accordion */}
-              <Accordion
-                elevation={0}
-                sx={{
-                  bgcolor: "transparent",
-                  color: "white",
-                  "&::before": { display: "none" },
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMore sx={{ color: "white" }} />}
-                  sx={{ p: 0, minHeight: "auto" }}
+                          {/* Additional Token Info */}
+                          <Typography variant="caption" color="grey.400">
+                            Token Payload (Key Fields)
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                              fontSize: "0.7rem",
+                              bgcolor: "grey.800",
+                              p: 1,
+                              borderRadius: 1,
+                              whiteSpace: "pre-wrap",
+                            }}
+                          >
+                            {JSON.stringify(
+                              {
+                                user_id: decodedToken.user_id,
+                                email: decodedToken.email,
+                                is_staff: decodedToken.is_staff,
+                                is_superuser: decodedToken.is_superuser,
+                                is_active: decodedToken.is_active,
+                                exp: decodedToken.exp,
+                                iat: decodedToken.iat,
+                              },
+                              null,
+                              2
+                            )}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Stack>
+                  </AccordionDetails>
+                </Accordion>
+
+                <Divider sx={{ bgcolor: "grey.700" }} />
+
+                {/* Actions */}
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  startIcon={<Logout />}
+                  onClick={handleClearAuth}
+                  fullWidth
                 >
-                  <Typography variant="body2">Token Details</Typography>
-                </AccordionSummary>
-                <AccordionDetails sx={{ p: 0, pt: 1 }}>
-                  <Stack spacing={1}>
-                    {token && (
-                      <Box>
-                        <Typography variant="caption" color="grey.400">
-                          Access Token
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily: "monospace",
-                            fontSize: "0.7rem",
-                            wordBreak: "break-all",
-                            bgcolor: "grey.800",
-                            p: 1,
-                            borderRadius: 1,
-                          }}
-                        >
-                          {token.substring(0, 60)}...
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {refreshToken && (
-                      <Box>
-                        <Typography variant="caption" color="grey.400">
-                          Refresh Token
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily: "monospace",
-                            fontSize: "0.7rem",
-                            wordBreak: "break-all",
-                            bgcolor: "grey.800",
-                            p: 1,
-                            borderRadius: 1,
-                          }}
-                        >
-                          {refreshToken.substring(0, 60)}...
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {decodedToken && (
-                      <Box>
-                        <Typography
-                          variant="caption"
-                          color="grey.400"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <AccessTime fontSize="small" />
-                          Token Expiry
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          {new Date(decodedToken.exp * 1000).toLocaleString()}
-                        </Typography>
-
-                        {/* Additional Token Info */}
-                        <Typography variant="caption" color="grey.400">
-                          Token Payload (Key Fields)
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily: "monospace",
-                            fontSize: "0.7rem",
-                            bgcolor: "grey.800",
-                            p: 1,
-                            borderRadius: 1,
-                            whiteSpace: "pre-wrap",
-                          }}
-                        >
-                          {JSON.stringify(
-                            {
-                              user_id: decodedToken.user_id,
-                              email: decodedToken.email,
-                              is_staff: decodedToken.is_staff,
-                              is_superuser: decodedToken.is_superuser,
-                              is_active: decodedToken.is_active,
-                              exp: decodedToken.exp,
-                              iat: decodedToken.iat,
-                            },
-                            null,
-                            2
-                          )}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
-
-              <Divider sx={{ bgcolor: "grey.700" }} />
-
-              {/* Actions */}
-              <Button
-                variant="contained"
-                color="error"
-                size="small"
-                startIcon={<Logout />}
-                onClick={handleClearAuth}
-                fullWidth
-              >
-                Clear Auth Data
-              </Button>
-            </Stack>
-          </Collapse>
-
-          {/* Minimized view */}
-          {isMinimized && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-              <Chip
-                icon={isAuthorized ? <Security /> : <Person />}
-                label={isAuthorized ? "Auth" : "No Auth"}
-                color={isAuthorized ? "success" : "error"}
-                size="small"
-              />
-              {user && (
-                <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
-                  {user.email?.split("@")[0] || user.username || "User"}
-                </Typography>
-              )}
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+                  Clear Auth Data{" "}
+                </Button>
+              </Stack>
+            </Collapse>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   );
 };
