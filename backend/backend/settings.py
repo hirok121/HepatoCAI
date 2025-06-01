@@ -40,6 +40,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
     "diagnosis",
     "aiassistant",
     "rest_framework",
+    "drf_spectacular",  # API documentation
     "django_rest_passwordreset",
     "corsheaders",
     # Django apps
@@ -325,3 +327,40 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOW_ALL_ORIGINS = False
+
+# =============================================================================
+# API DOCUMENTATION SETTINGS
+# =============================================================================
+
+# DRF Spectacular settings for API documentation
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HepatoCAI API",
+    "DESCRIPTION": "A comprehensive API for hepatitis C diagnosis and management using AI-powered tools.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SORT_OPERATIONS": False,
+    "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    "SERVERS": [
+        {"url": "http://127.0.0.1:8000", "description": "Development server"},
+        {"url": "https://api.hepatocai.com", "description": "Production server"},
+    ],
+    "EXTERNAL_DOCS": {
+        "description": "Full documentation",
+        "url": "https://docs.hepatocai.com/",
+    },
+    "CONTACT": {
+        "name": "HepatoCAI API Support",
+        "email": "api-support@hepatocai.com",
+    },
+    "LICENSE": {
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+}

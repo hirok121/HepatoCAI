@@ -11,6 +11,8 @@ from rest_framework.exceptions import (
     PermissionDenied,
     NotAuthenticated,
 )
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
+from drf_spectacular.types import OpenApiTypes
 
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model, logout, authenticate
@@ -207,10 +209,26 @@ class LoginViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
+    @extend_schema(
+        operation_id="login_user",
+        summary="User login",
+        description="Authenticate user with email and password. Returns JWT tokens for authentication.",
+        request=LoginSerializer,
+        responses={
+            200: OpenApiResponse(description="Login successful"),
+            400: OpenApiResponse(description="Invalid input data"),
+            401: OpenApiResponse(description="Invalid credentials"),
+            429: OpenApiResponse(description="Rate limit exceeded"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Authentication"],
+    )
     @handle_exceptions
     @RateLimitManager.rate_limit_decorator("login")  # 5 attempts per 15 minutes
     def create(self, request):
+        """User login endpoint"""
         # Security validation for login attempt
+        client_ip = request.META.get("REMOTE_ADDR")
         client_ip = request.META.get("REMOTE_ADDR")
 
         # Validate input data for XSS and injection attempts
@@ -302,9 +320,23 @@ class CheckEmailView(APIView):
     permission_classes = [AllowAny]
     serializer_class = EmailCheckSerializer
 
+    @extend_schema(
+        operation_id="check_email_availability",
+        summary="Check email availability",
+        description="Check if an email address is already registered in the system.",
+        request=EmailCheckSerializer,
+        responses={
+            200: OpenApiResponse(description="Email check completed successfully"),
+            400: OpenApiResponse(description="Invalid email format or input data"),
+            429: OpenApiResponse(description="Rate limit exceeded"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Authentication"],
+    )
     @handle_exceptions
     @RateLimitManager.rate_limit_decorator("api")  # 100 requests per hour
     def post(self, request):
+        """Check email availability endpoint"""
         client_ip = request.META.get("REMOTE_ADDR")
 
         # Security validation
@@ -351,9 +383,23 @@ class RegisterViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = RegisterSerializer
 
+    @extend_schema(
+        operation_id="register_user",
+        summary="User registration",
+        description="Register a new user account. Account will require email verification before activation.",
+        request=RegisterSerializer,
+        responses={
+            201: OpenApiResponse(description="Registration successful"),
+            400: OpenApiResponse(description="Validation error or user already exists"),
+            429: OpenApiResponse(description="Rate limit exceeded"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Authentication"],
+    )
     @handle_exceptions
     @RateLimitManager.rate_limit_decorator("api")  # 100 requests per hour
     def create(self, request):
+        """User registration endpoint"""
         client_ip = request.META.get("REMOTE_ADDR")
 
         email = request.data.get("email")
@@ -430,8 +476,20 @@ class UserViewset(viewsets.ViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
+    @extend_schema(
+        operation_id="list_users",
+        summary="List all users",
+        description="Retrieve a list of all registered users. Requires authentication.",
+        responses={
+            200: OpenApiResponse(description="Users retrieved successfully"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Users"],
+    )
     @handle_exceptions
     def list(self, request):
+        """List all users endpoint"""
         logger.info(f"User list requested by: {request.user.email}")
 
         queryset = User.objects.all()
@@ -447,9 +505,23 @@ class ProfileViewSet(viewsets.ViewSet):
     queryset = User.objects.all()
     serializer_class = ProfileSerializer
 
+    @extend_schema(
+        operation_id="user_profile",
+        summary="User profile operations",
+        description="Get or update the authenticated user's profile information.",
+        request=ProfileSerializer,
+        responses={
+            200: OpenApiResponse(description="Profile operation successful"),
+            400: OpenApiResponse(description="Validation error"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["User Profile"],
+    )
     @action(detail=False, methods=["get", "patch"], url_path="me")
     @handle_exceptions
     def me(self, request):
+        """User profile endpoint"""
         if request.method == "GET":
             logger.info(f"Profile requested by: {request.user.email}")
             serializer = ProfileSerializer(request.user)
@@ -495,6 +567,17 @@ class UserManagementView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="user_management_list",
+        summary="List all users",
+        description="Get comprehensive list of all users for admin management. Only accessible by superusers.",
+        responses={
+            200: OpenApiResponse(description="Users retrieved successfully"),
+            403: OpenApiResponse(description="Permission denied - superuser required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["User Management"],
+    )
     @handle_exceptions
     def get(self, request):
         """Get list of all users for management"""
@@ -561,7 +644,50 @@ class UserManagementView(APIView):
 
         except Exception as e:
             logger.error(f"Error in UserManagementView.get: {str(e)}")
-            return StandardResponse.server_error("Failed to retrieve users", e)
+            return StandardResponse.server_error(
+                "Failed to retrieve users", e
+            ) @ extend_schema(
+                operation_id="user_management_update",
+                summary="Update user permissions",
+                description="Update user permissions including staff status, superuser status, and account activation. Only accessible by superusers.",
+                parameters=[
+                    OpenApiParameter(
+                        "user_id",
+                        OpenApiTypes.INT,
+                        OpenApiParameter.PATH,
+                        description="ID of the user to update",
+                    )
+                ],
+                request={
+                    "application/json": {
+                        "type": "object",
+                        "properties": {
+                            "is_staff": {
+                                "type": "boolean",
+                                "description": "Staff status",
+                            },
+                            "is_superuser": {
+                                "type": "boolean",
+                                "description": "Superuser status",
+                            },
+                            "is_active": {
+                                "type": "boolean",
+                                "description": "Account activation status",
+                            },
+                        },
+                    }
+                },
+                responses={
+                    200: OpenApiResponse(
+                        description="User permissions updated successfully"
+                    ),
+                    400: OpenApiResponse(description="Bad request - invalid data"),
+                    403: OpenApiResponse(description="Permission denied"),
+                    404: OpenApiResponse(description="User not found"),
+                    500: OpenApiResponse(description="Internal server error"),
+                },
+                tags=["User Management"],
+            )
 
     def patch(self, request, user_id=None):
         """Update user permissions"""
@@ -631,6 +757,17 @@ class StaffManagementView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="staff_management_list",
+        summary="List all users (staff access)",
+        description="Get list of all users for staff management with limited permissions. Accessible by staff members.",
+        responses={
+            200: OpenApiResponse(description="Users retrieved successfully"),
+            403: OpenApiResponse(description="Permission denied - staff required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Staff Management"],
+    )
     @handle_exceptions
     def get(self, request):
         """Get list of all users for staff management (limited permissions)"""
@@ -684,6 +821,40 @@ class StaffManagementView(APIView):
                 "can_promote_to_superuser": request.user.is_superuser,
                 "can_deactivate_users": request.user.is_superuser,
             },
+        ) @ extend_schema(
+            operation_id="staff_management_update",
+            summary="Update user staff status",
+            description="Update user staff status with limited permissions. Only superusers can promote users to staff or superuser.",
+            parameters=[
+                OpenApiParameter(
+                    "user_id",
+                    OpenApiTypes.INT,
+                    OpenApiParameter.PATH,
+                    description="ID of the user to update",
+                )
+            ],
+            request={
+                "application/json": {
+                    "type": "object",
+                    "properties": {
+                        "is_staff": {"type": "boolean", "description": "Staff status"},
+                        "is_superuser": {
+                            "type": "boolean",
+                            "description": "Superuser status",
+                        },
+                    },
+                }
+            },
+            responses={
+                200: OpenApiResponse(
+                    description="User permissions updated successfully"
+                ),
+                400: OpenApiResponse(description="Bad request - invalid data"),
+                403: OpenApiResponse(description="Permission denied"),
+                404: OpenApiResponse(description="User not found"),
+                500: OpenApiResponse(description="Internal server error"),
+            },
+            tags=["Staff Management"],
         )
 
     @handle_exceptions

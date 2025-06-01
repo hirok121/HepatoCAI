@@ -3,13 +3,23 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
 
 User = get_user_model()
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField()
+    """
+    Serializer for user authentication.
+
+    Handles email and password validation for user login.
+    """
+
+    email = serializers.EmailField(help_text="User's email address for authentication")
+    password = serializers.CharField(
+        help_text="User's password", style={"input_type": "password"}, write_only=True
+    )
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -18,11 +28,24 @@ class LoginSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+
+    Creates new user accounts with email, full name, and password validation.
+    """
+
     class Meta:
         model = User
         fields = ["id", "full_name", "email", "password"]
         extra_kwargs = {
-            "password": {"write_only": True},
+            "password": {
+                "write_only": True,
+                "help_text": "User password (minimum 8 characters)",
+                "style": {"input_type": "password"},
+            },
+            "full_name": {"help_text": "User's full name"},
+            "email": {"help_text": "Valid email address (will be used as username)"},
+            "id": {"read_only": True, "help_text": "Unique user identifier"},
         }
 
     def create(self, validated_data):
@@ -34,11 +57,25 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class EmailCheckSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    """
+    Serializer for checking email availability during registration.
+    """
+
+    email = serializers.EmailField(help_text="Email address to check for availability")
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    birthday = serializers.DateField(required=False, allow_null=True)
+    """
+    Comprehensive user profile serializer.
+      Handles user profile information including personal details,
+    contact information, account status, and preferences.
+    """
+
+    birthday = serializers.DateField(
+        required=False,
+        allow_null=True,
+        help_text="User's date of birth (YYYY-MM-DD format)",
+    )
 
     class Meta:
         model = User
@@ -79,6 +116,37 @@ class ProfileSerializer(serializers.ModelSerializer):
             "terms_accepted_at",
             "terms_version",
         ]
+        extra_kwargs = {
+            "id": {"help_text": "Unique user identifier"},
+            "email": {
+                "help_text": "User's email address (read-only after registration)"
+            },
+            "username": {"help_text": "User's display username"},
+            "full_name": {"help_text": "User's complete name"},
+            "first_name": {"help_text": "User's first name"},
+            "last_name": {"help_text": "User's last name"},
+            "profile_picture": {"help_text": "URL to user's profile picture"},
+            "is_social_user": {
+                "help_text": "Whether user registered via social authentication"
+            },
+            "social_provider": {
+                "help_text": "Social authentication provider (e.g., Google, Facebook)"
+            },
+            "verified_email": {"help_text": "Whether user's email has been verified"},
+            "phone_number": {"help_text": "User's phone number"},
+            "country": {"help_text": "User's country of residence"},
+            "city": {"help_text": "User's city of residence"},
+            "timezone": {"help_text": "User's preferred timezone"},
+            "phone_verified_at": {
+                "help_text": "Timestamp when phone number was verified"
+            },
+            "last_login_ip": {"help_text": "IP address of user's last login"},
+            "login_count": {"help_text": "Total number of successful logins"},
+            "terms_accepted_at": {
+                "help_text": "Timestamp when user accepted terms of service"
+            },
+            "terms_version": {"help_text": "Version of terms accepted by user"},
+        }
 
     def validate_birthday(self, value):
         """Custom validation for birthday field"""

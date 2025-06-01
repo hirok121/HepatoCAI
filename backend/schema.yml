@@ -1,0 +1,2298 @@
+openapi: 3.0.3
+info:
+  title: HepatoCAI API
+  version: 1.0.0
+  description: A comprehensive API for hepatitis C diagnosis and management using
+    AI-powered tools.
+  contact:
+    name: HepatoCAI API Support
+    email: api-support@hepatocai.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+paths:
+  /api/v1/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/users/register/:
+    post:
+      operationId: register_user
+      description: Register a new user account. Account will require email verification
+        before activation.
+      summary: User registration
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          description: Registration successful
+        '400':
+          description: Validation error or user already exists
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /api/v1/users/login/:
+    post:
+      operationId: login_user
+      description: Authenticate user with email and password. Returns JWT tokens for
+        authentication.
+      summary: User login
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Login successful
+        '400':
+          description: Invalid input data
+        '401':
+          description: Invalid credentials
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /api/v1/users/users/:
+    get:
+      operationId: list_users
+      description: Retrieve a list of all registered users. Requires authentication.
+      summary: List all users
+      tags:
+      - Users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /api/v1/users/profile/me/:
+    patch:
+      operationId: user_profile_2
+      description: Get or update the authenticated user's profile information.
+      summary: User profile operations
+      tags:
+      - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Profile operation successful
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+    get:
+      operationId: user_profile
+      description: Get or update the authenticated user's profile information.
+      summary: User profile operations
+      tags:
+      - User Profile
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Profile operation successful
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /api/v1/users/reset-password/validate_token/:
+    post:
+      operationId: users_reset_password_validate_token_create
+      description: An Api View which provides a method to verify that a token is valid
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetTokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResetTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResetTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetToken'
+          description: ''
+  /api/v1/users/reset-password/confirm/:
+    post:
+      operationId: users_reset_password_confirm_create
+      description: An Api View which provides a method to reset a password based on
+        a unique token
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordTokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordToken'
+          description: ''
+  /api/v1/users/reset-password/:
+    post:
+      operationId: users_reset_password_create
+      description: |-
+        An Api View which provides a method to request a password reset token based on an e-mail address
+
+        Sends a signal reset_password_token_created when a reset token was created
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+          description: ''
+  /api/v1/users/check-email/:
+    post:
+      operationId: check_email_availability
+      description: Check if an email address is already registered in the system.
+      summary: Check email availability
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Email check completed successfully
+        '400':
+          description: Invalid email format or input data
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /api/v1/users/admin/users/:
+    get:
+      operationId: user_management_list
+      description: Get comprehensive list of all users for admin management. Only
+        accessible by superusers.
+      summary: List all users
+      tags:
+      - User Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - superuser required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_admin_users_partial_update
+      description: Update user permissions
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/admin/users/{user_id}/:
+    get:
+      operationId: user_management_list_2
+      description: Get comprehensive list of all users for admin management. Only
+        accessible by superusers.
+      summary: List all users
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - User Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - superuser required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_admin_users_partial_update_2
+      description: Update user permissions
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/staff/users/:
+    get:
+      operationId: staff_management_list
+      description: Get list of all users for staff management with limited permissions.
+        Accessible by staff members.
+      summary: List all users (staff access)
+      tags:
+      - Staff Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - staff required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_staff_users_partial_update
+      description: Update user staff status (limited permissions)
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/staff/users/{user_id}/:
+    get:
+      operationId: staff_management_list_2
+      description: Get list of all users for staff management with limited permissions.
+        Accessible by staff members.
+      summary: List all users (staff access)
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Staff Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - staff required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_staff_users_partial_update_2
+      description: Update user staff status (limited permissions)
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/diagnosis/analyze-hcv/:
+    get:
+      operationId: diagnosis_analyze_hcv_retrieve
+      description: Get diagnosis records created by the authenticated user
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    post:
+      operationId: diagnose_hcv
+      description: Submit patient data and laboratory values for AI-powered hepatitis
+        C diagnosis and staging
+      summary: Diagnose HCV using AI
+      tags:
+      - Diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosisRecord'
+          description: Successful diagnosis with AI predictions
+        '400':
+          description: Validation error - invalid input data
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error during diagnosis
+    put:
+      operationId: diagnosis_analyze_hcv_update
+      description: Update diagnosis record metadata (notes, tags, etc.)
+      tags:
+      - diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    delete:
+      operationId: diagnosis_analyze_hcv_destroy
+      description: Delete a specific diagnosis record (only if owned by user)
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/diagnosis/analyze-hcv/{id}/:
+    get:
+      operationId: diagnosis_analyze_hcv_retrieve_2
+      description: Get diagnosis records created by the authenticated user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    post:
+      operationId: diagnose_hcv_2
+      description: Submit patient data and laboratory values for AI-powered hepatitis
+        C diagnosis and staging
+      summary: Diagnose HCV using AI
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosisRecord'
+          description: Successful diagnosis with AI predictions
+        '400':
+          description: Validation error - invalid input data
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error during diagnosis
+    put:
+      operationId: diagnosis_analyze_hcv_update_2
+      description: Update diagnosis record metadata (notes, tags, etc.)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    delete:
+      operationId: diagnosis_analyze_hcv_destroy_2
+      description: Delete a specific diagnosis record (only if owned by user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/diagnosis/analytics/user/:
+    get:
+      operationId: user_diagnosis_analytics
+      description: Get comprehensive diagnosis analytics for the authenticated user's
+        personal dashboard.
+      summary: User diagnosis analytics
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: User analytics retrieved successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /api/v1/diagnosis/analytics/admin/:
+    get:
+      operationId: admin_diagnosis_analytics
+      description: Get comprehensive diagnosis analytics for admin dashboard. Only
+        accessible by staff users.
+      summary: Admin diagnosis analytics
+      tags:
+      - Analytics
+      - Admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Admin analytics retrieved successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Staff access required
+        '500':
+          description: Internal server error
+  /api/v1/diagnosis/search/:
+    get:
+      operationId: search_diagnosis_records
+      description: Advanced search and filtering for user's own diagnosis records
+        with pagination support.
+      summary: Search user's diagnosis records
+      parameters:
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+        description: Filter records from this date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+        description: Filter records until this date
+      - in: query
+        name: hcv_risk
+        schema:
+          type: string
+        description: Filter by HCV risk level
+      - in: query
+        name: hcv_status
+        schema:
+          type: string
+        description: Filter by HCV status
+      - in: query
+        name: max_age
+        schema:
+          type: integer
+        description: Maximum patient age
+      - in: query
+        name: max_confidence
+        schema:
+          type: number
+          format: float
+        description: Maximum confidence threshold
+      - in: query
+        name: min_age
+        schema:
+          type: integer
+        description: Minimum patient age
+      - in: query
+        name: min_confidence
+        schema:
+          type: number
+          format: float
+        description: Minimum confidence threshold
+      - in: query
+        name: order_by
+        schema:
+          type: string
+        description: Order results by field
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Number of results per page
+      - in: query
+        name: patient_name
+        schema:
+          type: string
+        description: Filter by patient name (partial match)
+      tags:
+      - Search
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Search completed successfully
+        '400':
+          description: Invalid pagination parameters
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /api/v1/diagnosis/admin/search/:
+    get:
+      operationId: admin_search_diagnosis_records
+      description: Advanced search and filtering for ALL diagnosis records in the
+        system. Only accessible by staff users.
+      summary: Admin search all diagnosis records
+      parameters:
+      - in: query
+        name: created_by
+        schema:
+          type: string
+        description: Filter by user who created the record
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+        description: Filter records from this date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+        description: Filter records until this date
+      - in: query
+        name: hcv_risk
+        schema:
+          type: string
+        description: Filter by HCV risk level
+      - in: query
+        name: hcv_status
+        schema:
+          type: string
+        description: Filter by HCV status
+      - in: query
+        name: max_age
+        schema:
+          type: integer
+        description: Maximum patient age
+      - in: query
+        name: max_confidence
+        schema:
+          type: number
+          format: float
+        description: Maximum confidence threshold
+      - in: query
+        name: min_age
+        schema:
+          type: integer
+        description: Minimum patient age
+      - in: query
+        name: min_confidence
+        schema:
+          type: number
+          format: float
+        description: Minimum confidence threshold
+      - in: query
+        name: order_by
+        schema:
+          type: string
+        description: Order results by field
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Number of results per page
+      - in: query
+        name: patient_name
+        schema:
+          type: string
+        description: Filter by patient name (partial match)
+      tags:
+      - Search
+      - Admin
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Admin search completed successfully
+        '400':
+          description: Invalid pagination parameters
+        '401':
+          description: Authentication required
+        '403':
+          description: Staff access required
+        '500':
+          description: Internal server error
+  /api/v1/diagnosis/records/:
+    get:
+      operationId: list_diagnosis_records
+      description: Get list of all diagnosis records for admin management. Only accessible
+        by staff users.
+      summary: List diagnosis records
+      tags:
+      - Admin
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Diagnosis records retrieved successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Staff access required
+        '500':
+          description: Internal server error
+  /api/v1/diagnosis/export/csv/:
+    get:
+      operationId: export_diagnosis_records_csv
+      description: Export diagnosis records in CSV format. Staff users get all records,
+        regular users get only their own records.
+      summary: Export diagnosis records as CSV
+      tags:
+      - Export
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: CSV file generated successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /api/v1/diagnosis/export/excel/:
+    get:
+      operationId: export_diagnosis_records_excel
+      description: Export diagnosis records in Excel format. Staff users get all records,
+        regular users get only their own records.
+      summary: Export diagnosis records as Excel
+      tags:
+      - Export
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Excel file generated successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /accounts/token/:
+    post:
+      operationId: accounts_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /accounts/token/refresh/:
+    post:
+      operationId: accounts_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /users/register/:
+    post:
+      operationId: register_user_2
+      description: Register a new user account. Account will require email verification
+        before activation.
+      summary: User registration
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          description: Registration successful
+        '400':
+          description: Validation error or user already exists
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /users/login/:
+    post:
+      operationId: login_user_2
+      description: Authenticate user with email and password. Returns JWT tokens for
+        authentication.
+      summary: User login
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Login successful
+        '400':
+          description: Invalid input data
+        '401':
+          description: Invalid credentials
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /users/users/:
+    get:
+      operationId: list_users_2
+      description: Retrieve a list of all registered users. Requires authentication.
+      summary: List all users
+      tags:
+      - Users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /users/profile/me/:
+    patch:
+      operationId: user_profile_4
+      description: Get or update the authenticated user's profile information.
+      summary: User profile operations
+      tags:
+      - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Profile operation successful
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+    get:
+      operationId: user_profile_3
+      description: Get or update the authenticated user's profile information.
+      summary: User profile operations
+      tags:
+      - User Profile
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Profile operation successful
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /users/reset-password/validate_token/:
+    post:
+      operationId: users_reset_password_validate_token_create_2
+      description: An Api View which provides a method to verify that a token is valid
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetTokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResetTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResetTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetToken'
+          description: ''
+  /users/reset-password/confirm/:
+    post:
+      operationId: users_reset_password_confirm_create_2
+      description: An Api View which provides a method to reset a password based on
+        a unique token
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordTokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordToken'
+          description: ''
+  /users/reset-password/:
+    post:
+      operationId: users_reset_password_create_2
+      description: |-
+        An Api View which provides a method to request a password reset token based on an e-mail address
+
+        Sends a signal reset_password_token_created when a reset token was created
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+          description: ''
+  /users/check-email/:
+    post:
+      operationId: check_email_availability_2
+      description: Check if an email address is already registered in the system.
+      summary: Check email availability
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Email check completed successfully
+        '400':
+          description: Invalid email format or input data
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+  /users/admin/users/:
+    get:
+      operationId: user_management_list_3
+      description: Get comprehensive list of all users for admin management. Only
+        accessible by superusers.
+      summary: List all users
+      tags:
+      - User Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - superuser required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_admin_users_partial_update_3
+      description: Update user permissions
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /users/admin/users/{user_id}/:
+    get:
+      operationId: user_management_list_4
+      description: Get comprehensive list of all users for admin management. Only
+        accessible by superusers.
+      summary: List all users
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - User Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - superuser required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_admin_users_partial_update_4
+      description: Update user permissions
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /users/staff/users/:
+    get:
+      operationId: staff_management_list_3
+      description: Get list of all users for staff management with limited permissions.
+        Accessible by staff members.
+      summary: List all users (staff access)
+      tags:
+      - Staff Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - staff required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_staff_users_partial_update_3
+      description: Update user staff status (limited permissions)
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /users/staff/users/{user_id}/:
+    get:
+      operationId: staff_management_list_4
+      description: Get list of all users for staff management with limited permissions.
+        Accessible by staff members.
+      summary: List all users (staff access)
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Staff Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '403':
+          description: Permission denied - staff required
+        '500':
+          description: Internal server error
+    patch:
+      operationId: users_staff_users_partial_update_4
+      description: Update user staff status (limited permissions)
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /diagnosis/analyze-hcv/:
+    get:
+      operationId: diagnosis_analyze_hcv_retrieve_3
+      description: Get diagnosis records created by the authenticated user
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    post:
+      operationId: diagnose_hcv_3
+      description: Submit patient data and laboratory values for AI-powered hepatitis
+        C diagnosis and staging
+      summary: Diagnose HCV using AI
+      tags:
+      - Diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosisRecord'
+          description: Successful diagnosis with AI predictions
+        '400':
+          description: Validation error - invalid input data
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error during diagnosis
+    put:
+      operationId: diagnosis_analyze_hcv_update_3
+      description: Update diagnosis record metadata (notes, tags, etc.)
+      tags:
+      - diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    delete:
+      operationId: diagnosis_analyze_hcv_destroy_3
+      description: Delete a specific diagnosis record (only if owned by user)
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /diagnosis/analyze-hcv/{id}/:
+    get:
+      operationId: diagnosis_analyze_hcv_retrieve_4
+      description: Get diagnosis records created by the authenticated user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    post:
+      operationId: diagnose_hcv_4
+      description: Submit patient data and laboratory values for AI-powered hepatitis
+        C diagnosis and staging
+      summary: Diagnose HCV using AI
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosisRecord'
+          description: Successful diagnosis with AI predictions
+        '400':
+          description: Validation error - invalid input data
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error during diagnosis
+    put:
+      operationId: diagnosis_analyze_hcv_update_4
+      description: Update diagnosis record metadata (notes, tags, etc.)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - diagnosis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HCVPatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HCVPatient'
+          description: ''
+    delete:
+      operationId: diagnosis_analyze_hcv_destroy_4
+      description: Delete a specific diagnosis record (only if owned by user)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - diagnosis
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /diagnosis/analytics/user/:
+    get:
+      operationId: user_diagnosis_analytics_2
+      description: Get comprehensive diagnosis analytics for the authenticated user's
+        personal dashboard.
+      summary: User diagnosis analytics
+      tags:
+      - Analytics
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: User analytics retrieved successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /diagnosis/analytics/admin/:
+    get:
+      operationId: admin_diagnosis_analytics_2
+      description: Get comprehensive diagnosis analytics for admin dashboard. Only
+        accessible by staff users.
+      summary: Admin diagnosis analytics
+      tags:
+      - Analytics
+      - Admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Admin analytics retrieved successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Staff access required
+        '500':
+          description: Internal server error
+  /diagnosis/search/:
+    get:
+      operationId: search_diagnosis_records_2
+      description: Advanced search and filtering for user's own diagnosis records
+        with pagination support.
+      summary: Search user's diagnosis records
+      parameters:
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+        description: Filter records from this date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+        description: Filter records until this date
+      - in: query
+        name: hcv_risk
+        schema:
+          type: string
+        description: Filter by HCV risk level
+      - in: query
+        name: hcv_status
+        schema:
+          type: string
+        description: Filter by HCV status
+      - in: query
+        name: max_age
+        schema:
+          type: integer
+        description: Maximum patient age
+      - in: query
+        name: max_confidence
+        schema:
+          type: number
+          format: float
+        description: Maximum confidence threshold
+      - in: query
+        name: min_age
+        schema:
+          type: integer
+        description: Minimum patient age
+      - in: query
+        name: min_confidence
+        schema:
+          type: number
+          format: float
+        description: Minimum confidence threshold
+      - in: query
+        name: order_by
+        schema:
+          type: string
+        description: Order results by field
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Number of results per page
+      - in: query
+        name: patient_name
+        schema:
+          type: string
+        description: Filter by patient name (partial match)
+      tags:
+      - Search
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Search completed successfully
+        '400':
+          description: Invalid pagination parameters
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /diagnosis/admin/search/:
+    get:
+      operationId: admin_search_diagnosis_records_2
+      description: Advanced search and filtering for ALL diagnosis records in the
+        system. Only accessible by staff users.
+      summary: Admin search all diagnosis records
+      parameters:
+      - in: query
+        name: created_by
+        schema:
+          type: string
+        description: Filter by user who created the record
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+        description: Filter records from this date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+        description: Filter records until this date
+      - in: query
+        name: hcv_risk
+        schema:
+          type: string
+        description: Filter by HCV risk level
+      - in: query
+        name: hcv_status
+        schema:
+          type: string
+        description: Filter by HCV status
+      - in: query
+        name: max_age
+        schema:
+          type: integer
+        description: Maximum patient age
+      - in: query
+        name: max_confidence
+        schema:
+          type: number
+          format: float
+        description: Maximum confidence threshold
+      - in: query
+        name: min_age
+        schema:
+          type: integer
+        description: Minimum patient age
+      - in: query
+        name: min_confidence
+        schema:
+          type: number
+          format: float
+        description: Minimum confidence threshold
+      - in: query
+        name: order_by
+        schema:
+          type: string
+        description: Order results by field
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Number of results per page
+      - in: query
+        name: patient_name
+        schema:
+          type: string
+        description: Filter by patient name (partial match)
+      tags:
+      - Search
+      - Admin
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Admin search completed successfully
+        '400':
+          description: Invalid pagination parameters
+        '401':
+          description: Authentication required
+        '403':
+          description: Staff access required
+        '500':
+          description: Internal server error
+  /diagnosis/records/:
+    get:
+      operationId: list_diagnosis_records_2
+      description: Get list of all diagnosis records for admin management. Only accessible
+        by staff users.
+      summary: List diagnosis records
+      tags:
+      - Admin
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Diagnosis records retrieved successfully
+        '401':
+          description: Authentication required
+        '403':
+          description: Staff access required
+        '500':
+          description: Internal server error
+  /diagnosis/export/csv/:
+    get:
+      operationId: export_diagnosis_records_csv_2
+      description: Export diagnosis records in CSV format. Staff users get all records,
+        regular users get only their own records.
+      summary: Export diagnosis records as CSV
+      tags:
+      - Export
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: CSV file generated successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+  /diagnosis/export/excel/:
+    get:
+      operationId: export_diagnosis_records_excel_2
+      description: Export diagnosis records in Excel format. Staff users get all records,
+        regular users get only their own records.
+      summary: Export diagnosis records as Excel
+      tags:
+      - Export
+      - Diagnosis Records
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Excel file generated successfully
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    CustomTokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    DiagnosisRecord:
+      type: object
+      description: |-
+        Comprehensive serializer for complete diagnosis records.
+
+        Combines patient information, laboratory values, and AI diagnosis results
+        into a single comprehensive view for diagnosis history and reporting.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: Unique diagnosis record identifier
+        patient_name:
+          type: string
+          readOnly: true
+          description: Patient's full name
+        age:
+          type: integer
+          readOnly: true
+          description: Patient's age in years
+        sex:
+          type: string
+          readOnly: true
+          description: Patient's biological sex (M/F)
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Username of the healthcare provider who created this record
+        alp:
+          type: number
+          format: double
+          readOnly: true
+          description: Alkaline phosphatase level (U/L)
+        ast:
+          type: number
+          format: double
+          readOnly: true
+          description: Aspartate aminotransferase level (U/L)
+        che:
+          type: number
+          format: double
+          readOnly: true
+          description: Cholinesterase level (U/L)
+        crea:
+          type: number
+          format: double
+          readOnly: true
+          description: Creatinine level (mg/dL)
+        ggt:
+          type: number
+          format: double
+          readOnly: true
+          description: Gamma-glutamyl transferase level (U/L)
+        hcv_status:
+          type: string
+          readOnly: true
+          description: AI-predicted HCV infection status
+        hcv_status_probability:
+          type: number
+          format: double
+          readOnly: true
+          description: Confidence probability for HCV status prediction (0.0-1.0)
+        hcv_risk:
+          type: string
+          readOnly: true
+          description: Risk level assessment based on lab values and patient data
+        hcv_stage:
+          type: string
+          readOnly: true
+          description: Predicted liver fibrosis stage (F0-F4)
+        confidence:
+          type: number
+          format: double
+          readOnly: true
+          description: Overall model confidence in the diagnosis (0.0-1.0)
+        stage_predictions:
+          readOnly: true
+          description: Detailed probability scores for each fibrosis stage
+        recommendation:
+          type: string
+          readOnly: true
+          description: Clinical recommendations based on diagnosis results
+        diagnosis_completed:
+          type: boolean
+          description: Whether the AI diagnosis process has completed successfully
+        analysis_duration:
+          type: string
+          nullable: true
+          description: Time taken to complete the diagnosis analysis (in seconds)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when diagnosis record was created
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when diagnosis record was last updated
+      required:
+      - age
+      - alp
+      - ast
+      - che
+      - confidence
+      - crea
+      - created_at
+      - created_by_username
+      - ggt
+      - hcv_risk
+      - hcv_stage
+      - hcv_status
+      - hcv_status_probability
+      - id
+      - patient_name
+      - recommendation
+      - sex
+      - stage_predictions
+      - updated_at
+    Email:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    EmailCheckRequest:
+      type: object
+      description: Serializer for checking email availability during registration.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Email address to check for availability
+      required:
+      - email
+    EmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    HCVPatient:
+      type: object
+      description: |-
+        Serializer for HCV Patient data with comprehensive liver function test parameters.
+
+        This serializer handles patient information and laboratory values required for
+        hepatitis C diagnosis and stage prediction.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: Unique patient identifier
+        patient_name:
+          type: string
+          description: Full name of the patient
+          maxLength: 100
+        age:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Patient age in years (1-120)
+        sex:
+          type: string
+          description: Patient biological sex (M/F)
+          maxLength: 10
+        alp:
+          type: number
+          format: double
+          description: Alkaline phosphatase level (U/L)
+        ast:
+          type: number
+          format: double
+          description: Aspartate aminotransferase level (U/L)
+        che:
+          type: number
+          format: double
+          description: Cholinesterase level (U/L)
+        crea:
+          type: number
+          format: double
+          description: Creatinine level (mg/dL)
+        ggt:
+          type: number
+          format: double
+          description: Gamma-glutamyl transferase level (U/L)
+        alb:
+          type: number
+          format: double
+          nullable: true
+          description: Albumin level (g/dL) - optional
+        bil:
+          type: number
+          format: double
+          nullable: true
+          description: Bilirubin level (mg/dL) - optional
+        chol:
+          type: number
+          format: double
+          nullable: true
+          description: Cholesterol level (mg/dL) - optional
+        prot:
+          type: number
+          format: double
+          nullable: true
+          description: Protein level (g/dL) - optional
+        alt:
+          type: number
+          format: double
+          nullable: true
+          description: Alanine aminotransferase level (U/L) - optional
+        symptoms:
+          description: Additional symptoms or clinical notes
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when patient was created
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when patient was last updated
+        created_by:
+          type: integer
+          readOnly: true
+          description: User who created this patient record
+      required:
+      - age
+      - alp
+      - ast
+      - che
+      - crea
+      - created_at
+      - created_by
+      - ggt
+      - id
+      - patient_name
+      - sex
+      - updated_at
+    HCVPatientRequest:
+      type: object
+      description: |-
+        Serializer for HCV Patient data with comprehensive liver function test parameters.
+
+        This serializer handles patient information and laboratory values required for
+        hepatitis C diagnosis and stage prediction.
+      properties:
+        patient_name:
+          type: string
+          minLength: 1
+          description: Full name of the patient
+          maxLength: 100
+        age:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Patient age in years (1-120)
+        sex:
+          type: string
+          minLength: 1
+          description: Patient biological sex (M/F)
+          maxLength: 10
+        alp:
+          type: number
+          format: double
+          description: Alkaline phosphatase level (U/L)
+        ast:
+          type: number
+          format: double
+          description: Aspartate aminotransferase level (U/L)
+        che:
+          type: number
+          format: double
+          description: Cholinesterase level (U/L)
+        crea:
+          type: number
+          format: double
+          description: Creatinine level (mg/dL)
+        ggt:
+          type: number
+          format: double
+          description: Gamma-glutamyl transferase level (U/L)
+        alb:
+          type: number
+          format: double
+          nullable: true
+          description: Albumin level (g/dL) - optional
+        bil:
+          type: number
+          format: double
+          nullable: true
+          description: Bilirubin level (mg/dL) - optional
+        chol:
+          type: number
+          format: double
+          nullable: true
+          description: Cholesterol level (mg/dL) - optional
+        prot:
+          type: number
+          format: double
+          nullable: true
+          description: Protein level (g/dL) - optional
+        alt:
+          type: number
+          format: double
+          nullable: true
+          description: Alanine aminotransferase level (U/L) - optional
+        symptoms:
+          description: Additional symptoms or clinical notes
+      required:
+      - age
+      - alp
+      - ast
+      - che
+      - crea
+      - ggt
+      - patient_name
+      - sex
+    LoginRequest:
+      type: object
+      description: |-
+        Serializer for user authentication.
+
+        Handles email and password validation for user login.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: User's email address for authentication
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: User's password
+      required:
+      - email
+      - password
+    PasswordToken:
+      type: object
+      properties:
+        password:
+          type: string
+        token:
+          type: string
+      required:
+      - password
+      - token
+    PasswordTokenRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+        token:
+          type: string
+          minLength: 1
+      required:
+      - password
+      - token
+    PatchedProfileRequest:
+      type: object
+      description: |-
+        Comprehensive user profile serializer.
+          Handles user profile information including personal details,
+        contact information, account status, and preferences.
+      properties:
+        username:
+          type: string
+          nullable: true
+          description: User's display username
+          maxLength: 200
+        birthday:
+          type: string
+          format: date
+          nullable: true
+          description: User's date of birth (YYYY-MM-DD format)
+        full_name:
+          type: string
+          nullable: true
+          description: User's complete name
+          maxLength: 200
+        first_name:
+          type: string
+          nullable: true
+          description: User's first name
+          maxLength: 100
+        last_name:
+          type: string
+          nullable: true
+          description: User's last name
+          maxLength: 100
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to user's profile picture
+          maxLength: 500
+        phone_number:
+          type: string
+          nullable: true
+          description: User's phone number
+          maxLength: 20
+        country:
+          type: string
+          nullable: true
+          description: User's country of residence
+          maxLength: 100
+        city:
+          type: string
+          nullable: true
+          description: User's city of residence
+          maxLength: 100
+        timezone:
+          type: string
+          nullable: true
+          description: User's preferred timezone
+          maxLength: 50
+    RegisterRequest:
+      type: object
+      description: |-
+        Serializer for user registration.
+
+        Creates new user accounts with email, full name, and password validation.
+      properties:
+        full_name:
+          type: string
+          nullable: true
+          description: User's full name
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Valid email address (will be used as username)
+          maxLength: 200
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: User password (minimum 8 characters)
+          maxLength: 128
+      required:
+      - email
+      - password
+    ResetToken:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
+    ResetTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+servers:
+- url: http://localhost:8000
+  description: Development server
+- url: https://api.hepatocai.com
+  description: Production server
+externalDocs:
+  description: Full documentation
+  url: https://docs.hepatocai.com/

@@ -4,6 +4,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
+from drf_spectacular.types import OpenApiTypes
 from .models import HCVPatient, HCVResult, DiagnosisRecord
 from .AiDiagnosisTool.main import AiDiagnosisTool
 from .serializers import (
@@ -25,9 +27,32 @@ logger = logging.getLogger(__name__)
 
 
 class DiagnoseAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Changed to IsAuthenticated as requested
+    """
+    AI-powered HCV diagnosis endpoint.
+
+    Analyzes patient data and laboratory values to predict hepatitis C status,
+    fibrosis stage, and provide clinical recommendations using machine learning.
+    """
+
+    permission_classes = [IsAuthenticated]
     serializer_class = HCVPatientSerializer
 
+    @extend_schema(
+        operation_id="diagnose_hcv",
+        summary="Diagnose HCV using AI",
+        description="Submit patient data and laboratory values for AI-powered hepatitis C diagnosis and staging",
+        request=HCVPatientSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=DiagnosisRecordSerializer,
+                description="Successful diagnosis with AI predictions",
+            ),
+            400: OpenApiResponse(description="Validation error - invalid input data"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error during diagnosis"),
+        },
+        tags=["Diagnosis"],
+    )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def post(self, request):
@@ -187,7 +212,19 @@ class ExportDiagnosisRecordsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="export_diagnosis_records_csv",
+        summary="Export diagnosis records as CSV",
+        description="Export diagnosis records in CSV format. Staff users get all records, regular users get only their own records.",
+        responses={
+            200: OpenApiResponse(description="CSV file generated successfully"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Export", "Diagnosis Records"],
+    )
     def get(self, request):
+        """Export diagnosis records as CSV"""
         resource = DiagnosisRecordResource()
 
         # If user is staff, export all data; otherwise, only their own data
@@ -212,7 +249,19 @@ class ExportDiagnosisRecordsExcelView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="export_diagnosis_records_excel",
+        summary="Export diagnosis records as Excel",
+        description="Export diagnosis records in Excel format. Staff users get all records, regular users get only their own records.",
+        responses={
+            200: OpenApiResponse(description="Excel file generated successfully"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Export", "Diagnosis Records"],
+    )
     def get(self, request):
+        """Export diagnosis records as Excel"""
         resource = DiagnosisRecordResource()
 
         # If user is staff, export all data; otherwise, only their own data
@@ -244,6 +293,17 @@ class UserDiagnosisAnalyticsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="user_diagnosis_analytics",
+        summary="User diagnosis analytics",
+        description="Get comprehensive diagnosis analytics for the authenticated user's personal dashboard.",
+        responses={
+            200: OpenApiResponse(description="User analytics retrieved successfully"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Analytics"],
+    )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
@@ -383,6 +443,18 @@ class AdminDiagnosisAnalyticsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="admin_diagnosis_analytics",
+        summary="Admin diagnosis analytics",
+        description="Get comprehensive diagnosis analytics for admin dashboard. Only accessible by staff users.",
+        responses={
+            200: OpenApiResponse(description="Admin analytics retrieved successfully"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Staff access required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Analytics", "Admin"],
+    )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
@@ -556,6 +628,20 @@ class DiagnosisRecordListView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="list_diagnosis_records",
+        summary="List diagnosis records",
+        description="Get list of all diagnosis records for admin management. Only accessible by staff users.",
+        responses={
+            200: OpenApiResponse(
+                description="Diagnosis records retrieved successfully"
+            ),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Staff access required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Admin", "Diagnosis Records"],
+    )
     def get(self, request):
         """Get list of diagnosis records"""
         if not request.user.is_staff:
@@ -590,11 +676,69 @@ class DiagnosisRecordListView(APIView):
 
 class DiagnosisSearchView(APIView):
     """
-    Advanced search and filtering for diagnosis records
+    Advanced search and filtering for diagnosis records for user specific records
     """
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="search_diagnosis_records",
+        summary="Search user's diagnosis records",
+        description="Advanced search and filtering for user's own diagnosis records with pagination support.",
+        parameters=[
+            OpenApiParameter(
+                "hcv_status", OpenApiTypes.STR, description="Filter by HCV status"
+            ),
+            OpenApiParameter(
+                "hcv_risk", OpenApiTypes.STR, description="Filter by HCV risk level"
+            ),
+            OpenApiParameter(
+                "min_confidence",
+                OpenApiTypes.FLOAT,
+                description="Minimum confidence threshold",
+            ),
+            OpenApiParameter(
+                "max_confidence",
+                OpenApiTypes.FLOAT,
+                description="Maximum confidence threshold",
+            ),
+            OpenApiParameter(
+                "patient_name",
+                OpenApiTypes.STR,
+                description="Filter by patient name (partial match)",
+            ),
+            OpenApiParameter(
+                "min_age", OpenApiTypes.INT, description="Minimum patient age"
+            ),
+            OpenApiParameter(
+                "max_age", OpenApiTypes.INT, description="Maximum patient age"
+            ),
+            OpenApiParameter(
+                "date_from",
+                OpenApiTypes.DATETIME,
+                description="Filter records from this date",
+            ),
+            OpenApiParameter(
+                "date_to",
+                OpenApiTypes.DATETIME,
+                description="Filter records until this date",
+            ),
+            OpenApiParameter(
+                "order_by", OpenApiTypes.STR, description="Order results by field"
+            ),
+            OpenApiParameter("page", OpenApiTypes.INT, description="Page number"),
+            OpenApiParameter(
+                "page_size", OpenApiTypes.INT, description="Number of results per page"
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(description="Search completed successfully"),
+            400: OpenApiResponse(description="Invalid pagination parameters"),
+            401: OpenApiResponse(description="Authentication required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Search", "Diagnosis Records"],
+    )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
@@ -742,6 +886,70 @@ class AdminDiagnosisSearchView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id="admin_search_diagnosis_records",
+        summary="Admin search all diagnosis records",
+        description="Advanced search and filtering for ALL diagnosis records in the system. Only accessible by staff users.",
+        parameters=[
+            OpenApiParameter(
+                "hcv_status", OpenApiTypes.STR, description="Filter by HCV status"
+            ),
+            OpenApiParameter(
+                "hcv_risk", OpenApiTypes.STR, description="Filter by HCV risk level"
+            ),
+            OpenApiParameter(
+                "min_confidence",
+                OpenApiTypes.FLOAT,
+                description="Minimum confidence threshold",
+            ),
+            OpenApiParameter(
+                "max_confidence",
+                OpenApiTypes.FLOAT,
+                description="Maximum confidence threshold",
+            ),
+            OpenApiParameter(
+                "patient_name",
+                OpenApiTypes.STR,
+                description="Filter by patient name (partial match)",
+            ),
+            OpenApiParameter(
+                "min_age", OpenApiTypes.INT, description="Minimum patient age"
+            ),
+            OpenApiParameter(
+                "max_age", OpenApiTypes.INT, description="Maximum patient age"
+            ),
+            OpenApiParameter(
+                "created_by",
+                OpenApiTypes.STR,
+                description="Filter by user who created the record",
+            ),
+            OpenApiParameter(
+                "date_from",
+                OpenApiTypes.DATETIME,
+                description="Filter records from this date",
+            ),
+            OpenApiParameter(
+                "date_to",
+                OpenApiTypes.DATETIME,
+                description="Filter records until this date",
+            ),
+            OpenApiParameter(
+                "order_by", OpenApiTypes.STR, description="Order results by field"
+            ),
+            OpenApiParameter("page", OpenApiTypes.INT, description="Page number"),
+            OpenApiParameter(
+                "page_size", OpenApiTypes.INT, description="Number of results per page"
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(description="Admin search completed successfully"),
+            400: OpenApiResponse(description="Invalid pagination parameters"),
+            401: OpenApiResponse(description="Authentication required"),
+            403: OpenApiResponse(description="Staff access required"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["Search", "Admin", "Diagnosis Records"],
+    )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
