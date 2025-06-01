@@ -10,6 +10,8 @@ class HCVPatientSerializer(serializers.ModelSerializer):
     Serializer for HCV Patient data with comprehensive liver function test parameters.
     """
 
+    created_by = serializers.SerializerMethodField()
+
     class Meta:
         model = HCVPatient
         fields = [
@@ -33,9 +35,9 @@ class HCVPatientSerializer(serializers.ModelSerializer):
             "created_by",
         ]
         extra_kwargs = {
-            "created_by": {"read_only": True},
             "id": {"read_only": True},
             "created_at": {"read_only": True},
+            "created_by": {"read_only": True},
             "updated_at": {"read_only": True},
             # Optional fields
             "alb": {"required": False, "allow_null": True},
@@ -45,6 +47,16 @@ class HCVPatientSerializer(serializers.ModelSerializer):
             "alt": {"required": False, "allow_null": True},
             "symptoms": {"required": False},
         }
+
+    def get_created_by(self, obj):
+        """Return user's full name if available, otherwise email"""
+        if obj.created_by:
+            return (
+                obj.created_by.full_name
+                if obj.created_by.full_name
+                else obj.created_by.email
+            )
+        return None
 
     def validate_alb(self, value):
         if value == "" or value is None:
@@ -105,6 +117,7 @@ class PatientWithResultSerializer(serializers.ModelSerializer):
     """
 
     hcv_result = HCVResultSerializer(read_only=True)
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = HCVPatient
@@ -130,8 +143,18 @@ class PatientWithResultSerializer(serializers.ModelSerializer):
             "hcv_result",
         ]
         extra_kwargs = {
-            "created_by": {"read_only": True},
             "id": {"read_only": True},
             "created_at": {"read_only": True},
+            "created_by": {"read_only": True},
             "updated_at": {"read_only": True},
         }
+
+    def get_created_by(self, obj):
+        """Return user's full name if available, otherwise email"""
+        if obj.created_by:
+            return (
+                obj.created_by.full_name
+                if obj.created_by.full_name
+                else obj.created_by.email
+            )
+        return None

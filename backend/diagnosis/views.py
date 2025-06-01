@@ -93,8 +93,12 @@ class DiagnoseAPIView(APIView):
 
         # Return response with patient data and AI diagnosis result
         patient_with_result = PatientWithResultSerializer(patient)
+        data = {
+            "patient": patient_with_result.data,
+            "feature_importance": ai_result.get("feature_importance", {}),
+        }
         return StandardResponse.success(
-            data=patient_with_result.data,
+            data=data,
             message="Diagnosis completed successfully",
             status_code=status.HTTP_201_CREATED,
         )
@@ -328,20 +332,20 @@ class UserDiagnosisAnalyticsView(APIView):
 
         # Get user's risk level distribution
         risk_distribution = {
-            "high_risk": user_patients.filter(hcv_result__hcv_risk="high").count(),
-            "medium_risk": user_patients.filter(hcv_result__hcv_risk="medium").count(),
-            "low_risk": user_patients.filter(hcv_result__hcv_risk="low").count(),
+            "high_risk": user_patients.filter(hcv_result__hcv_risk="High").count(),
+            "medium_risk": user_patients.filter(hcv_result__hcv_risk="Medium").count(),
+            "low_risk": user_patients.filter(hcv_result__hcv_risk="Low").count(),
         }
 
         # Get user's HCV status distribution
         hcv_status_distribution = {
-            "positive": user_patients.filter(hcv_result__hcv_status="positive").count(),
-            "negative": user_patients.filter(hcv_result__hcv_status="negative").count(),
+            "positive": user_patients.filter(hcv_result__hcv_status="Positive").count(),
+            "negative": user_patients.filter(hcv_result__hcv_status="Negative").count(),
         }
 
         # Get user's stage distribution
         stage_stats = {}
-        stages = ["F0", "F1", "F2", "F3", "F4"]
+        stages = ["Blood Donors", "Hepatitis", "Fibrosis", "Cirrhosis"]
         for stage in stages:
             stage_stats[stage] = user_patients.filter(
                 hcv_result__hcv_stage=stage
@@ -349,8 +353,8 @@ class UserDiagnosisAnalyticsView(APIView):
 
         # Get user's gender distribution
         gender_stats = {
-            "male": user_patients.filter(sex="male").count(),
-            "female": user_patients.filter(sex="female").count(),
+            "male": user_patients.filter(sex="Male").count(),
+            "female": user_patients.filter(sex="Female").count(),
         }
 
         # Calculate user's average confidence
@@ -467,26 +471,26 @@ class AdminDiagnosisAnalyticsView(APIView):
 
         # Get risk level distribution based on HCV results
         risk_distribution = {
-            "high_risk": HCVPatient.objects.filter(hcv_result__hcv_risk="high").count(),
+            "high_risk": HCVPatient.objects.filter(hcv_result__hcv_risk="High").count(),
             "medium_risk": HCVPatient.objects.filter(
-                hcv_result__hcv_risk="medium"
+                hcv_result__hcv_risk="Medium"
             ).count(),
-            "low_risk": HCVPatient.objects.filter(hcv_result__hcv_risk="low").count(),
+            "low_risk": HCVPatient.objects.filter(hcv_result__hcv_risk="Low").count(),
         }
 
         # Get HCV status distribution
         hcv_status_distribution = {
             "positive": HCVPatient.objects.filter(
-                hcv_result__hcv_status="positive"
+                hcv_result__hcv_status="Positive"
             ).count(),
             "negative": HCVPatient.objects.filter(
-                hcv_result__hcv_status="negative"
+                hcv_result__hcv_status="Negative"
             ).count(),
         }
 
         # Get stage distribution
         stage_stats = {}
-        stages = ["F0", "F1", "F2", "F3", "F4"]
+        stages = ["Blood Donors", "Hepatitis", "Fibrosis", "Cirrhosis"]
         for stage in stages:
             stage_stats[stage] = HCVPatient.objects.filter(
                 hcv_result__hcv_stage=stage
@@ -494,8 +498,8 @@ class AdminDiagnosisAnalyticsView(APIView):
 
         # Get gender distribution
         gender_stats = {
-            "male": HCVPatient.objects.filter(sex="male").count(),
-            "female": HCVPatient.objects.filter(sex="female").count(),
+            "male": HCVPatient.objects.filter(sex="Male").count(),
+            "female": HCVPatient.objects.filter(sex="Female").count(),
         }
 
         # Calculate average confidence

@@ -34,65 +34,34 @@ const DiagnosisCard = ({ diagnosis }) => {
   const age = diagnosis?.age || "N/A";
   const sex = diagnosis?.sex || "N/A";
 
-  // Extract diagnosis result data - API returns flat structure
-  const hcvStatus = diagnosis?.hcv_status || "Unknown";
-  const hcvRisk = diagnosis?.hcv_risk || "Unknown";
-  const confidence = diagnosis?.confidence || 0;
-  const hcvStage = diagnosis?.hcv_stage || "N/A";
+  // Extract diagnosis result data - API returns nested structure in hcv_result
+  const hcvStatus = diagnosis?.hcv_result?.hcv_status || "Unknown";
+  const hcvRisk = diagnosis?.hcv_result?.hcv_risk || "Unknown";
+  const confidence = diagnosis?.hcv_result?.confidence || 0;
+  const hcvStage = diagnosis?.hcv_result?.hcv_stage || "N/A";
   const createdAt = diagnosis?.created_at || null;
 
-  // Extract lab values
+  // Extract lab values - all available from API
   const alp = diagnosis?.alp || "N/A";
   const ast = diagnosis?.ast || "N/A";
   const che = diagnosis?.che || "N/A";
   const crea = diagnosis?.crea || "N/A";
   const ggt = diagnosis?.ggt || "N/A";
+  const alb = diagnosis?.alb || "N/A";
+  const bil = diagnosis?.bil || "N/A";
+  const chol = diagnosis?.chol || "N/A";
+  const prot = diagnosis?.prot || "N/A";
+  const alt = diagnosis?.alt || "N/A";
 
-  // Extract additional data
-  const recommendation = diagnosis?.recommendation || "N/A";
-  const stagePredictions = diagnosis?.stage_predictions || {};
-  const hcvStatusProbability = diagnosis?.hcv_status_probability || 0; // Handle download functionality
+  // Extract additional data from nested structure
+  const recommendation = diagnosis?.hcv_result?.recommendation || "N/A";
+  const stagePredictions = diagnosis?.hcv_result?.stage_predictions || {};
+  const hcvStatusProbability =
+    diagnosis?.hcv_result?.hcv_status_probability || 0;
+  const symptoms = diagnosis?.symptoms || []; // Handle download functionality
+
   const handleDownload = () => {
-    const reportData = {
-      // Patient Information
-      patient_name: patientName,
-      age: age,
-      sex: sex,
-
-      // Diagnosis Results
-      hcv_status: hcvStatus,
-      hcv_risk: hcvRisk,
-      hcv_stage: hcvStage,
-      confidence: (confidence * 100).toFixed(1) + "%",
-      hcv_status_probability: (hcvStatusProbability * 100).toFixed(1) + "%",
-
-      // Lab Values
-      alp: alp,
-      ast: ast,
-      che: che,
-      crea: crea,
-      ggt: ggt,
-
-      // Stage Predictions
-      stage_predictions: stagePredictions,
-
-      // Recommendation
-      recommendation: recommendation,
-
-      // Additional metadata
-      diagnosis_id: diagnosis?.id || "N/A",
-      created_at: createdAt ? new Date(createdAt).toLocaleDateString() : "N/A",
-      created_time: createdAt
-        ? new Date(createdAt).toLocaleTimeString()
-        : "N/A",
-      created_by: diagnosis?.created_by_username || "N/A",
-      diagnosis_completed: diagnosis?.diagnosis_completed || false,
-      analysis_duration: diagnosis?.analysis_duration || "N/A",
-
-      // All raw data from API
-      raw_data: diagnosis,
-    };
-
+    const reportData = diagnosis;
     const dataStr = JSON.stringify(reportData, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
@@ -233,9 +202,7 @@ const DiagnosisCard = ({ diagnosis }) => {
               </Box>
             </Box>
           </Box>
-
           <Divider sx={{ mb: 3 }} />
-
           {/* Diagnosis Results Section */}
           <Box mb={3}>
             <Typography variant="h6" color="primary" gutterBottom>
@@ -266,10 +233,7 @@ const DiagnosisCard = ({ diagnosis }) => {
               </Typography>
             </Box>
           </Box>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {/* Lab Values Section */}
+          <Divider sx={{ mb: 3 }} /> {/* Lab Values Section */}
           <Box mb={3}>
             <Typography variant="h6" color="primary" gutterBottom>
               Laboratory Values
@@ -315,11 +279,69 @@ const DiagnosisCard = ({ diagnosis }) => {
                   {ggt}
                 </Typography>
               </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  ALB
+                </Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {alb}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  BIL
+                </Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {bil}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  CHOL
+                </Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {chol}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  PROT
+                </Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {prot}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  ALT
+                </Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {alt}
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-
+          </Box>{" "}
           <Divider sx={{ mb: 3 }} />
-
+          {/* Symptoms Section */}
+          {symptoms && symptoms.length > 0 && (
+            <Box mb={3}>
+              <Typography variant="h6" color="primary" gutterBottom>
+                Symptoms
+              </Typography>
+              <Box display="flex" gap={1} flexWrap="wrap">
+                {symptoms.map((symptom, index) => (
+                  <Chip
+                    key={index}
+                    label={symptom}
+                    variant="outlined"
+                    color="secondary"
+                    size="medium"
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+          {symptoms && symptoms.length > 0 && <Divider sx={{ mb: 3 }} />}
           {/* Stage Predictions Section */}
           {Object.keys(stagePredictions).length > 0 && (
             <Box mb={3}>
@@ -340,11 +362,9 @@ const DiagnosisCard = ({ diagnosis }) => {
               </Box>
             </Box>
           )}
-
           {Object.keys(stagePredictions).length > 0 && (
             <Divider sx={{ mb: 3 }} />
           )}
-
           {/* Recommendation Section */}
           {recommendation !== "N/A" && (
             <Box mb={3}>
@@ -356,9 +376,7 @@ const DiagnosisCard = ({ diagnosis }) => {
               </Typography>
             </Box>
           )}
-
           {recommendation !== "N/A" && <Divider sx={{ mb: 3 }} />}
-
           {/* Metadata Section */}
           <Box>
             <Typography variant="h6" color="primary" gutterBottom>
@@ -372,13 +390,13 @@ const DiagnosisCard = ({ diagnosis }) => {
                 <Typography variant="body1">
                   {diagnosis?.id || "N/A"}
                 </Typography>
-              </Box>
+              </Box>{" "}
               <Box>
                 <Typography variant="body2" color="text.secondary">
                   Created By
                 </Typography>
                 <Typography variant="body1">
-                  {diagnosis?.created_by_username || "N/A"}
+                  {diagnosis?.created_by || "N/A"}
                 </Typography>
               </Box>
               <Box>
@@ -386,8 +404,14 @@ const DiagnosisCard = ({ diagnosis }) => {
                   Completed
                 </Typography>
                 <Chip
-                  label={diagnosis?.diagnosis_completed ? "Yes" : "No"}
-                  color={diagnosis?.diagnosis_completed ? "success" : "warning"}
+                  label={
+                    diagnosis?.hcv_result?.diagnosis_completed ? "Yes" : "No"
+                  }
+                  color={
+                    diagnosis?.hcv_result?.diagnosis_completed
+                      ? "success"
+                      : "warning"
+                  }
                   size="small"
                 />
               </Box>

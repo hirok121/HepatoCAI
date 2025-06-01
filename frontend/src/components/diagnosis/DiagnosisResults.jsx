@@ -15,7 +15,6 @@ import HcvStatusRiskStage from "./HcvStatusRiskStage";
 import PatientInfo from "./PatientInfo";
 import HCVAnalysis from "./HCVAnalysisCompact";
 import FeatureImportance from "./FeatureImportance";
-import MedicalDisclaimer from "./MedicalDisclaimer";
 
 function DiagnosisResults({ results, loading }) {
   if (loading) {
@@ -66,14 +65,17 @@ function DiagnosisResults({ results, loading }) {
     );
   }
   if (!results) return null;
+
   // Extract data from results - handle both nested and direct structure
-  const diagnosisData = results.diagnosis_result;
+  const diagnosisData = results.patient.hcv_result;
   const hcvProbability = diagnosisData.hcv_status_probability || 0;
   const confidence = diagnosisData.confidence || 0;
   const stagePredictions = diagnosisData.stage_predictions;
-  const featureImportance = diagnosisData.feature_importance;
+  const featureImportance = results.feature_importance || {};
+
   const recommendation =
     diagnosisData.recommendation || "No recommendation provided";
+
   // Extract HCV status, risk, and stage for new components
   const hcvStatus = diagnosisData.hcv_status;
   const hcvRisk = diagnosisData.hcv_risk;
@@ -109,7 +111,7 @@ function DiagnosisResults({ results, loading }) {
     return colors[stage] || "#6B7280";
   };
   return (
-    <Container sx={{ py: 2, height: "120vh" }}>
+    <Container sx={{ py: 2, height: "130vh" }}>
       {/* Compact Header Section */}
       <Paper
         elevation={4}
@@ -323,43 +325,24 @@ function DiagnosisResults({ results, loading }) {
 DiagnosisResults.propTypes = {
   loading: PropTypes.bool.isRequired,
   results: PropTypes.shape({
-    // Patient information
-    patient_id: PropTypes.number,
-    patient_name: PropTypes.string,
-    age: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    sex: PropTypes.string,
-
-    // Lab values
-    ALP: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    AST: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    CHE: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    CREA: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    GGT: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-
-    // Direct fields from API response
-    hcv_status: PropTypes.string,
-    hcv_status_probability: PropTypes.number,
-    hcv_risk: PropTypes.string,
-    hcv_stage: PropTypes.string,
-    confidence: PropTypes.number,
-    recommendation: PropTypes.string,
-    stage_predictions: PropTypes.objectOf(PropTypes.number),
-    feature_importance: PropTypes.objectOf(PropTypes.number),
-
-    // Nested diagnosis_result object (for compatibility)
-    diagnosis_result: PropTypes.shape({
-      hcv_status: PropTypes.string,
-      hcv_status_probability: PropTypes.number,
-      hcv_risk: PropTypes.string,
-      hcv_stage: PropTypes.string,
-      confidence: PropTypes.number,
-      recommendation: PropTypes.string,
-      stage_predictions: PropTypes.objectOf(PropTypes.number),
-      feature_importance: PropTypes.objectOf(PropTypes.number),
+    patient: PropTypes.shape({
+      hcv_result: PropTypes.shape({
+        patient: PropTypes.number,
+        hcv_status: PropTypes.string,
+        hcv_status_probability: PropTypes.number,
+        hcv_risk: PropTypes.string,
+        hcv_stage: PropTypes.string,
+        confidence: PropTypes.number,
+        stage_predictions: PropTypes.objectOf(PropTypes.number),
+        recommendation: PropTypes.string,
+        diagnosis_completed: PropTypes.bool,
+        analysis_duration: PropTypes.number,
+        feature_importance: PropTypes.objectOf(PropTypes.number),
+        created_at: PropTypes.string,
+        updated_at: PropTypes.string,
+      }),
     }),
-
-    // Metadata
-    timestamp: PropTypes.string,
+    feature_importance: PropTypes.objectOf(PropTypes.number),
   }),
 };
 

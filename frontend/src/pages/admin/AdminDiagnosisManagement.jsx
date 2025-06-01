@@ -794,12 +794,8 @@ function AdminDiagnosisManagement() {
                                       color="text.primary"
                                     >
                                       {`${
-                                        user.patient__created_by__first_name ||
-                                        ""
-                                      } ${
-                                        user.patient__created_by__last_name ||
-                                        ""
-                                      }`}
+                                        user.created_by__first_name || "User"
+                                      } ${user.created_by__last_name || ""}`}
                                     </Typography>
                                   </Box>
                                   <Chip
@@ -818,7 +814,7 @@ function AdminDiagnosisManagement() {
                                 >
                                   <Chip
                                     icon={<Person />}
-                                    label={user.patient__created_by__email}
+                                    label={user.created_by__email}
                                     size="small"
                                     variant="outlined"
                                     color="info"

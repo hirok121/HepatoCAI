@@ -15,9 +15,9 @@ class HCVPatient(models.Model):
     )
 
     SEX_CHOICES = [
-        ("male", "Male"),
-        ("female", "Female"),
-        ("other", "Other"),
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
     ]
     sex = models.CharField(max_length=10, choices=SEX_CHOICES)
 

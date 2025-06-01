@@ -65,48 +65,7 @@ const DiagnosisTable = ({
 
   // Handle download functionality (copied from DiagnosisCard)
   const handleDownload = (diagnosis) => {
-    const reportData = {
-      // Patient Information
-      patient_name: diagnosis.patient_name,
-      age: diagnosis.age,
-      sex: diagnosis.sex,
-
-      // Diagnosis Results
-      hcv_status: diagnosis.hcv_status,
-      hcv_risk: diagnosis.hcv_risk,
-      hcv_stage: diagnosis.hcv_stage,
-      confidence: ((diagnosis.confidence || 0) * 100).toFixed(1) + "%",
-      hcv_status_probability:
-        ((diagnosis.hcv_status_probability || 0) * 100).toFixed(1) + "%",
-
-      // Lab Values
-      alp: diagnosis.alp,
-      ast: diagnosis.ast,
-      che: diagnosis.che,
-      crea: diagnosis.crea,
-      ggt: diagnosis.ggt,
-
-      // Stage Predictions
-      stage_predictions: diagnosis.stage_predictions,
-
-      // Recommendation
-      recommendation: diagnosis.recommendation,
-
-      // Additional metadata
-      diagnosis_id: diagnosis.id,
-      created_at: diagnosis.created_at
-        ? new Date(diagnosis.created_at).toLocaleDateString()
-        : "N/A",
-      created_time: diagnosis.created_at
-        ? new Date(diagnosis.created_at).toLocaleTimeString()
-        : "N/A",
-      created_by: diagnosis.created_by_username,
-      diagnosis_completed: diagnosis.diagnosis_completed,
-      analysis_duration: diagnosis.analysis_duration,
-
-      // All raw data from API
-      raw_data: diagnosis,
-    };
+    const reportData = diagnosis;
 
     const dataStr = JSON.stringify(reportData, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
@@ -213,23 +172,23 @@ const DiagnosisTable = ({
                 {/* HCV Status */}
                 <TableCell>
                   <Chip
-                    label={diagnosis.hcv_status || "Unknown"}
-                    color={getStatusColor(diagnosis.hcv_status)}
+                    label={diagnosis.hcv_result?.hcv_status || "Unknown"}
+                    color={getStatusColor(diagnosis.hcv_result?.hcv_status)}
                     size="small"
                   />
                 </TableCell>
                 {/* Risk Level */}
                 <TableCell>
                   <Chip
-                    label={diagnosis.hcv_risk || "Unknown"}
-                    color={getRiskColor(diagnosis.hcv_risk)}
+                    label={diagnosis.hcv_result?.hcv_risk || "Unknown"}
+                    color={getRiskColor(diagnosis.hcv_result?.hcv_risk)}
                     size="small"
                   />
                 </TableCell>
                 {/* Stage */}
                 <TableCell>
                   <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
-                    {diagnosis.hcv_stage || "Unknown"}
+                    {diagnosis.hcv_result?.hcv_stage || "Unknown"}
                   </Typography>
                 </TableCell>
                 {/* Confidence */}
@@ -238,11 +197,14 @@ const DiagnosisTable = ({
                     <Box display="flex" alignItems="center" gap={1}>
                       <LinearProgress
                         variant="determinate"
-                        value={(diagnosis.confidence || 0) * 100}
+                        value={(diagnosis.hcv_result?.confidence || 0) * 100}
                         sx={{ flexGrow: 1, height: 6, borderRadius: 1 }}
                       />
                       <Typography variant="caption" fontWeight="bold">
-                        {((diagnosis.confidence || 0) * 100).toFixed(0)}%
+                        {(
+                          (diagnosis.hcv_result?.confidence || 0) * 100
+                        ).toFixed(0)}
+                        %
                       </Typography>
                     </Box>
                   </Box>
@@ -333,32 +295,32 @@ const DiagnosisTable = ({
                 </Box>
               </Box>
             </Box>
-
             <Divider sx={{ mb: 3 }} />
-
             {/* Diagnosis Results Section */}
             <Box mb={3}>
               <Typography variant="h6" color="primary" gutterBottom>
                 Diagnosis Results
-              </Typography>
+              </Typography>{" "}
               <Box display="flex" gap={1} mb={2} flexWrap="wrap">
                 <Chip
                   label={`HCV Status: ${
-                    selectedDiagnosis.hcv_status || "Unknown"
+                    selectedDiagnosis.hcv_result?.hcv_status || "Unknown"
                   }`}
-                  color={getStatusColor(selectedDiagnosis.hcv_status)}
+                  color={getStatusColor(
+                    selectedDiagnosis.hcv_result?.hcv_status
+                  )}
                   size="medium"
                 />
                 <Chip
                   label={`Risk Level: ${
-                    selectedDiagnosis.hcv_risk || "Unknown"
+                    selectedDiagnosis.hcv_result?.hcv_risk || "Unknown"
                   }`}
-                  color={getRiskColor(selectedDiagnosis.hcv_risk)}
+                  color={getRiskColor(selectedDiagnosis.hcv_result?.hcv_risk)}
                   size="medium"
                 />
-                {selectedDiagnosis.hcv_stage && (
+                {selectedDiagnosis.hcv_result?.hcv_stage && (
                   <Chip
-                    label={`Stage: ${selectedDiagnosis.hcv_stage}`}
+                    label={`Stage: ${selectedDiagnosis.hcv_result.hcv_stage}`}
                     color="info"
                     size="medium"
                   />
@@ -367,20 +329,22 @@ const DiagnosisTable = ({
               <Box display="flex" gap={2} flexWrap="wrap">
                 <Typography variant="body1">
                   <strong>Confidence:</strong>{" "}
-                  {((selectedDiagnosis.confidence || 0) * 100).toFixed(1)}%
+                  {(
+                    (selectedDiagnosis.hcv_result?.confidence || 0) * 100
+                  ).toFixed(1)}
+                  %
                 </Typography>
                 <Typography variant="body1">
                   <strong>HCV Status Probability:</strong>{" "}
                   {(
-                    (selectedDiagnosis.hcv_status_probability || 0) * 100
+                    (selectedDiagnosis.hcv_result?.hcv_status_probability ||
+                      0) * 100
                   ).toFixed(1)}
                   %
                 </Typography>
               </Box>
             </Box>
-
             <Divider sx={{ mb: 3 }} />
-
             {/* Lab Values Section */}
             <Box mb={3}>
               <Typography variant="h6" color="primary" gutterBottom>
@@ -427,56 +391,111 @@ const DiagnosisTable = ({
                     {selectedDiagnosis.ggt || "N/A"}
                   </Typography>
                 </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    ALB
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {selectedDiagnosis.alb || "N/A"}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    BIL
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {selectedDiagnosis.bil || "N/A"}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    CHOL
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {selectedDiagnosis.chol || "N/A"}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    PROT
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {selectedDiagnosis.prot || "N/A"}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    ALT
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {selectedDiagnosis.alt || "N/A"}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-
-            <Divider sx={{ mb: 3 }} />
-
+            {/* Symptoms Section */}
+            {selectedDiagnosis.symptoms &&
+              selectedDiagnosis.symptoms.length > 0 && (
+                <Box mb={3}>
+                  <Divider sx={{ mb: 3 }} />
+                  <Typography variant="h6" color="primary" gutterBottom>
+                    Symptoms
+                  </Typography>
+                  <Box display="flex" gap={1} flexWrap="wrap">
+                    {selectedDiagnosis.symptoms.map((symptom, index) => (
+                      <Chip
+                        key={index}
+                        label={symptom}
+                        variant="outlined"
+                        color="secondary"
+                        size="medium"
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
             {/* Stage Predictions Section */}
-            {selectedDiagnosis.stage_predictions &&
-              Object.keys(selectedDiagnosis.stage_predictions).length > 0 && (
+            <Divider sx={{ mb: 3 }} />
+            {selectedDiagnosis.hcv_result?.stage_predictions &&
+              Object.keys(selectedDiagnosis.hcv_result.stage_predictions)
+                .length > 0 && (
                 <Box mb={3}>
                   <Typography variant="h6" color="primary" gutterBottom>
                     Stage Predictions
                   </Typography>
                   <Box display="flex" gap={2} flexWrap="wrap">
-                    {Object.entries(selectedDiagnosis.stage_predictions).map(
-                      ([stage, probability]) => (
-                        <Chip
-                          key={stage}
-                          label={`${stage}: ${(probability * 100).toFixed(0)}%`}
-                          variant="outlined"
-                          color={probability > 0.5 ? "primary" : "default"}
-                        />
-                      )
-                    )}
+                    {Object.entries(
+                      selectedDiagnosis.hcv_result.stage_predictions
+                    ).map(([stage, probability]) => (
+                      <Chip
+                        key={stage}
+                        label={`${stage}: ${(probability * 100).toFixed(0)}%`}
+                        variant="outlined"
+                        color={probability > 0.5 ? "primary" : "default"}
+                      />
+                    ))}
                   </Box>
                 </Box>
               )}
-
-            {selectedDiagnosis.stage_predictions &&
-              Object.keys(selectedDiagnosis.stage_predictions).length > 0 && (
-                <Divider sx={{ mb: 3 }} />
-              )}
-
+            {selectedDiagnosis.hcv_result?.stage_predictions &&
+              Object.keys(selectedDiagnosis.hcv_result.stage_predictions)
+                .length > 0 && <Divider sx={{ mb: 3 }} />}
             {/* Recommendation Section */}
-            {selectedDiagnosis.recommendation &&
-              selectedDiagnosis.recommendation !== "N/A" && (
+            {selectedDiagnosis.hcv_result?.recommendation &&
+              selectedDiagnosis.hcv_result.recommendation !== "N/A" && (
                 <Box mb={3}>
                   <Typography variant="h6" color="primary" gutterBottom>
                     AI Recommendation
                   </Typography>
                   <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
-                    {selectedDiagnosis.recommendation}
+                    {selectedDiagnosis.hcv_result.recommendation}
                   </Typography>
                 </Box>
               )}
-
-            {selectedDiagnosis.recommendation &&
-              selectedDiagnosis.recommendation !== "N/A" && (
+            {selectedDiagnosis.hcv_result?.recommendation &&
+              selectedDiagnosis.hcv_result.recommendation !== "N/A" && (
                 <Divider sx={{ mb: 3 }} />
               )}
-
             {/* Metadata Section */}
             <Box>
               <Typography variant="h6" color="primary" gutterBottom>
@@ -496,17 +515,21 @@ const DiagnosisTable = ({
                     Created By
                   </Typography>
                   <Typography variant="body1">
-                    {selectedDiagnosis.created_by_username || "N/A"}
+                    {selectedDiagnosis.created_by || "N/A"}
                   </Typography>
-                </Box>
+                </Box>{" "}
                 <Box>
                   <Typography variant="body2" color="text.secondary">
                     Completed
                   </Typography>
                   <Chip
-                    label={selectedDiagnosis.diagnosis_completed ? "Yes" : "No"}
+                    label={
+                      selectedDiagnosis.hcv_result?.diagnosis_completed
+                        ? "Yes"
+                        : "No"
+                    }
                     color={
-                      selectedDiagnosis.diagnosis_completed
+                      selectedDiagnosis.hcv_result?.diagnosis_completed
                         ? "success"
                         : "warning"
                     }

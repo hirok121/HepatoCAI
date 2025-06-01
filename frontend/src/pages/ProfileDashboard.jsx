@@ -196,11 +196,6 @@ const ProfileDashboard = () => {
   // Debug: Log monthly trends data to check if it's populated
   console.log("Monthly trends data:", monthlyTrendsData);
 
-  // Check if we have any meaningful data (at least one non-zero value)
-  const hasValidTrendsData =
-    monthlyTrendsData.length > 0 &&
-    monthlyTrendsData.some((item) => item.count > 0);
-
   // Prepare stage distribution data for bar chart
   const stageDistributionData = Object.entries(
     analyticsData.stage_distribution || {}
