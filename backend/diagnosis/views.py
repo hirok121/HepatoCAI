@@ -6,15 +6,15 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
-from .models import HCVPatient, HCVResult, DiagnosisRecord
+from .models import HCVPatient, HCVResult
 from .AiDiagnosisTool.main import AiDiagnosisTool
 from .serializers import (
     HCVPatientSerializer,
     HCVResultSerializer,
-    DiagnosisRecordSerializer,
+    PatientWithResultSerializer,
 )
 from django.http import HttpResponse
-from .resources import DiagnosisRecordResource
+from .resources import PatientWithResultResource
 from utils.responses import StandardResponse, handle_exceptions
 from utils.performance import PerformanceMonitor
 import logging
@@ -44,7 +44,7 @@ class DiagnoseAPIView(APIView):
         request=HCVPatientSerializer,
         responses={
             201: OpenApiResponse(
-                response=DiagnosisRecordSerializer,
+                response=PatientWithResultSerializer,
                 description="Successful diagnosis with AI predictions",
             ),
             400: OpenApiResponse(description="Validation error - invalid input data"),
@@ -87,30 +87,14 @@ class DiagnoseAPIView(APIView):
                 recommendation=ai_result.get("recommendation"),
             )
 
-            # Create combined diagnosis record
-            diagnosis_record = DiagnosisRecord.objects.create(
-                patient=patient, result=hcv_result, diagnosis_completed=True
-            )
-
         except Exception as e:
             logger.error(f"AI diagnosis tool failed: {str(e)}")
-            return StandardResponse.server_error(
-                "AI diagnosis tool failed", e
-            )  # Return response with patient data and AI diagnosis result
+            return StandardResponse.server_error("AI diagnosis tool failed", e)
+
+        # Return response with patient data and AI diagnosis result
+        patient_with_result = PatientWithResultSerializer(patient)
         return StandardResponse.success(
-            data={
-                "patient_id": patient.id,
-                "patient_name": patient.patient_name,
-                "age": patient.age,
-                "sex": patient.sex,
-                "ALP": patient.alp,
-                "AST": patient.ast,
-                "CHE": patient.che,
-                "CREA": patient.crea,
-                "GGT": patient.ggt,
-                "diagnosis_result": ai_result,
-                "timestamp": patient.created_at,
-            },
+            data=patient_with_result.data,
             message="Diagnosis completed successfully",
             status_code=status.HTTP_201_CREATED,
         )
@@ -118,161 +102,157 @@ class DiagnoseAPIView(APIView):
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request, pk=None):
-        """Get diagnosis records created by the authenticated user"""
-        # If pk is provided, get specific record
+        """Get patients with results created by the authenticated user"""
+        # If pk is provided, get specific patient with result
         if pk:
             try:
-                diagnosis_record = DiagnosisRecord.objects.select_related(
-                    "patient", "result", "patient__created_by"
-                ).get(pk=pk, patient__created_by=request.user)
+                patient = HCVPatient.objects.select_related(
+                    "hcv_result", "created_by"
+                ).get(pk=pk, created_by=request.user)
 
-                serializer = DiagnosisRecordSerializer(diagnosis_record)
+                serializer = PatientWithResultSerializer(patient)
                 return StandardResponse.success(
-                    data=serializer.data, message="Diagnosis retrieved successfully"
+                    data=serializer.data, message="Patient retrieved successfully"
                 )
-            except DiagnosisRecord.DoesNotExist:
-                return StandardResponse.not_found("Diagnosis not found", "diagnosis")
+            except HCVPatient.DoesNotExist:
+                return StandardResponse.not_found("Patient not found", "patient")
 
-        # Otherwise, get all diagnosis records for the user
+        # Otherwise, get all patients with results for the user
         queryset = (
-            DiagnosisRecord.objects.filter(patient__created_by=request.user)
-            .select_related("patient", "result", "patient__created_by")
+            HCVPatient.objects.filter(created_by=request.user)
+            .select_related("hcv_result", "created_by")
             .order_by("-created_at")
         )
 
-        serializer = DiagnosisRecordSerializer(queryset, many=True)
+        serializer = PatientWithResultSerializer(queryset, many=True)
 
         return StandardResponse.success(
-            data=serializer.data, message="Diagnoses retrieved successfully"
+            data=serializer.data, message="Patients retrieved successfully"
         )
 
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def delete(self, request, pk=None):
-        """Delete a specific diagnosis record (only if owned by user)"""
+        """Delete a specific patient record (only if owned by user)"""
         if not pk:
             pk = request.query_params.get("pk")
 
         if not pk:
             return StandardResponse.error(
-                message="Diagnosis ID is required for deletion",
+                message="Patient ID is required for deletion",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            diagnosis_record = DiagnosisRecord.objects.get(
-                pk=pk, patient__created_by=request.user
-            )
-            diagnosis_record.delete()
+            patient = HCVPatient.objects.get(pk=pk, created_by=request.user)
+            patient.delete()
             return StandardResponse.success(
-                message="Diagnosis record deleted successfully"
+                message="Patient record deleted successfully"
             )
-        except DiagnosisRecord.DoesNotExist:
-            return StandardResponse.not_found("Diagnosis not found", "diagnosis")
+        except HCVPatient.DoesNotExist:
+            return StandardResponse.not_found("Patient not found", "patient")
 
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def put(self, request, pk=None):
-        """Update diagnosis record metadata (notes, tags, etc.)"""
+        """Update patient record (only basic information, not diagnosis results)"""
         if not pk:
             pk = request.query_params.get("pk")
 
         if not pk:
             return StandardResponse.error(
-                message="Diagnosis ID is required for update",
+                message="Patient ID is required for update",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            diagnosis_record = DiagnosisRecord.objects.select_related(
-                "patient", "result"
-            ).get(pk=pk, patient__created_by=request.user)
+            patient = HCVPatient.objects.get(pk=pk, created_by=request.user)
 
-            # Only allow updating certain fields (not the actual diagnosis)
-            allowed_fields = ["notes", "tags", "follow_up_date"]
+            # Only allow updating certain fields (not the lab values or diagnosis)
+            allowed_fields = ["patient_name", "symptoms"]
             update_data = {k: v for k, v in request.data.items() if k in allowed_fields}
 
             for field, value in update_data.items():
-                if hasattr(diagnosis_record, field):
-                    setattr(diagnosis_record, field, value)
+                if hasattr(patient, field):
+                    setattr(patient, field, value)
 
-            diagnosis_record.save()
+            patient.save()
 
-            serializer = DiagnosisRecordSerializer(diagnosis_record)
+            serializer = PatientWithResultSerializer(patient)
             return StandardResponse.success(
-                data=serializer.data, message="Diagnosis record updated successfully"
+                data=serializer.data, message="Patient record updated successfully"
             )
 
-        except DiagnosisRecord.DoesNotExist:
-            return StandardResponse.not_found("Diagnosis not found", "diagnosis")
+        except HCVPatient.DoesNotExist:
+            return StandardResponse.not_found("Patient not found", "patient")
 
 
-class ExportDiagnosisRecordsView(APIView):
-    """Export diagnosis records using the new DiagnosisRecord model"""
+class ExportPatientsCSVView(APIView):
+    """Export patient records as CSV"""
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        operation_id="export_diagnosis_records_csv",
-        summary="Export diagnosis records as CSV",
-        description="Export diagnosis records in CSV format. Staff users get all records, regular users get only their own records.",
+        operation_id="export_patients_csv",
+        summary="Export patient records as CSV",
+        description="Export patient records in CSV format. Staff users get all records, regular users get only their own records.",
         responses={
             200: OpenApiResponse(description="CSV file generated successfully"),
             401: OpenApiResponse(description="Authentication required"),
             500: OpenApiResponse(description="Internal server error"),
         },
-        tags=["Export", "Diagnosis Records"],
+        tags=["Export", "Patients"],
     )
     def get(self, request):
-        """Export diagnosis records as CSV"""
-        resource = DiagnosisRecordResource()
+        """Export patient records as CSV"""
+        resource = PatientWithResultResource()
 
         # If user is staff, export all data; otherwise, only their own data
         if request.user.is_staff:
-            queryset = DiagnosisRecord.objects.select_related(
-                "patient", "result", "patient__created_by"
+            queryset = HCVPatient.objects.select_related(
+                "hcv_result", "created_by"
             ).all()
         else:
-            queryset = DiagnosisRecord.objects.select_related(
-                "patient", "result", "patient__created_by"
-            ).filter(patient__created_by=request.user)
+            queryset = HCVPatient.objects.select_related(
+                "hcv_result", "created_by"
+            ).filter(created_by=request.user)
 
         dataset = resource.export(queryset)
 
         response = HttpResponse(dataset.csv, content_type="text/csv")
-        response["Content-Disposition"] = 'attachment; filename="diagnosis_records.csv"'
+        response["Content-Disposition"] = 'attachment; filename="patient_records.csv"'
         return response
 
 
-class ExportDiagnosisRecordsExcelView(APIView):
-    """Export diagnosis records as Excel using the new DiagnosisRecord model"""
+class ExportPatientsExcelView(APIView):
+    """Export patient records as Excel"""
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        operation_id="export_diagnosis_records_excel",
-        summary="Export diagnosis records as Excel",
-        description="Export diagnosis records in Excel format. Staff users get all records, regular users get only their own records.",
+        operation_id="export_patients_excel",
+        summary="Export patient records as Excel",
+        description="Export patient records in Excel format. Staff users get all records, regular users get only their own records.",
         responses={
             200: OpenApiResponse(description="Excel file generated successfully"),
             401: OpenApiResponse(description="Authentication required"),
             500: OpenApiResponse(description="Internal server error"),
         },
-        tags=["Export", "Diagnosis Records"],
+        tags=["Export", "Patients"],
     )
     def get(self, request):
-        """Export diagnosis records as Excel"""
-        resource = DiagnosisRecordResource()
-
-        # If user is staff, export all data; otherwise, only their own data
+        """Export patient records as Excel"""
+        resource = (
+            PatientWithResultResource()
+        )  # If user is staff, export all data; otherwise, only their own data
         if request.user.is_staff:
-            queryset = DiagnosisRecord.objects.select_related(
-                "patient", "result", "patient__created_by"
+            queryset = HCVPatient.objects.select_related(
+                "hcv_result", "created_by"
             ).all()
         else:
-            queryset = DiagnosisRecord.objects.select_related(
-                "patient", "result", "patient__created_by"
-            ).filter(patient__created_by=request.user)
+            queryset = HCVPatient.objects.select_related(
+                "hcv_result", "created_by"
+            ).filter(created_by=request.user)
 
         dataset = resource.export(queryset)
 
@@ -280,9 +260,7 @@ class ExportDiagnosisRecordsExcelView(APIView):
             dataset.xlsx,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = (
-            'attachment; filename="diagnosis_records.xlsx"'
-        )
+        response["Content-Disposition"] = 'attachment; filename="patient_records.xlsx"'
         return response
 
 
@@ -308,13 +286,13 @@ class UserDiagnosisAnalyticsView(APIView):
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
         """Get comprehensive diagnosis analytics for the authenticated user"""
-        # Get user's diagnosis records
-        user_diagnoses = DiagnosisRecord.objects.filter(
-            patient__created_by=request.user
-        ).select_related("patient", "result")
+        # Get user's patients with results
+        user_patients = HCVPatient.objects.filter(
+            created_by=request.user
+        ).select_related("hcv_result")
 
         # Basic counts
-        total_diagnoses = user_diagnoses.count()
+        total_diagnoses = user_patients.count()
 
         if total_diagnoses == 0:
             return StandardResponse.success(
@@ -327,25 +305,21 @@ class UserDiagnosisAnalyticsView(APIView):
 
         # Get user's diagnoses by age groups
         age_stats = {
-            "young": user_diagnoses.filter(patient__age__lt=30).count(),
-            "middle": user_diagnoses.filter(
-                patient__age__gte=30, patient__age__lt=60
-            ).count(),
-            "elder": user_diagnoses.filter(patient__age__gte=60).count(),
+            "young": user_patients.filter(age__lt=30).count(),
+            "middle": user_patients.filter(age__gte=30, age__lt=60).count(),
+            "elder": user_patients.filter(age__gte=60).count(),
         }
 
         # Get recent diagnoses (last 30 days)
         thirty_days_ago = datetime.now() - timedelta(days=30)
-        recent_diagnoses = user_diagnoses.filter(
-            created_at__gte=thirty_days_ago
-        ).count()
+        recent_diagnoses = user_patients.filter(created_at__gte=thirty_days_ago).count()
 
         # Get monthly diagnosis trends for user (last 6 months)
         monthly_trends = []
         for i in range(6):
             start_date = datetime.now() - timedelta(days=(i + 1) * 30)
             end_date = datetime.now() - timedelta(days=i * 30)
-            count = user_diagnoses.filter(
+            count = user_patients.filter(
                 created_at__gte=start_date, created_at__lt=end_date
             ).count()
             monthly_trends.append(
@@ -354,55 +328,52 @@ class UserDiagnosisAnalyticsView(APIView):
 
         # Get user's risk level distribution
         risk_distribution = {
-            "high_risk": user_diagnoses.filter(result__hcv_risk="High").count(),
-            "medium_risk": user_diagnoses.filter(result__hcv_risk="Medium").count(),
-            "low_risk": user_diagnoses.filter(result__hcv_risk="Low").count(),
+            "high_risk": user_patients.filter(hcv_result__hcv_risk="high").count(),
+            "medium_risk": user_patients.filter(hcv_result__hcv_risk="medium").count(),
+            "low_risk": user_patients.filter(hcv_result__hcv_risk="low").count(),
         }
 
         # Get user's HCV status distribution
         hcv_status_distribution = {
-            "positive": user_diagnoses.filter(result__hcv_status="Positive").count(),
-            "negative": user_diagnoses.filter(result__hcv_status="Negative").count(),
+            "positive": user_patients.filter(hcv_result__hcv_status="positive").count(),
+            "negative": user_patients.filter(hcv_result__hcv_status="negative").count(),
         }
 
         # Get user's stage distribution
         stage_stats = {}
-        stages = [
-            "Class 0 (Blood Donors)",
-            "Class 1 (Hepatitis)",
-            "Class 2 (Fibrosis)",
-            "Class 3 (Cirrhosis)",
-        ]
+        stages = ["F0", "F1", "F2", "F3", "F4"]
         for stage in stages:
-            stage_stats[stage] = user_diagnoses.filter(result__hcv_stage=stage).count()
+            stage_stats[stage] = user_patients.filter(
+                hcv_result__hcv_stage=stage
+            ).count()
 
-        # Get user's gender distribution (if they have multiple diagnoses)
+        # Get user's gender distribution
         gender_stats = {
-            "male": user_diagnoses.filter(patient__sex="Male").count(),
-            "female": user_diagnoses.filter(patient__sex="Female").count(),
+            "male": user_patients.filter(sex="male").count(),
+            "female": user_patients.filter(sex="female").count(),
         }
 
         # Calculate user's average confidence
         from django.db.models import Avg
 
         avg_confidence = (
-            user_diagnoses.aggregate(avg_confidence=Avg("result__confidence"))[
+            user_patients.aggregate(avg_confidence=Avg("hcv_result__confidence"))[
                 "avg_confidence"
             ]
             or 0
         )
 
         # Get latest diagnosis for quick info
-        latest_diagnosis = user_diagnoses.first()
+        latest_patient = user_patients.first()
         latest_diagnosis_info = None
-        if latest_diagnosis:
+        if latest_patient and hasattr(latest_patient, "hcv_result"):
             latest_diagnosis_info = {
-                "id": latest_diagnosis.id,
-                "patient_name": latest_diagnosis.patient.patient_name,
-                "hcv_status": latest_diagnosis.result.hcv_status,
-                "hcv_risk": latest_diagnosis.result.hcv_risk,
-                "created_at": latest_diagnosis.created_at,
-                "confidence": latest_diagnosis.result.confidence,
+                "id": latest_patient.id,
+                "patient_name": latest_patient.patient_name,
+                "hcv_status": latest_patient.hcv_result.hcv_status,
+                "hcv_risk": latest_patient.hcv_result.hcv_risk,
+                "created_at": latest_patient.created_at,
+                "confidence": latest_patient.hcv_result.confidence,
             }
 
         return StandardResponse.success(
@@ -465,24 +436,20 @@ class AdminDiagnosisAnalyticsView(APIView):
                 status_code=status.HTTP_403_FORBIDDEN,
             )
 
-        # Get total counts using DiagnosisRecord
-        total_diagnoses = DiagnosisRecord.objects.count()
-        total_users = (
-            DiagnosisRecord.objects.values("patient__created_by").distinct().count()
-        )
+        # Get total counts using HCVPatient
+        total_diagnoses = HCVPatient.objects.count()
+        total_users = HCVPatient.objects.values("created_by").distinct().count()
 
-        # Get diagnoses by age groups using DiagnosisRecord
+        # Get diagnoses by age groups
         age_stats = {
-            "young": DiagnosisRecord.objects.filter(patient__age__lt=30).count(),
-            "middle": DiagnosisRecord.objects.filter(
-                patient__age__gte=30, patient__age__lt=60
-            ).count(),
-            "elder": DiagnosisRecord.objects.filter(patient__age__gte=60).count(),
+            "young": HCVPatient.objects.filter(age__lt=30).count(),
+            "middle": HCVPatient.objects.filter(age__gte=30, age__lt=60).count(),
+            "elder": HCVPatient.objects.filter(age__gte=60).count(),
         }
 
         # Get recent diagnoses (last 30 days)
         thirty_days_ago = datetime.now() - timedelta(days=30)
-        recent_diagnoses = DiagnosisRecord.objects.filter(
+        recent_diagnoses = HCVPatient.objects.filter(
             created_at__gte=thirty_days_ago
         ).count()
 
@@ -491,7 +458,7 @@ class AdminDiagnosisAnalyticsView(APIView):
         for i in range(12):
             start_date = datetime.now() - timedelta(days=(i + 1) * 30)
             end_date = datetime.now() - timedelta(days=i * 30)
-            count = DiagnosisRecord.objects.filter(
+            count = HCVPatient.objects.filter(
                 created_at__gte=start_date, created_at__lt=end_date
             ).count()
             monthly_trends.append(
@@ -500,49 +467,42 @@ class AdminDiagnosisAnalyticsView(APIView):
 
         # Get risk level distribution based on HCV results
         risk_distribution = {
-            "high_risk": DiagnosisRecord.objects.filter(
-                result__hcv_risk="High"
+            "high_risk": HCVPatient.objects.filter(hcv_result__hcv_risk="high").count(),
+            "medium_risk": HCVPatient.objects.filter(
+                hcv_result__hcv_risk="medium"
             ).count(),
-            "medium_risk": DiagnosisRecord.objects.filter(
-                result__hcv_risk="Medium"
-            ).count(),
-            "low_risk": DiagnosisRecord.objects.filter(result__hcv_risk="Low").count(),
+            "low_risk": HCVPatient.objects.filter(hcv_result__hcv_risk="low").count(),
         }
 
         # Get HCV status distribution
         hcv_status_distribution = {
-            "positive": DiagnosisRecord.objects.filter(
-                result__hcv_status="Positive"
+            "positive": HCVPatient.objects.filter(
+                hcv_result__hcv_status="positive"
             ).count(),
-            "negative": DiagnosisRecord.objects.filter(
-                result__hcv_status="Negative"
+            "negative": HCVPatient.objects.filter(
+                hcv_result__hcv_status="negative"
             ).count(),
         }
 
         # Get stage distribution
         stage_stats = {}
-        stages = [
-            "Class 0 (Blood Donors)",
-            "Class 1 (Hepatitis)",
-            "Class 2 (Fibrosis)",
-            "Class 3 (Cirrhosis)",
-        ]
+        stages = ["F0", "F1", "F2", "F3", "F4"]
         for stage in stages:
-            stage_stats[stage] = DiagnosisRecord.objects.filter(
-                result__hcv_stage=stage
+            stage_stats[stage] = HCVPatient.objects.filter(
+                hcv_result__hcv_stage=stage
             ).count()
 
         # Get gender distribution
         gender_stats = {
-            "male": DiagnosisRecord.objects.filter(patient__sex="Male").count(),
-            "female": DiagnosisRecord.objects.filter(patient__sex="Female").count(),
+            "male": HCVPatient.objects.filter(sex="male").count(),
+            "female": HCVPatient.objects.filter(sex="female").count(),
         }
 
         # Calculate average confidence
         from django.db.models import Avg, Max, Min
 
         avg_confidence = (
-            DiagnosisRecord.objects.aggregate(avg_confidence=Avg("result__confidence"))[
+            HCVPatient.objects.aggregate(avg_confidence=Avg("hcv_result__confidence"))[
                 "avg_confidence"
             ]
             or 0
@@ -553,20 +513,20 @@ class AdminDiagnosisAnalyticsView(APIView):
         from django.db.models import Count
 
         top_users = (
-            DiagnosisRecord.objects.values(
-                "patient__created_by__email",
-                "patient__created_by__first_name",
-                "patient__created_by__last_name",
+            HCVPatient.objects.values(
+                "created_by__email",
+                "created_by__first_name",
+                "created_by__last_name",
             )
             .annotate(diagnosis_count=Count("id"))
-            .order_by("-diagnosis_count")[:10]
+            .order_by("-diagnosis_count")[:5]
         )
 
         # Age distribution analysis
-        age_analysis = DiagnosisRecord.objects.aggregate(
-            avg_age=Avg("patient__age"),
-            min_age=Min("patient__age"),
-            max_age=Max("patient__age"),
+        age_analysis = HCVPatient.objects.aggregate(
+            avg_age=Avg("age"),
+            min_age=Min("age"),
+            max_age=Max("age"),
         )
 
         # Weekly trends (last 4 weeks)
@@ -574,7 +534,7 @@ class AdminDiagnosisAnalyticsView(APIView):
         for i in range(4):
             start_date = datetime.now() - timedelta(days=(i + 1) * 7)
             end_date = datetime.now() - timedelta(days=i * 7)
-            count = DiagnosisRecord.objects.filter(
+            count = HCVPatient.objects.filter(
                 created_at__gte=start_date, created_at__lt=end_date
             ).count()
             weekly_trends.append({"week": f"Week {4-i}", "count": count})
@@ -607,8 +567,8 @@ class AdminDiagnosisAnalyticsView(APIView):
                 "system_health": {
                     "total_records": total_diagnoses,
                     "active_users": total_users,
-                    "average_diagnosis_time": "2.3 minutes",  # Can be calculated from analysis_duration
-                    "system_uptime": "99.9%",  # Placeholder
+                    "average_diagnosis_time": "2.3 minutes",
+                    "system_uptime": "99.9%",
                 },
                 "model_performance": {
                     "accuracy": "96.73%",
@@ -621,46 +581,42 @@ class AdminDiagnosisAnalyticsView(APIView):
         )
 
 
-class DiagnosisRecordListView(APIView):
+class PatientListView(APIView):
     """
-    API endpoint to list diagnosis records for admin management
+    API endpoint to list patient records for admin management
     """
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        operation_id="list_diagnosis_records",
-        summary="List diagnosis records",
-        description="Get list of all diagnosis records for admin management. Only accessible by staff users.",
+        operation_id="list_patients",
+        summary="List patient records",
+        description="Get list of all patient records for admin management. Only accessible by staff users or superuser.",
         responses={
-            200: OpenApiResponse(
-                description="Diagnosis records retrieved successfully"
-            ),
+            200: OpenApiResponse(description="Patient records retrieved successfully"),
             401: OpenApiResponse(description="Authentication required"),
             403: OpenApiResponse(description="Staff access required"),
             500: OpenApiResponse(description="Internal server error"),
         },
-        tags=["Admin", "Diagnosis Records"],
+        tags=["Admin", "Patients"],
     )
     def get(self, request):
-        """Get list of diagnosis records"""
-        if not request.user.is_staff:
+        """Get list of patient records"""
+        if not request.user.is_staff or not request.user.is_superuser:
             return Response(
-                {"error": "Only staff users can access diagnosis records"},
+                {"error": "Only staff users can access patient records"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Get all diagnosis records with related data
-        diagnosis_records = (
-            DiagnosisRecord.objects.select_related(
-                "patient", "result", "patient__created_by"
-            )
+        # Get all patient records with related data
+        patients = (
+            HCVPatient.objects.select_related("hcv_result", "created_by")
             .all()
             .order_by("-created_at")
         )
 
         # Serialize the data
-        serializer = DiagnosisRecordSerializer(diagnosis_records, many=True)
+        serializer = PatientWithResultSerializer(patients, many=True)
 
         return Response(
             {
@@ -671,20 +627,17 @@ class DiagnosisRecordListView(APIView):
         )
 
 
-# Additional utility views for better DiagnosisRecord utilization
-
-
-class DiagnosisSearchView(APIView):
+class PatientSearchView(APIView):
     """
-    Advanced search and filtering for diagnosis records for user specific records
+    Advanced search and filtering for patient records for user specific records
     """
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        operation_id="search_diagnosis_records",
-        summary="Search user's diagnosis records",
-        description="Advanced search and filtering for user's own diagnosis records with pagination support.",
+        operation_id="search_patients",
+        summary="Search user's patient records",
+        description="Advanced search and filtering for user's own patient records with pagination support.",
         parameters=[
             OpenApiParameter(
                 "hcv_status", OpenApiTypes.STR, description="Filter by HCV status"
@@ -737,31 +690,31 @@ class DiagnosisSearchView(APIView):
             401: OpenApiResponse(description="Authentication required"),
             500: OpenApiResponse(description="Internal server error"),
         },
-        tags=["Search", "Diagnosis Records"],
+        tags=["Search", "Patients"],
     )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
-        """Search diagnosis records with advanced filters"""
+        """Search patient records with advanced filters"""
         # Get base queryset for user
-        queryset = DiagnosisRecord.objects.filter(
-            patient__created_by=request.user
-        ).select_related("patient", "result")
+        queryset = HCVPatient.objects.filter(created_by=request.user).select_related(
+            "hcv_result"
+        )
 
         # Apply filters
         hcv_status = request.query_params.get("hcv_status")
         if hcv_status:
-            queryset = queryset.filter(result__hcv_status__icontains=hcv_status)
+            queryset = queryset.filter(hcv_result__hcv_status__icontains=hcv_status)
 
         hcv_risk = request.query_params.get("hcv_risk")
         if hcv_risk:
-            queryset = queryset.filter(result__hcv_risk__icontains=hcv_risk)
+            queryset = queryset.filter(hcv_result__hcv_risk__icontains=hcv_risk)
 
         min_confidence = request.query_params.get("min_confidence")
         if min_confidence:
             try:
                 queryset = queryset.filter(
-                    result__confidence__gte=float(min_confidence)
+                    hcv_result__confidence__gte=float(min_confidence)
                 )
             except ValueError:
                 pass
@@ -770,26 +723,26 @@ class DiagnosisSearchView(APIView):
         if max_confidence:
             try:
                 queryset = queryset.filter(
-                    result__confidence__lte=float(max_confidence)
+                    hcv_result__confidence__lte=float(max_confidence)
                 )
             except ValueError:
                 pass
 
         patient_name = request.query_params.get("patient_name")
         if patient_name:
-            queryset = queryset.filter(patient__patient_name__icontains=patient_name)
+            queryset = queryset.filter(patient_name__icontains=patient_name)
 
         min_age = request.query_params.get("min_age")
         if min_age:
             try:
-                queryset = queryset.filter(patient__age__gte=int(min_age))
+                queryset = queryset.filter(age__gte=int(min_age))
             except ValueError:
                 pass
 
         max_age = request.query_params.get("max_age")
         if max_age:
             try:
-                queryset = queryset.filter(patient__age__lte=int(max_age))
+                queryset = queryset.filter(age__lte=int(max_age))
             except ValueError:
                 pass
 
@@ -820,12 +773,12 @@ class DiagnosisSearchView(APIView):
         valid_order_fields = [
             "created_at",
             "-created_at",
-            "patient__age",
-            "-patient__age",
-            "result__confidence",
-            "-result__confidence",
-            "patient__patient_name",
-            "-patient__patient_name",
+            "age",
+            "-age",
+            "hcv_result__confidence",
+            "-hcv_result__confidence",
+            "patient_name",
+            "-patient_name",
         ]
         if order_by in valid_order_fields:
             queryset = queryset.order_by(order_by)
@@ -849,7 +802,7 @@ class DiagnosisSearchView(APIView):
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = DiagnosisRecordSerializer(results, many=True)
+        serializer = PatientWithResultSerializer(results, many=True)
 
         return StandardResponse.success(
             data={
@@ -879,17 +832,17 @@ class DiagnosisSearchView(APIView):
         )
 
 
-class AdminDiagnosisSearchView(APIView):
+class AdminPatientSearchView(APIView):
     """
-    Admin-only advanced search and filtering for ALL diagnosis records
+    Admin-only advanced search and filtering for ALL patient records
     """
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        operation_id="admin_search_diagnosis_records",
-        summary="Admin search all diagnosis records",
-        description="Advanced search and filtering for ALL diagnosis records in the system. Only accessible by staff users.",
+        operation_id="admin_search_patients",
+        summary="Admin search all patient records",
+        description="Advanced search and filtering for ALL patient records in the system. Only accessible by staff users.",
         parameters=[
             OpenApiParameter(
                 "hcv_status", OpenApiTypes.STR, description="Filter by HCV status"
@@ -948,12 +901,12 @@ class AdminDiagnosisSearchView(APIView):
             403: OpenApiResponse(description="Staff access required"),
             500: OpenApiResponse(description="Internal server error"),
         },
-        tags=["Search", "Admin", "Diagnosis Records"],
+        tags=["Search", "Admin", "Patients"],
     )
     @handle_exceptions
     @PerformanceMonitor.monitor_db_queries
     def get(self, request):
-        """Search ALL diagnosis records with advanced filters (admin only)"""
+        """Search ALL patient records with advanced filters (admin only)"""
         # Check if user is admin/staff
         if not request.user.is_staff:
             return StandardResponse.error(
@@ -962,24 +915,22 @@ class AdminDiagnosisSearchView(APIView):
             )
 
         # Get base queryset for ALL users (admin access)
-        queryset = DiagnosisRecord.objects.select_related(
-            "patient", "result", "patient__created_by"
-        )
+        queryset = HCVPatient.objects.select_related("hcv_result", "created_by")
 
         # Apply filters
         hcv_status = request.query_params.get("hcv_status")
         if hcv_status:
-            queryset = queryset.filter(result__hcv_status__icontains=hcv_status)
+            queryset = queryset.filter(hcv_result__hcv_status__icontains=hcv_status)
 
         hcv_risk = request.query_params.get("hcv_risk")
         if hcv_risk:
-            queryset = queryset.filter(result__hcv_risk__icontains=hcv_risk)
+            queryset = queryset.filter(hcv_result__hcv_risk__icontains=hcv_risk)
 
         min_confidence = request.query_params.get("min_confidence")
         if min_confidence:
             try:
                 queryset = queryset.filter(
-                    result__confidence__gte=float(min_confidence)
+                    hcv_result__confidence__gte=float(min_confidence)
                 )
             except ValueError:
                 pass
@@ -988,35 +939,33 @@ class AdminDiagnosisSearchView(APIView):
         if max_confidence:
             try:
                 queryset = queryset.filter(
-                    result__confidence__lte=float(max_confidence)
+                    hcv_result__confidence__lte=float(max_confidence)
                 )
             except ValueError:
                 pass
 
         patient_name = request.query_params.get("patient_name")
         if patient_name:
-            queryset = queryset.filter(patient__patient_name__icontains=patient_name)
+            queryset = queryset.filter(patient_name__icontains=patient_name)
 
         min_age = request.query_params.get("min_age")
         if min_age:
             try:
-                queryset = queryset.filter(patient__age__gte=int(min_age))
+                queryset = queryset.filter(age__gte=int(min_age))
             except ValueError:
                 pass
 
         max_age = request.query_params.get("max_age")
         if max_age:
             try:
-                queryset = queryset.filter(patient__age__lte=int(max_age))
+                queryset = queryset.filter(age__lte=int(max_age))
             except ValueError:
                 pass
 
         # Additional admin-specific filters
         created_by_user = request.query_params.get("created_by")
         if created_by_user:
-            queryset = queryset.filter(
-                patient__created_by__username__icontains=created_by_user
-            )
+            queryset = queryset.filter(created_by__username__icontains=created_by_user)
 
         date_from = request.query_params.get("date_from")
         if date_from:
@@ -1045,14 +994,14 @@ class AdminDiagnosisSearchView(APIView):
         valid_order_fields = [
             "created_at",
             "-created_at",
-            "patient__age",
-            "-patient__age",
-            "result__confidence",
-            "-result__confidence",
-            "patient__patient_name",
-            "-patient__patient_name",
-            "patient__created_by__username",
-            "-patient__created_by__username",
+            "age",
+            "-age",
+            "hcv_result__confidence",
+            "-hcv_result__confidence",
+            "patient_name",
+            "-patient_name",
+            "created_by__username",
+            "-created_by__username",
         ]
         if order_by in valid_order_fields:
             queryset = queryset.order_by(order_by)
@@ -1076,7 +1025,7 @@ class AdminDiagnosisSearchView(APIView):
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = DiagnosisRecordSerializer(results, many=True)
+        serializer = PatientWithResultSerializer(results, many=True)
 
         return StandardResponse.success(
             data={
