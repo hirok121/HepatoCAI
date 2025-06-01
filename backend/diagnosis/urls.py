@@ -1,13 +1,13 @@
 from django.urls import path
 from .views import (
     DiagnoseAPIView,
-    ExportDiagnosisRecordsView,
-    ExportDiagnosisRecordsExcelView,
+    ExportPatientsCSVView,
+    ExportPatientsExcelView,
     UserDiagnosisAnalyticsView,
     AdminDiagnosisAnalyticsView,
-    DiagnosisRecordListView,
-    DiagnosisSearchView,
-    AdminDiagnosisSearchView,
+    PatientListView,
+    PatientSearchView,
+    AdminPatientSearchView,
 )
 
 app_name = "diagnosis"
@@ -24,14 +24,15 @@ urlpatterns = [
     path(
         "analytics/admin/",
         AdminDiagnosisAnalyticsView.as_view(),
-        name="admin_analytics",    ),    # Advanced features
-    path("search/", DiagnosisSearchView.as_view(), name="diagnosis_search"),
-    path("admin/search/", AdminDiagnosisSearchView.as_view(), name="admin_diagnosis_search"),
-    # Admin management
-    path("records/", DiagnosisRecordListView.as_view(), name="diagnosis_records_list"),
-    # Export endpoints
-    path("export/csv/", ExportDiagnosisRecordsView.as_view(), name="export_csv"),
+        name="admin_analytics",
+    ),  # Advanced features
+    path("search/", PatientSearchView.as_view(), name="diagnosis_search"),
     path(
-        "export/excel/", ExportDiagnosisRecordsExcelView.as_view(), name="export_excel"
+        "admin/search/", AdminPatientSearchView.as_view(), name="admin_diagnosis_search"
     ),
+    # Admin management
+    path("records/", PatientListView.as_view(), name="diagnosis_records_list"),
+    # Export endpoints
+    path("export/csv/", ExportPatientsCSVView.as_view(), name="export_csv"),
+    path("export/excel/", ExportPatientsExcelView.as_view(), name="export_excel"),
 ]

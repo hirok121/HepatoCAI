@@ -1,12 +1,12 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from .models import HCVPatient, HCVResult, DiagnosisRecord
-from .resources import HCVPatientResource, DiagnosisRecordResource
+from .models import HCVPatient, HCVResult
+from .resources import PatientWithResultResource
 
 
 @admin.register(HCVPatient)
 class HCVPatientAdmin(ImportExportModelAdmin):
-    resource_class = HCVPatientResource
+    resource_class = PatientWithResultResource
 
     list_display = ("patient_name", "age", "sex", "created_at", "created_by")
     list_filter = ("sex", "created_at", "created_by")
@@ -79,61 +79,3 @@ class HCVResultAdmin(admin.ModelAdmin):
             {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
         ),
     )
-
-
-@admin.register(DiagnosisRecord)
-class DiagnosisRecordAdmin(ImportExportModelAdmin):
-    resource_class = DiagnosisRecordResource
-
-    list_display = (
-        "patient_name",
-        "age",
-        "sex",
-        "hcv_status",
-        "hcv_risk",
-        "diagnosis_completed",
-        "created_at",
-    )
-    list_filter = (
-        "diagnosis_completed",
-        "result__hcv_status",
-        "result__hcv_risk",
-        "patient__sex",
-        "created_at",
-    )
-    search_fields = ("patient__patient_name",)
-    readonly_fields = ("created_at", "updated_at")
-
-    fieldsets = (
-        ("References", {"fields": ("patient", "result")}),
-        ("Diagnosis Status", {"fields": ("diagnosis_completed", "analysis_duration")}),
-        (
-            "Metadata",
-            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
-        ),
-    )
-
-    def patient_name(self, obj):
-        return obj.patient.patient_name
-
-    patient_name.short_description = "Patient Name"
-
-    def age(self, obj):
-        return obj.patient.age
-
-    age.short_description = "Age"
-
-    def sex(self, obj):
-        return obj.patient.sex
-
-    sex.short_description = "Sex"
-
-    def hcv_status(self, obj):
-        return obj.result.hcv_status if obj.result else "N/A"
-
-    hcv_status.short_description = "HCV Status"
-
-    def hcv_risk(self, obj):
-        return obj.result.hcv_risk if obj.result else "N/A"
-
-    hcv_risk.short_description = "Risk Level"

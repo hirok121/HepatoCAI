@@ -15,13 +15,13 @@ def AiDiagnosisTool():
         "hcv_status": "Positive",
         "hcv_status_probability": random_float(0.9, 0.99),
         "hcv_risk": "High",
-        "hcv_stage": "Class 2 (Fibrosis)",
+        "hcv_stage": "Fibrosis",  # Fibrosis stage
         "confidence": random_float(0.9, 0.99),
         "stage_predictions": {
-            "Class 0 (Blood Donors)": random_float(0.01, 0.1),
-            "Class 1 (Hepatitis)": random_float(0.1, 0.3),
-            "Class 2 (Fibrosis)": random_float(0.5, 0.8),
-            "Class 3 (Cirrhosis)": random_float(0.1, 0.3),
+            "Blood Donors": random_float(0.01, 0.1),
+            "Hepatitis": random_float(0.1, 0.3),
+            "Fibrosis": random_float(0.5, 0.8),
+            "Cirrhosis": random_float(0.1, 0.3),
         },
         "recommendation": (
             "High probability of Hepatitis C Virus (HCV) infection detected. "
