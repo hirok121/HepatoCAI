@@ -107,6 +107,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "django.utils.autoreload": {
+            "handlers": ["file"],  # Log to file only, not console
+            "level": "WARNING",  # Suppress DEBUG messages from autoreloader
+            "propagate": False,
+        },
         # Root logger
         "root": {
             "handlers": ["console", "file"],

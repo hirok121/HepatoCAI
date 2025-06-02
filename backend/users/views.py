@@ -41,6 +41,7 @@ from .serializers import (
 from utils.responses import StandardResponse, handle_exceptions
 from utils.security import SecurityValidator, RateLimitManager, AuditLogger
 from utils.ip_utils import update_user_login_tracking
+from utils.url_utils import URLBuilder
 
 import json
 import logging
@@ -97,17 +98,15 @@ def verificationMail(name, verification_link, email):
 
 
 def SendVerificationEmail(user):
-    DOMAIN = os.getenv("DOMAIN", default="localhost:8000")
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    verification_link = f"http://{DOMAIN}/users/verify-email/{uid}/{token}/"
+    verification_link = URLBuilder.get_email_verification_url(uid, token)
 
     verificationMail(user.get_full_name(), verification_link, user.email)
 
 
 @login_required
 def login_redirect_view(request):
-    frontend_url = os.getenv("FRONTEND_URL", default="http://localhost:5173")
     jwt_data = request.session.pop("jwt", None)
 
     if jwt_data:
@@ -120,15 +119,14 @@ def login_redirect_view(request):
 
         # print("JWT data (from login redirect view):", jwt_data) # Debugging line
         return HttpResponseRedirect(
-            f"{frontend_url}/auth/callback?access={access}&refresh={refresh}"
+            URLBuilder.get_auth_callback_url(access_token=access, refresh_token=refresh)
         )
 
-    return HttpResponseRedirect(f"{frontend_url}/auth/callback?error=missing_token")
+    return HttpResponseRedirect(URLBuilder.get_auth_callback_url(error="missing_token"))
 
 
 class VerifyEmailView(View):
     def get(self, request, uidb64, token):
-        frontend_url = os.getenv("FRONTEND_URL", default="http://localhost:5173")
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
@@ -143,14 +141,14 @@ class VerifyEmailView(View):
             return render(
                 request,
                 "backend/confirmationDone.html",
-                context={"login_link": f"{frontend_url}/signin"},
+                context={"login_link": URLBuilder.get_frontend_url("/signin")},
             )
         else:
             return render(
                 request,
                 "backend/expiredConfirmationToken.html",
                 context={
-                    "home": f"{frontend_url}/",
+                    "home": URLBuilder.get_frontend_url("/"),
                 },
             )
 

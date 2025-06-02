@@ -6,6 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.contrib.auth.signals import user_logged_in
+from utils.url_utils import URLBuilder
 from dotenv import load_dotenv
 import os
 import logging
@@ -20,11 +21,9 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
     Handle password reset token creation by sending email to user.
 
     This signal is triggered when a password reset token is created
-    via django_rest_passwordreset package.
-    """
-    BaseURLForntend = os.getenv("BaseURLForntend", default="http://localhost:5173")
+    via django_rest_passwordreset package."""
     token = "{}".format(reset_password_token.key)
-    full_link = f"http://localhost:5173/resetpassword/confirm?token={token}"
+    full_link = URLBuilder.get_frontend_url(f"/resetpassword/confirm?token={token}")
     print(full_link)
 
     context = {"full_link": full_link, "email_adress": reset_password_token.user.email}

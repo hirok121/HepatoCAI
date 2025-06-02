@@ -176,12 +176,29 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS settings
-# CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+
+# Dynamic CORS configuration based on environment
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+
+# Parse additional CORS origins from environment variable
+ADDITIONAL_CORS_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+ADDITIONAL_CORS_ORIGINS = [
+    url.strip() for url in ADDITIONAL_CORS_ORIGINS if url.strip()
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    FRONTEND_URL,
+    BACKEND_URL,
+    "http://localhost:5173",  # Development fallback
+    "http://127.0.0.1:5173",  # Development fallback
+    "http://localhost:8000",  # Backend fallback
+    "http://127.0.0.1:8000",  # Backend fallback
+] + ADDITIONAL_CORS_ORIGINS
+
+# Remove duplicates and empty strings
+CORS_ALLOWED_ORIGINS = list(set([url for url in CORS_ALLOWED_ORIGINS if url]))
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -229,7 +246,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {
             "access_type": "online",
         },
-        "REDIRECT_URI": "http://127.0.0.1:8000/accounts/google/login/callback/",
+        "REDIRECT_URI": f"{BACKEND_URL}/accounts/google/login/callback/",
     }
 }
 
