@@ -80,11 +80,12 @@ class EmailVerificationIntegrationTests(TestCase):
         url = reverse("verify-email", kwargs={"uidb64": uidb64, "token": token})
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # User should now be active
+        self.assertEqual(
+            response.status_code, status.HTTP_200_OK
+        )  # User should now be active and email verified
         self.user.refresh_from_db()
         self.assertTrue(self.user.is_active)
+        self.assertTrue(self.user.verified_email)
 
     def test_verify_email_invalid_token(self):
         """Test email verification with invalid token"""

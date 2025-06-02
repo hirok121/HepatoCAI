@@ -1,24 +1,13 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django_rest_passwordreset.signals import reset_password_token_created
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.signals import user_logged_in
-from django.dispatch import receiver
-from django.urls import reverse
-from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
-from django.utils.html import strip_tags
+from django.core.validators import RegexValidator
+from django.utils import timezone
 from dotenv import load_dotenv
 import os
 import logging
-import os
 
 load_dotenv()
-
-
-import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -36,44 +25,283 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
         return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(max_length=200, unique=True)
-    birthday = models.DateField(null=True, blank=True)
-    username = models.CharField(max_length=200, null=True, blank=True)
-    full_name = models.CharField(max_length=200, null=True, blank=True)
-    first_name = models.CharField(max_length=100, null=True, blank=True)
-    last_name = models.CharField(max_length=100, null=True, blank=True)
-    profile_picture = models.URLField(max_length=500, null=True, blank=True)
-    google_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
+    """
+    Custom user model extending Django's AbstractUser with additional fields
+    for social authentication, profile information, and activity tracking.
+    """
+
+    # Core authentication fields
+    email = models.EmailField(
+        max_length=254,  # RFC 5321 compliant
+        unique=True,
+        db_index=True,
+        help_text="User's email address used for authentication",
+    )
+
+    # Personal information
+    birthday = models.DateField(null=True, blank=True, help_text="User's date of birth")
+    username = models.CharField(
+        max_length=150,  # Django default
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Display username",
+    )
+    full_name = models.CharField(
+        max_length=300,  # Accommodate longer names
+        blank=True,
+        default="",
+        help_text="User's complete name",
+    )
+    first_name = models.CharField(
+        max_length=150,  # Django default
+        blank=True,
+        default="",
+        help_text="User's first name",
+    )
+    last_name = models.CharField(
+        max_length=150,  # Django default
+        blank=True,
+        default="",
+        help_text="User's last name",
+    )
+    # Profile and social authentication
+    profile_picture = models.URLField(
+        max_length=2048,  # URLs can be long
+        blank=True,
+        default="",
+        help_text="URL to user's profile picture",
+    )
+    google_id = models.CharField(
+        max_length=255,  # Google IDs can be long
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+        help_text="Google account identifier",
+    )
     locale = models.CharField(
-        max_length=10, null=True, blank=True
-    )  # Language preference
-    verified_email = models.BooleanField(default=False)  # Social login tracking
-    is_social_user = models.BooleanField(default=False)
-    social_provider = models.CharField(max_length=50, null=True, blank=True)
+        max_length=10,
+        blank=True,
+        default="en",
+        validators=[
+            RegexValidator(
+                regex=r"^[a-z]{2}(-[A-Z]{2})?$",
+                message="Locale must be in format 'en' or 'en-US'",
+            )
+        ],
+        help_text="User's language preference",
+    )
+    verified_email = models.BooleanField(
+        default=False, help_text="Whether user's email has been verified"
+    )
+    is_social_user = models.BooleanField(
+        default=False, help_text="Whether user registered via social authentication"
+    )
+    social_provider = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        choices=[
+            ("google", "Google"),
+            ("facebook", "Facebook"),
+            ("github", "GitHub"),
+            ("linkedin", "LinkedIn"),
+        ],
+        help_text="Social authentication provider",
+    )
 
     # Contact & Location Information
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
-    country = models.CharField(max_length=100, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    timezone = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        validators=[
+            RegexValidator(
+                regex=r"^\+?1?\d{9,15}$",
+                message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.",
+            )
+        ],
+        help_text="User's phone number in international format",
+    )
+    country = models.CharField(
+        max_length=100, blank=True, default="", help_text="User's country of residence"
+    )
+    city = models.CharField(
+        max_length=100, blank=True, default="", help_text="User's city of residence"
+    )
+    timezone = models.CharField(
+        max_length=50, blank=True, default="UTC", help_text="User's preferred timezone"
+    )
 
     # Account Status & Verification
-    phone_verified_at = models.DateTimeField(null=True, blank=True)
+    phone_verified_at = models.DateTimeField(
+        null=True, blank=True, help_text="Timestamp when phone number was verified"
+    )
 
     # Activity Tracking
-    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
-    login_count = models.PositiveIntegerField(default=0)
-    terms_accepted_at = models.DateTimeField(null=True, blank=True)
-    terms_version = models.CharField(max_length=10, null=True, blank=True)
+    last_login_ip = models.GenericIPAddressField(
+        null=True, blank=True, help_text="IP address of user's last login"
+    )
+    login_count = models.PositiveIntegerField(
+        default=0, help_text="Total number of successful logins"
+    )
+    # Terms and Legal
+    terms_accepted_at = models.DateTimeField(
+        null=True, blank=True, help_text="Timestamp when user accepted terms of service"
+    )
+    terms_version = models.CharField(
+        max_length=10,  # Keep consistent with serializer validation
+        blank=True,
+        default="",
+        help_text="Version of terms accepted by user",
+    )
+
+    # Timestamps
+    created_at = models.DateTimeField(
+        auto_now_add=True, help_text="Timestamp when user account was created"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, help_text="Timestamp when user account was last updated"
+    )
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    class Meta:
+        db_table = "users_customuser"
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+        indexes = [
+            models.Index(fields=["email"]),
+            models.Index(fields=["username"]),
+            models.Index(fields=["social_provider"]),
+            models.Index(fields=["created_at"]),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(birthday__lte=timezone.now().date()),
+                name="birthday_not_future",
+            ),
+            models.CheckConstraint(
+                check=models.Q(login_count__gte=0), name="login_count_non_negative"
+            ),
+            models.UniqueConstraint(
+                fields=["google_id"],
+                condition=models.Q(google_id__isnull=False),
+                name="unique_google_id_when_not_null",
+            ),
+        ]
+
+    def __str__(self):
+        """String representation of the user"""
+        return f"{self.email} ({self.get_full_name() or 'No name'})"
+
+    def __repr__(self):
+        """Developer-friendly representation of the user"""
+        return f"<CustomUser: {self.email}>"
+
+    @property
+    def display_name(self):
+        """Get the best available display name for the user"""
+        if self.full_name and self.full_name.strip():
+            return self.full_name.strip()
+        elif self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        elif self.first_name:
+            return self.first_name.strip()
+        elif self.username:
+            return self.username
+        else:
+            return self.email.split("@")[0]
+
+    @property
+    def is_profile_complete(self):
+        """Check if user profile has essential information"""
+        required_fields = [
+            self.email,
+            self.full_name or (self.first_name and self.last_name),
+        ]
+        return all(field for field in required_fields)
+
+    @property
+    def age(self):
+        """Calculate user's age from birthday"""
+        if not self.birthday:
+            return None
+        today = timezone.now().date()
+        return (
+            today.year
+            - self.birthday.year
+            - ((today.month, today.day) < (self.birthday.month, self.birthday.day))
+        )
+
+    def get_full_name(self):
+        """Return the user's full name"""
+        if self.full_name and self.full_name.strip():
+            return self.full_name.strip()
+        elif self.first_name or self.last_name:
+            return f"{self.first_name or ''} {self.last_name or ''}".strip()
+        return ""
+
+    def get_short_name(self):
+        """Return the user's short name"""
+        return self.first_name or self.username or self.email.split("@")[0]
+
+    def increment_login_count(self, ip_address=None):
+        """Increment login count and update last login IP"""
+        self.login_count += 1
+        if ip_address:
+            self.last_login_ip = ip_address
+        self.save(update_fields=["login_count", "last_login_ip"])
+
+    def verify_phone(self):
+        """Mark phone number as verified"""
+        self.phone_verified_at = timezone.now()
+        self.save(update_fields=["phone_verified_at"])
+
+    def accept_terms(self, version):
+        """Record terms acceptance"""
+        self.terms_accepted_at = timezone.now()
+        self.terms_version = version
+        self.save(update_fields=["terms_accepted_at", "terms_version"])
+
+    def clean(self):
+        """Model validation"""
+        from django.core.exceptions import ValidationError
+
+        if self.birthday and self.birthday > timezone.now().date():
+            raise ValidationError({"birthday": "Birthday cannot be in the future."})
+
+        if self.social_provider and not self.is_social_user:
+            raise ValidationError(
+                {"social_provider": "Social provider can only be set for social users."}
+            )
+
+        if self.is_social_user and not self.social_provider:
+            raise ValidationError(
+                {
+                    "is_social_user": "Social users must have a social provider specified."
+                }
+            )
+
+        # Ensure superusers are also staff members
+        if self.is_superuser and not self.is_staff:
+            raise ValidationError(
+                {"is_staff": "Superusers must also be staff members."}
+            )
 
     def save(self, *args, **kwargs):
         # Handle bidirectional relationship between full_name, first_name, and last_name
@@ -83,95 +311,75 @@ class CustomUser(AbstractUser):
         if not self.username and self.email:
             self.username = self.email.split("@")[0]
 
+        # Ensure superusers are also staff members
+        if self.is_superuser and not self.is_staff:
+            self.is_staff = True
+
+        # Clean the model before saving
+        self.full_clean()
+
         super().save(*args, **kwargs)
 
     def _sync_name_fields(self):
         """
         Synchronizes full_name, first_name, and last_name fields bidirectionally.
-        Priority: If full_name is provided, split it into first_name and last_name.
-        Otherwise, concatenate first_name and last_name to create full_name.
+
+        Logic:
+        1. Clean all name fields first
+        2. If full_name is provided and component names are missing, split full_name
+        3. If full_name is empty but component names exist, build full_name
+        4. Handle edge cases gracefully
         """
-        # If full_name is provided and either first_name or last_name is empty/different
-        if (
-            self.full_name
-            and self.full_name.strip()
-            and (not self.first_name or not self.last_name)
-        ):
-            # Split full_name into components
-            name_parts = self.full_name.strip().split()
+        # Clean all fields first to avoid issues with whitespace
+        self.full_name = (self.full_name or "").strip()
+        self.first_name = (self.first_name or "").strip()
+        self.last_name = (self.last_name or "").strip()
 
-            if len(name_parts) >= 2:
-                # First name: all words except the last one
-                self.first_name = " ".join(name_parts[:-1])
-                # Last name: the last word
-                self.last_name = name_parts[-1]
-            elif len(name_parts) == 1:
-                # Only one word provided, treat as first name
-                self.first_name = name_parts[0]
-                self.last_name = ""
-            else:
-                # Empty full_name after strip
-                self.first_name = ""
-                self.last_name = ""
+        # Priority 1: If full_name exists and component names are incomplete, split full_name
+        if self.full_name and (not self.first_name or not self.last_name):
+            self._split_full_name()
 
-        # If full_name is empty but first_name or last_name is provided
-        elif (self.first_name and self.first_name.strip()) or (
-            self.last_name and self.last_name.strip()
-        ):
-            # Concatenate first_name and last_name to create full_name
-            first_part = self.first_name.strip() if self.first_name else ""
-            last_part = self.last_name.strip() if self.last_name else ""
-            self.full_name = f"{first_part} {last_part}".strip()
+        # Priority 2: If full_name is empty but we have component names, build full_name
+        elif not self.full_name and (self.first_name or self.last_name):
+            self._build_full_name()
 
-        # Ensure all fields are properly cleaned
-        self.full_name = self.full_name.strip() if self.full_name else ""
-        self.first_name = self.first_name.strip() if self.first_name else ""
-        self.last_name = self.last_name.strip() if self.last_name else ""
+    def _split_full_name(self):
+        """
+        Split full_name into first_name and last_name components.
+        Handles various name formats gracefully.
+        """
+        if not self.full_name:
+            return
 
+        # Split on whitespace and filter out empty strings
+        name_parts = [part.strip() for part in self.full_name.split() if part.strip()]
 
-@receiver(reset_password_token_created)
-def password_reset_token_created(reset_password_token, *args, **kwargs):
-    BaseURLForntend = os.getenv("BaseURLForntend", default="http://localhost:5173")
-    token = "{}".format(reset_password_token.key)
-    full_link = f"http://localhost:5173/resetpassword/confirm?token={token}"
-    print(full_link)
+        if len(name_parts) == 0:
+            # Empty full_name after cleaning
+            self.first_name = ""
+            self.last_name = ""
+        elif len(name_parts) == 1:
+            # Single name - treat as first name
+            self.first_name = name_parts[0]
+            self.last_name = ""
+        elif len(name_parts) == 2:
+            # Two parts - first and last name
+            self.first_name = name_parts[0]
+            self.last_name = name_parts[1]
+        else:
+            # Multiple parts - first name is all but last, last name is the final part
+            self.first_name = " ".join(name_parts[:-1])
+            self.last_name = name_parts[-1]
 
-    context = {"full_link": full_link, "email_adress": reset_password_token.user.email}
+    def _build_full_name(self):
+        """
+        Build full_name from first_name and last_name components.
+        """
+        name_parts = []
 
-    html_message = render_to_string("backend/email.html", context=context)
-    plain_message = strip_tags(html_message)
+        if self.first_name:
+            name_parts.append(self.first_name)
+        if self.last_name:
+            name_parts.append(self.last_name)
 
-    msg = EmailMultiAlternatives(
-        subject="Request for resetting password for {title}".format(
-            title=reset_password_token.user.email
-        ),
-        body=plain_message,
-        # from_email="sender@example.com",
-        from_email=f"HepatoCAI Team <{settings.EMAIL_HOST_USER}>",
-        to=[reset_password_token.user.email],
-    )
-
-    msg.attach_alternative(html_message, "text/html")
-    msg.send()
-
-
-@receiver(user_logged_in)
-def generate_jwt_on_login(request, user, **kwargs):
-    # Import here to avoid circular import
-    from .serializers import CustomTokenObtainPairSerializer
-    from utils.ip_utils import update_user_login_tracking
-
-    # Use the custom token serializer to ensure is_staff is included
-    refresh = CustomTokenObtainPairSerializer.get_token(user)
-    request.session["jwt"] = {
-        "access": str(refresh.access_token),
-        "refresh": str(refresh),
-    }
-
-    # Update login tracking when user logs in via social auth
-    # This is the central place where we track all social auth logins
-    if hasattr(user, "socialaccount_set") and user.socialaccount_set.exists():
-        update_user_login_tracking(user, request)
-        logger.info(f"Login tracking updated for social auth user: {user.email}")
-
-    # print("JWT generated and stored in session:", request.session["jwt"])  # Debugging line
+        self.full_name = " ".join(name_parts)

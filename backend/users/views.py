@@ -50,6 +50,7 @@ import os
 User = get_user_model()
 load_dotenv()
 logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -125,58 +126,6 @@ def login_redirect_view(request):
     return HttpResponseRedirect(f"{frontend_url}/auth/callback?error=missing_token")
 
 
-# TODO: this view is not used anywhere
-class SendVerificationEmailView(
-    View
-):  # TODO if email is not verified then verification email can be sent by this view
-    permission_classes = [AllowAny]
-
-    @handle_exceptions
-    def post(self, request):
-        DOMAIN = os.getenv("DOMAIN", default="localhost:8000")
-        email = request.POST.get("email")
-
-        if not email:
-            logger.warning("Verification email request without email address")
-            return StandardResponse.error(
-                message="Email address is required",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            logger.warning(
-                f"Verification email requested for non-existent user: {email}"
-            )
-            return StandardResponse.not_found(
-                message="User not found", resource_type="user"
-            )
-
-        if user.is_active:
-            logger.info(
-                f"Verification email requested for already active user: {email}"
-            )
-            return StandardResponse.success(message="Email already verified")
-
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        verification_link = f"http://{DOMAIN}/users/verify-email/{uid}/{token}/"
-
-        try:
-            verificationMail(user.get_full_name(), verification_link, user.email)
-            logger.info(f"Verification email sent successfully to: {email}")
-
-            return StandardResponse.success(
-                message="Verification email sent successfully"
-            )
-        except Exception as e:
-            logger.error(f"Failed to send verification email to {email}: {str(e)}")
-            return StandardResponse.server_error(
-                message="Failed to send verification email", error=e
-            )
-
-
 class VerifyEmailView(View):
     def get(self, request, uidb64, token):
         frontend_url = os.getenv("FRONTEND_URL", default="http://localhost:5173")
@@ -188,7 +137,9 @@ class VerifyEmailView(View):
 
         if user and default_token_generator.check_token(user, token):
             user.is_active = True  # ✅ Activate user account
+            user.verified_email = True  # ✅ Mark email as verified
             user.save()
+            logger.info(f"Email verified successfully for user: {user.email}")
             return render(
                 request,
                 "backend/confirmationDone.html",
@@ -202,118 +153,6 @@ class VerifyEmailView(View):
                     "home": f"{frontend_url}/",
                 },
             )
-
-
-class LoginViewSet(viewsets.ViewSet):
-    #! this is almost the same as the TokenObtainPairView from rest_framework_simplejwt.views
-    permission_classes = [AllowAny]
-    serializer_class = LoginSerializer
-
-    @extend_schema(
-        operation_id="login_user",
-        summary="User login",
-        description="Authenticate user with email and password. Returns JWT tokens for authentication.",
-        request=LoginSerializer,
-        responses={
-            200: OpenApiResponse(description="Login successful"),
-            400: OpenApiResponse(description="Invalid input data"),
-            401: OpenApiResponse(description="Invalid credentials"),
-            429: OpenApiResponse(description="Rate limit exceeded"),
-            500: OpenApiResponse(description="Internal server error"),
-        },
-        tags=["Authentication"],
-    )
-    @handle_exceptions
-    @RateLimitManager.rate_limit_decorator("login")  # 5 attempts per 15 minutes
-    def create(self, request):
-        """User login endpoint"""
-        # Security validation for login attempt
-        client_ip = request.META.get("REMOTE_ADDR")
-        client_ip = request.META.get("REMOTE_ADDR")
-
-        # Validate input data for XSS and injection attempts
-        if not SecurityValidator.validate_input_data(request.data):
-            AuditLogger.log_suspicious_activity(
-                "invalid_login_input",
-                ip_address=client_ip,
-                details={"data_keys": list(request.data.keys())},
-            )
-            return StandardResponse.error(
-                message="Invalid input data detected",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-
-        logger.info(
-            f"Login attempt for: {request.data.get('email', 'Unknown')} from IP: {client_ip}"
-        )
-
-        serializer = self.serializer_class(data=request.data)
-        if not serializer.is_valid():
-            logger.warning(f"Login validation failed: {serializer.errors}")
-            return StandardResponse.validation_error(
-                errors=serializer.errors, message="Invalid login data provided"
-            )
-
-        email = serializer.validated_data["email"]
-        password = serializer.validated_data["password"]
-
-        # Additional security check for email format
-        if not SecurityValidator.validate_email_format(email):
-            AuditLogger.log_suspicious_activity(
-                "invalid_email_format_login",
-                ip_address=client_ip,
-                details={"email": email},
-            )
-            return StandardResponse.error(
-                message="Invalid email format", status_code=status.HTTP_400_BAD_REQUEST
-            )
-
-        user = authenticate(request, email=email, password=password)
-
-        if user is not None:
-            if not user.is_active:
-                logger.warning(f"Inactive user login attempt: {email}")
-                AuditLogger.log_authentication_event(
-                    "inactive_login_attempt", user=user, ip_address=client_ip
-                )
-                return StandardResponse.error(
-                    message="Account is not active. Please verify your email.",
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                )
-
-            refresh = RefreshToken.for_user(user)
-            logger.info(f"Successful login for user: {email}")
-
-            # Update login tracking information
-            update_user_login_tracking(user, request)
-
-            AuditLogger.log_authentication_event(
-                "successful_login", user=user, ip_address=client_ip
-            )
-
-            return StandardResponse.success(
-                data={
-                    "user": {
-                        "id": user.id,
-                        "email": user.email,
-                        "username": user.username,
-                        "full_name": user.full_name,
-                        "is_staff": user.is_staff,
-                        "is_superuser": user.is_superuser,
-                    },
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                },
-                message="Login successful",
-            )
-
-        logger.warning(f"Failed login attempt for: {email} from IP: {client_ip}")
-        AuditLogger.log_authentication_event(
-            "failed_login_attempt", ip_address=client_ip, details={"email": email}
-        )
-        return StandardResponse.error(
-            message="Invalid credentials", status_code=status.HTTP_401_UNAUTHORIZED
-        )
 
 
 class CheckEmailView(APIView):
@@ -417,6 +256,7 @@ class RegisterViewset(viewsets.ViewSet):
                     user = serializer.save()
                     user.set_password(request.data["password"])
                     user.is_active = False  # Still require verification
+                    user.verified_email = False  # Email not yet verified
                     user.save()
                     SendVerificationEmail(user)
                     logger.info(f"Updated existing inactive user: {email}")
@@ -437,7 +277,8 @@ class RegisterViewset(viewsets.ViewSet):
                     errors=serializer.errors, message="Invalid registration data"
                 )
 
-            # Active user with usable password already exists            # Log the registration attempt
+            # Active user with usable password already exists
+            # Log the registration attempt
             logger.info(f"Registration attempt for existing active user: {email}")
             # AuditLogger.log_authentication_event(
             #     "duplicate_registration_attempt",
@@ -447,12 +288,12 @@ class RegisterViewset(viewsets.ViewSet):
             return StandardResponse.error(
                 message="A user with this email already exists.",
                 status_code=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Standard registration flow
+            )  # Standard registration flow
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.save(is_active=False)
+            user.verified_email = False  # Email not yet verified
+            user.save()
             SendVerificationEmail(user)
             logger.info(f"Successfully registered new user: {email}")
             # AuditLogger.log_authentication_event(
@@ -468,35 +309,6 @@ class RegisterViewset(viewsets.ViewSet):
         logger.warning(f"Registration validation failed: {serializer.errors}")
         return StandardResponse.validation_error(
             errors=serializer.errors, message="Invalid registration data"
-        )
-
-
-class UserViewset(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
-
-    @extend_schema(
-        operation_id="list_users",
-        summary="List all users",
-        description="Retrieve a list of all registered users. Requires authentication.",
-        responses={
-            200: OpenApiResponse(description="Users retrieved successfully"),
-            401: OpenApiResponse(description="Authentication required"),
-            500: OpenApiResponse(description="Internal server error"),
-        },
-        tags=["Users"],
-    )
-    @handle_exceptions
-    def list(self, request):
-        """List all users endpoint"""
-        logger.info(f"User list requested by: {request.user.email}")
-
-        queryset = User.objects.all()
-        serializer = self.serializer_class(queryset, many=True)
-
-        return StandardResponse.success(
-            data=serializer.data, message="Users retrieved successfully"
         )
 
 
@@ -553,16 +365,9 @@ class ProfileViewSet(viewsets.ViewSet):
             )
 
 
-# logout
-def logout_view(request):
-    frontend_url = os.getenv("FRONTEND_URL", default="http://localhost:5173")
-    logout(request)
-    return redirect(f"{frontend_url}/signin")
-
-
 class UserManagementView(APIView):
     """
-    API endpoints for user management - only accessible by superusers
+    Unified API endpoints for user management - accessible by staff, modifiable by superusers only
     """
 
     permission_classes = [IsAuthenticated]
@@ -570,10 +375,10 @@ class UserManagementView(APIView):
     @extend_schema(
         operation_id="user_management_list",
         summary="List all users",
-        description="Get comprehensive list of all users for admin management. Only accessible by superusers.",
+        description="Get comprehensive list of all users for admin management. Accessible by staff, only superusers can modify.",
         responses={
             200: OpenApiResponse(description="Users retrieved successfully"),
-            403: OpenApiResponse(description="Permission denied - superuser required"),
+            403: OpenApiResponse(description="Permission denied - staff required"),
             500: OpenApiResponse(description="Internal server error"),
         },
         tags=["User Management"],
@@ -586,17 +391,42 @@ class UserManagementView(APIView):
             f"UserManagementView - request.user.is_authenticated: {request.user.is_authenticated}"
         )
         logger.info(
+            f"UserManagementView - request.user.is_staff: {getattr(request.user, 'is_staff', 'No attr')}"
+        )
+        logger.info(
             f"UserManagementView - request.user.is_superuser: {getattr(request.user, 'is_superuser', 'No attr')}"
         )
 
         try:
-            if not request.user.is_superuser:
+            # Check for export parameter
+            export_format = request.GET.get("export")
+            if export_format == "csv":
+                return self.export_users(request)
+
+            # Allow access to staff members, but only superusers can modify
+            if not request.user.is_staff:
                 return StandardResponse.permission_denied(
-                    "Only superusers can access user management"
+                    "Only staff members can access user management"
                 )
 
             users = User.objects.all().order_by("-date_joined")
             user_data = []
+
+            # Calculate statistics
+            total_users = users.count()
+            active_users = users.filter(is_active=True).count()
+            staff_users = users.filter(is_staff=True).count()
+            super_users = users.filter(is_superuser=True).count()
+
+            # Get new users this week
+            from datetime import datetime, timedelta
+
+            week_ago = datetime.now() - timedelta(days=7)
+            new_users_this_week = users.filter(date_joined__gte=week_ago).count()
+
+            # Get recent logins (last 24 hours)
+            day_ago = datetime.now() - timedelta(days=1)
+            recent_logins = users.filter(last_login__gte=day_ago).count()
 
             for user in users:
                 user_data.append(
@@ -612,6 +442,7 @@ class UserManagementView(APIView):
                         "is_staff": user.is_staff,
                         "is_superuser": user.is_superuser,
                         "is_active": user.is_active,
+                        "verified_email": user.verified_email,
                         "is_social_user": user.is_social_user,
                         "social_provider": user.social_provider,
                         "date_joined": user.date_joined,
@@ -634,63 +465,83 @@ class UserManagementView(APIView):
             return StandardResponse.success(
                 data=user_data,
                 message="Users retrieved successfully",
-                total_users=len(user_data),
+                total_users=total_users,
+                statistics={
+                    "total_users": total_users,
+                    "active_users": active_users,
+                    "staff_users": staff_users,
+                    "super_users": super_users,
+                    "new_users_this_week": new_users_this_week,
+                    "recent_logins": recent_logins,
+                },
                 permissions={
+                    "can_view_users": request.user.is_staff,
                     "can_promote_to_staff": request.user.is_superuser,
                     "can_promote_to_superuser": request.user.is_superuser,
                     "can_deactivate_users": request.user.is_superuser,
+                    "can_modify_permissions": request.user.is_superuser,
                 },
             )
 
         except Exception as e:
             logger.error(f"Error in UserManagementView.get: {str(e)}")
-            return StandardResponse.server_error(
-                "Failed to retrieve users", e
-            ) @ extend_schema(
-                operation_id="user_management_update",
-                summary="Update user permissions",
-                description="Update user permissions including staff status, superuser status, and account activation. Only accessible by superusers.",
-                parameters=[
-                    OpenApiParameter(
-                        "user_id",
-                        OpenApiTypes.INT,
-                        OpenApiParameter.PATH,
-                        description="ID of the user to update",
-                    )
-                ],
-                request={
-                    "application/json": {
-                        "type": "object",
-                        "properties": {
-                            "is_staff": {
-                                "type": "boolean",
-                                "description": "Staff status",
-                            },
-                            "is_superuser": {
-                                "type": "boolean",
-                                "description": "Superuser status",
-                            },
-                            "is_active": {
-                                "type": "boolean",
-                                "description": "Account activation status",
-                            },
-                        },
-                    }
-                },
-                responses={
-                    200: OpenApiResponse(
-                        description="User permissions updated successfully"
-                    ),
-                    400: OpenApiResponse(description="Bad request - invalid data"),
-                    403: OpenApiResponse(description="Permission denied"),
-                    404: OpenApiResponse(description="User not found"),
-                    500: OpenApiResponse(description="Internal server error"),
-                },
-                tags=["User Management"],
-            )
+            return StandardResponse.server_error("Failed to retrieve users", e)
 
+    @extend_schema(
+        operation_id="user_management_update",
+        summary="Update user permissions",
+        description="Update user permissions following hierarchy (user -> staff -> superuser). Only accessible by superusers.",
+        parameters=[
+            OpenApiParameter(
+                "user_id",
+                OpenApiTypes.INT,
+                OpenApiParameter.PATH,
+                description="ID of the user to update",
+            )
+        ],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "promote_to_staff",
+                            "promote_to_superuser",
+                            "demote_from_staff",
+                            "demote_from_superuser",
+                            "activate",
+                            "deactivate",
+                        ],
+                        "description": "Action to perform on user",
+                    },
+                    "is_staff": {
+                        "type": "boolean",
+                        "description": "Staff status (deprecated - use action instead)",
+                    },
+                    "is_superuser": {
+                        "type": "boolean",
+                        "description": "Superuser status (deprecated - use action instead)",
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "description": "Account activation status",
+                    },
+                },
+            }
+        },
+        responses={
+            200: OpenApiResponse(description="User permissions updated successfully"),
+            400: OpenApiResponse(description="Bad request - invalid data"),
+            403: OpenApiResponse(description="Permission denied"),
+            404: OpenApiResponse(description="User not found"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+        tags=["User Management"],
+    )
+    @handle_exceptions
     def patch(self, request, user_id=None):
-        """Update user permissions"""
+        """Update user permissions following hierarchy"""
         try:
             if not request.user.is_superuser:
                 return StandardResponse.permission_denied(
@@ -708,27 +559,81 @@ class UserManagementView(APIView):
                 return StandardResponse.not_found("User not found", "user")
 
             # Prevent users from removing their own superuser status
-            if (
-                user_to_update == request.user
-                and request.data.get("is_superuser") == False
+            if user_to_update == request.user and (
+                request.data.get("is_superuser") == False
+                or request.data.get("action")
+                in ["demote_from_superuser", "demote_from_staff"]
             ):
                 return StandardResponse.error(
                     "You cannot remove your own superuser privileges",
                     status.HTTP_400_BAD_REQUEST,
-                )  # Update permissions
-            if "is_staff" in request.data:
-                user_to_update.is_staff = request.data["is_staff"]
+                )
 
-            if "is_superuser" in request.data:
-                user_to_update.is_superuser = request.data["is_superuser"]
-                # If promoting to superuser, also make them staff
-                if request.data["is_superuser"]:
+            action = request.data.get("action")
+
+            # Handle hierarchical promotion/demotion
+            if action:
+                if action == "promote_to_staff":
+                    if user_to_update.is_superuser:
+                        return StandardResponse.error(
+                            "User is already a superuser (higher than staff)",
+                            status.HTTP_400_BAD_REQUEST,
+                        )
                     user_to_update.is_staff = True
 
-            if "is_active" in request.data:
-                user_to_update.is_active = request.data["is_active"]
+                elif action == "promote_to_superuser":
+                    user_to_update.is_staff = True  # Superuser must be staff
+                    user_to_update.is_superuser = True
+
+                elif action == "demote_from_superuser":
+                    user_to_update.is_superuser = False
+                    # Keep staff status unless explicitly demoting further
+
+                elif action == "demote_from_staff":
+                    if user_to_update.is_superuser:
+                        return StandardResponse.error(
+                            "Cannot demote from staff while user is superuser. Demote from superuser first.",
+                            status.HTTP_400_BAD_REQUEST,
+                        )
+                    user_to_update.is_staff = False
+
+                elif action == "activate":
+                    user_to_update.is_active = True
+
+                elif action == "deactivate":
+                    user_to_update.is_active = False
+
+                else:
+                    return StandardResponse.error(
+                        "Invalid action specified",
+                        status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                # Legacy support for direct field updates
+                if "is_staff" in request.data:
+                    if not request.data["is_staff"] and user_to_update.is_superuser:
+                        return StandardResponse.error(
+                            "Cannot remove staff status from superuser. Demote from superuser first.",
+                            status.HTTP_400_BAD_REQUEST,
+                        )
+                    user_to_update.is_staff = request.data["is_staff"]
+
+                if "is_superuser" in request.data:
+                    user_to_update.is_superuser = request.data["is_superuser"]
+                    # If promoting to superuser, also make them staff
+                    if request.data["is_superuser"]:
+                        user_to_update.is_staff = True
+
+                if "is_active" in request.data:
+                    user_to_update.is_active = request.data["is_active"]
 
             user_to_update.save()
+
+            logger.info(
+                f"User permissions updated for {user_to_update.email} by {request.user.email}. "
+                f"Action: {action or 'direct_update'}, Staff: {user_to_update.is_staff}, "
+                f"Superuser: {user_to_update.is_superuser}, Active: {user_to_update.is_active}"
+            )
 
             return StandardResponse.success(
                 data={
@@ -749,169 +654,74 @@ class UserManagementView(APIView):
             logger.error(f"Error in UserManagementView.patch: {str(e)}")
             return StandardResponse.server_error("Failed to update user permissions", e)
 
-
-class StaffManagementView(APIView):
-    """
-    API endpoints for staff management - accessible by staff users
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        operation_id="staff_management_list",
-        summary="List all users (staff access)",
-        description="Get list of all users for staff management with limited permissions. Accessible by staff members.",
-        responses={
-            200: OpenApiResponse(description="Users retrieved successfully"),
-            403: OpenApiResponse(description="Permission denied - staff required"),
-            500: OpenApiResponse(description="Internal server error"),
-        },
-        tags=["Staff Management"],
-    )
-    @handle_exceptions
-    def get(self, request):
-        """Get list of all users for staff management (limited permissions)"""
-        if not request.user.is_staff:
-            return StandardResponse.permission_denied(
-                "Only staff members can access user management"
-            )
-
-        users = User.objects.all().order_by("-date_joined")
-        user_data = []
-
-        for user in users:
-            user_data.append(
-                {
-                    "id": user.id,
-                    "email": user.email,
-                    "full_name": user.full_name
-                    or f"{user.first_name} {user.last_name}".strip()
-                    or user.username,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "username": user.username,
-                    "is_staff": user.is_staff,
-                    "is_superuser": user.is_superuser,
-                    "is_active": user.is_active,
-                    "is_social_user": user.is_social_user,
-                    "social_provider": user.social_provider,
-                    "date_joined": user.date_joined,
-                    "last_login": user.last_login,
-                    "profile_picture": user.profile_picture,
-                    # Contact & Location Information
-                    "phone_number": user.phone_number,
-                    "country": user.country,
-                    "city": user.city,
-                    "timezone": user.timezone,
-                    # Activity Tracking
-                    "last_login_ip": user.last_login_ip,
-                    "login_count": user.login_count,
-                    "phone_verified_at": user.phone_verified_at,
-                    "terms_accepted_at": user.terms_accepted_at,
-                    "terms_version": user.terms_version,
-                }
-            )
-
-        return StandardResponse.success(
-            data=user_data,
-            message="Users retrieved successfully",
-            total_users=len(user_data),
-            permissions={
-                "can_promote_to_staff": request.user.is_superuser,
-                "can_promote_to_superuser": request.user.is_superuser,
-                "can_deactivate_users": request.user.is_superuser,
-            },
-        ) @ extend_schema(
-            operation_id="staff_management_update",
-            summary="Update user staff status",
-            description="Update user staff status with limited permissions. Only superusers can promote users to staff or superuser.",
-            parameters=[
-                OpenApiParameter(
-                    "user_id",
-                    OpenApiTypes.INT,
-                    OpenApiParameter.PATH,
-                    description="ID of the user to update",
-                )
-            ],
-            request={
-                "application/json": {
-                    "type": "object",
-                    "properties": {
-                        "is_staff": {"type": "boolean", "description": "Staff status"},
-                        "is_superuser": {
-                            "type": "boolean",
-                            "description": "Superuser status",
-                        },
-                    },
-                }
-            },
-            responses={
-                200: OpenApiResponse(
-                    description="User permissions updated successfully"
-                ),
-                400: OpenApiResponse(description="Bad request - invalid data"),
-                403: OpenApiResponse(description="Permission denied"),
-                404: OpenApiResponse(description="User not found"),
-                500: OpenApiResponse(description="Internal server error"),
-            },
-            tags=["Staff Management"],
-        )
-
-    @handle_exceptions
-    def patch(self, request, user_id=None):
-        """Update user staff status (limited permissions)"""
-        if not request.user.is_staff:
-            return StandardResponse.permission_denied(
-                "Only staff members can modify user permissions"
-            )
-
-        if not user_id:
-            return StandardResponse.error(
-                "User ID is required", status.HTTP_400_BAD_REQUEST
-            )
-
+    def export_users(self, request):
+        """Export users data as CSV"""
         try:
-            user_to_update = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return StandardResponse.not_found("User not found", "user")
+            if not request.user.is_staff:
+                return StandardResponse.permission_denied(
+                    "Only staff members can export user data"
+                )
 
-        # Only superusers can promote to staff or superuser
-        if not request.user.is_superuser:
-            return StandardResponse.permission_denied(
-                "Only superusers can promote users to staff or superuser status"
+            users = User.objects.all().order_by("-date_joined")
+
+            import csv
+            from django.http import HttpResponse
+
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = 'attachment; filename="users_export.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(
+                [
+                    "ID",
+                    "Email",
+                    "Full Name",
+                    "First Name",
+                    "Last Name",
+                    "Username",
+                    "Is Staff",
+                    "Is Superuser",
+                    "Is Active",
+                    "Verified Email",
+                    "Is Social User",
+                    "Social Provider",
+                    "Date Joined",
+                    "Last Login",
+                    "Phone Number",
+                    "Country",
+                    "City",
+                    "Timezone",
+                    "Login Count",
+                ]
             )
 
-        # Prevent users from removing their own superuser status
-        if user_to_update == request.user and request.data.get("is_superuser") == False:
-            return StandardResponse.error(
-                "You cannot remove your own superuser privileges",
-                status.HTTP_400_BAD_REQUEST,
-            )
+            for user in users:
+                writer.writerow(
+                    [
+                        user.id,
+                        user.email,
+                        user.full_name,
+                        user.first_name,
+                        user.last_name,
+                        user.username,
+                        user.is_staff,
+                        user.is_superuser,
+                        user.is_active,
+                        user.verified_email,
+                        user.is_social_user,
+                        user.social_provider,
+                        user.date_joined,
+                        user.last_login,
+                        user.phone_number,
+                        user.country,
+                        user.city,
+                        user.timezone,
+                        user.login_count,
+                    ]
+                )
 
-        # Update permissions
-        if "is_staff" in request.data:
-            user_to_update.is_staff = request.data["is_staff"]
+            return response
 
-        if "is_superuser" in request.data:
-            user_to_update.is_superuser = request.data["is_superuser"]
-            # If promoting to superuser, also make them staff
-            if request.data["is_superuser"]:
-                user_to_update.is_staff = True
-
-        user_to_update.save()
-
-        return StandardResponse.success(
-            data={
-                "user": {
-                    "id": user_to_update.id,
-                    "email": user_to_update.email,
-                    "full_name": user_to_update.full_name
-                    or f"{user_to_update.first_name} {user_to_update.last_name}".strip()
-                    or user_to_update.username,
-                    "is_staff": user_to_update.is_staff,
-                    "is_superuser": user_to_update.is_superuser,
-                    "is_active": user_to_update.is_active,
-                },
-            },
-            message="User permissions updated successfully",
-        )
+        except Exception as e:
+            logger.error(f"Error in export_users: {str(e)}")
+            return StandardResponse.server_error("Failed to export users", e)

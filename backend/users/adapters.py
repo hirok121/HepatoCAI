@@ -25,11 +25,16 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             return
 
         try:
-            user = User.objects.get(email=email)
-
-            # Optionally activate inactive users here
+            user = User.objects.get(
+                email=email
+            )  # Optionally activate inactive users here
             if not user.is_active:
                 user.is_active = True
+                user.verified_email = True  # Email is verified by Google
+                user.save()
+            elif not user.verified_email:
+                # If user is active but email wasn't previously verified via Google
+                user.verified_email = True
                 user.save()
 
             # Connect social account to existing user

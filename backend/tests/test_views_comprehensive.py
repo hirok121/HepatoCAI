@@ -52,12 +52,14 @@ class AuthenticationViewTests(TestCase):
         response = self.client.post(url, self.valid_user_data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["status"], "success")
-
-        # Verify user was created
-        self.assertTrue(
-            User.objects.filter(email=self.valid_user_data["email"]).exists()
-        )
+        self.assertEqual(
+            response.data["status"], "success"
+        )  # Verify user was created with correct initial state
+        new_user = User.objects.get(email=self.valid_user_data["email"])
+        self.assertFalse(
+            new_user.is_active
+        )  # Should be inactive until email verification
+        self.assertFalse(new_user.verified_email)  # Email should not be verified yet
 
     def test_user_registration_duplicate_email(self):
         """Test registration with existing email"""
@@ -135,11 +137,12 @@ class AuthenticationViewTests(TestCase):
         url = reverse("verify-email", kwargs={"uidb64": uidb64, "token": token})
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Verify user is now active
+        self.assertEqual(
+            response.status_code, status.HTTP_200_OK
+        )  # Verify user is now active and email verified
         user.refresh_from_db()
         self.assertTrue(user.is_active)
+        self.assertTrue(user.verified_email)
 
 
 class UserManagementViewTests(TestCase):

@@ -39,7 +39,6 @@ const ProfilePage = () => {
     updateSuccess,
     clearMessages,
   } = useProfileUpdate();
-  console.log("ProfilePage profile:", profile);
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -143,7 +142,6 @@ const ProfilePage = () => {
         birthday: formatDateForAPI(formData.birthday),
       };
 
-      console.log("Sending form data:", submitData);
       await updateProfile(submitData);
       setIsEditing(false);
       refetch(); // Refresh profile data
@@ -210,7 +208,16 @@ const ProfilePage = () => {
     if (profile?.first_name && profile?.last_name) {
       return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
     }
-    return profile?.username?.[0]?.toUpperCase() || "U";
+    if (profile?.username) {
+      return profile.username[0].toUpperCase();
+    }
+    if (profile?.display_name) {
+      return profile.display_name[0].toUpperCase();
+    }
+    if (profile?.email) {
+      return profile.email[0].toUpperCase();
+    }
+    return "U";
   };
 
   if (loading) {
@@ -380,6 +387,7 @@ const ProfilePage = () => {
             {/* Profile Info */}
             <Grid item xs={12} md={6}>
               <Box>
+                {" "}
                 <Typography
                   variant="h4"
                   gutterBottom
@@ -393,16 +401,17 @@ const ProfilePage = () => {
                 >
                   {`${profile?.data?.first_name || ""} ${
                     profile?.data?.last_name || ""
-                  }`.trim() || profile?.data?.username}
+                  }`.trim() ||
+                    profile?.data?.display_name ||
+                    profile?.data?.username ||
+                    "User"}
                 </Typography>
-
                 <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
                   <MailIcon sx={{ mr: 1, color: "text.secondary" }} />
                   <Typography variant="body1" color="text.secondary">
                     {profile?.data?.email}
                   </Typography>
                 </Box>
-
                 <Box display="flex" gap={1} flexWrap="wrap">
                   {profile?.data?.verified_email && (
                     <Chip
@@ -883,7 +892,7 @@ const ProfilePage = () => {
                           {profile?.data?.country || "Not provided"}
                         </Typography>
                       </Box>
-                    </Grid>
+                    </Grid>{" "}
                     <Grid item xs={12} sm={6}>
                       <Box
                         sx={{
@@ -912,6 +921,37 @@ const ProfilePage = () => {
                           sx={{ fontWeight: 600, color: "#1e293b" }}
                         >
                           {profile?.data?.city || "Not provided"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box
+                        sx={{
+                          p: 3,
+                          background:
+                            "linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%)",
+                          borderRadius: 2,
+                          border: "1px solid rgba(37, 99, 235, 0.1)",
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            color: "#2563EB",
+                            fontWeight: 600,
+                            mb: 1,
+                            fontSize: "0.85rem",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                          }}
+                        >
+                          Timezone
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: 600, color: "#1e293b" }}
+                        >
+                          {profile?.data?.timezone || "Not provided"}
                         </Typography>
                       </Box>
                     </Grid>
@@ -979,12 +1019,14 @@ const ProfilePage = () => {
                         }}
                       >
                         Username
-                      </Typography>
+                      </Typography>{" "}
                       <Typography
                         variant="h6"
                         sx={{ fontWeight: 600, color: "#1e293b" }}
                       >
-                        {profile?.data?.username}
+                        {profile?.data?.username ||
+                          profile?.data?.display_name ||
+                          "Not provided"}
                       </Typography>
                     </Box>
                   </Grid>
