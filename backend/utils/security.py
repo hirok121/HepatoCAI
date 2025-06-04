@@ -99,7 +99,7 @@ class SecurityValidator:
             "ast",
             "che",
             "crea",
-            "ggt",
+            "cgt",
             "alb",
             "bil",
             "chol",

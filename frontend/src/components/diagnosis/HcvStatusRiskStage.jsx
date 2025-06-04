@@ -287,7 +287,7 @@ HcvRiskCard.propTypes = {
 const HcvStageCard = ({ stage }) => {
   const getStageConfig = (stage) => {
     const configs = {
-      F0: {
+      "Blood Donors": {
         color: "#16a34a",
         bgColor: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
         borderColor: "#bbf7d0",
@@ -296,7 +296,7 @@ const HcvStageCard = ({ stage }) => {
         textColor: "#15803d",
         description: "No Fibrosis",
       },
-      F1: {
+      Hepatitis: {
         color: "#65a30d",
         bgColor: "linear-gradient(135deg, #f7fee7 0%, #ecfccb 100%)",
         borderColor: "#d9f99d",
@@ -305,7 +305,7 @@ const HcvStageCard = ({ stage }) => {
         textColor: "#4d7c0f",
         description: "Mild Fibrosis",
       },
-      F2: {
+      Fibrosis: {
         color: "#d97706",
         bgColor: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)",
         borderColor: "#fed7aa",
@@ -314,7 +314,7 @@ const HcvStageCard = ({ stage }) => {
         textColor: "#a16207",
         description: "Moderate Fibrosis",
       },
-      F3: {
+      Chirosis: {
         color: "#ea580c",
         bgColor: "linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)",
         borderColor: "#fdba74",
@@ -322,15 +322,6 @@ const HcvStageCard = ({ stage }) => {
         chipColor: "warning",
         textColor: "#c2410c",
         description: "Severe Fibrosis",
-      },
-      F4: {
-        color: "#dc2626",
-        bgColor: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
-        borderColor: "#fecaca",
-        icon: <LocalHospital sx={{ color: "#dc2626", fontSize: "1.2rem" }} />,
-        chipColor: "error",
-        textColor: "#991b1b",
-        description: "Cirrhosis",
       },
       Unknown: {
         color: "#6b7280",
@@ -401,7 +392,7 @@ const HcvStageCard = ({ stage }) => {
             fontSize: "0.65rem",
           }}
         >
-          Fibrosis Stage
+          HCV Stage
         </Typography>
 
         <Typography

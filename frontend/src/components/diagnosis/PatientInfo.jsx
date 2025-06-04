@@ -53,7 +53,7 @@ function PatientInfo({ results }) {
           <span>AST: {patient_info.ast} U/L</span>
           <span>CHE: {patient_info.che} kU/L</span>
           <span>CREA: {patient_info.crea} mg/dL</span>
-          <span>GGT: {patient_info.ggt} U/L</span>
+          <span>CGT: {patient_info.cgt} U/L</span>
         </Typography>
         <Typography
           variant="body2"
@@ -103,7 +103,7 @@ PatientInfo.propTypes = {
       ast: PropTypes.number,
       che: PropTypes.number,
       crea: PropTypes.number,
-      ggt: PropTypes.number,
+      cgt: PropTypes.number,
       alb: PropTypes.number,
       bil: PropTypes.number,
       chol: PropTypes.number,

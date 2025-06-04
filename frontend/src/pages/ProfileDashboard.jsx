@@ -156,14 +156,6 @@ const ProfileDashboard = () => {
     { name: "Elder (60+)", value: analyticsData.age_distribution?.elder || 0 },
   ];
 
-  // Fix gender distribution issues
-  // Debug and fix gender distribution data
-
-  //   // Fix 1: Log the analytics data to see what we're actually getting
-  //   console.log("Analytics data:", analyticsData);
-  //   console.log("Gender distribution data:", analyticsData.gender_distribution);
-
-  // Fix 2: More robust gender data preparation that handles different cases
   const genderDistributionData = [
     {
       name: "Male",
@@ -196,29 +188,35 @@ const ProfileDashboard = () => {
   // Debug: Log monthly trends data to check if it's populated
   console.log("Monthly trends data:", monthlyTrendsData);
 
+  console.log("Analytics data:", analyticsData);
   // Prepare stage distribution data for bar chart
   const stageDistributionData = Object.entries(
-    analyticsData.stage_distribution || {}
+    analyticsData.hcv_stage_distribution || {}
   ).map(([stage, count]) => {
-    // Extract stage number and description for better display
-    const stageNum = stage.match(/Class (\d+)/)?.[1] || "0";
-    const stageDesc = stage.match(/\((.*?)\)/)?.[1] || "";
+    // Map different stages to appropriate colors and display names
+    const getStageColor = (stageName) => {
+      switch (stageName.toLowerCase()) {
+        case "blood donors":
+          return COLORS.success; // Green for healthy donors
+        case "hepatitis":
+          return COLORS.warning; // Orange for hepatitis
+        case "fibrosis":
+          return COLORS.info; // Blue for fibrosis
+        case "cirrhosis":
+          return COLORS.error; // Red for cirrhosis (most severe)
+        default:
+          return COLORS.primary;
+      }
+    };
 
     return {
-      name: `Class ${stageNum}`,
+      name: stage,
       fullName: stage,
-      description: stageDesc,
+      description: stage,
       value: count,
-      color: stage.includes("Class 0")
-        ? COLORS.success
-        : stage.includes("Class 1")
-        ? COLORS.info
-        : stage.includes("Class 2")
-        ? COLORS.warning
-        : COLORS.error,
+      color: getStageColor(stage),
     };
   });
-
   //   // Add debug logging for stage distribution
   //   console.log("Stage distribution raw data:", analyticsData.stage_distribution);
   //   console.log(

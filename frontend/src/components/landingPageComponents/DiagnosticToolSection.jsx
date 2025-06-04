@@ -255,7 +255,7 @@ const DiagnosticToolSection = ({ id }) => {
                     {
                       icon: <DataObject />,
                       title: "Multi-Parameter Analysis",
-                      desc: "Analyzes Age, ALP, AST, CHE, CREA, GGT and other biomarkers",
+                      desc: "Analyzes Age, ALP, AST, CHE, CREA, CGT and other biomarkers",
                     },
                     {
                       icon: <Biotech />,

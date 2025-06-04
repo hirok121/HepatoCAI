@@ -43,7 +43,7 @@ function Methodology() {
       description: "Comprehensive dataset preparation and feature engineering",
       details: [
         "Multi-center hepatitis C patient data collection",
-        "Biomarker standardization (Age, ALP, AST, CHE, CREA, GGT)",
+        "Biomarker standardization (Age, ALP, AST, CHE, CREA, CGT)",
         "Data quality assessment and missing value handling",
         "Feature scaling and normalization techniques",
       ],
@@ -97,7 +97,7 @@ function Methodology() {
       category: "Input Features",
       specs: [
         { name: "Demographic", value: "Age, Gender" },
-        { name: "Liver Enzymes", value: "ALP, AST, GGT" },
+        { name: "Liver Enzymes", value: "ALP, AST, CGT" },
         { name: "Biomarkers", value: "CHE, CREA" },
         { name: "Additional", value: "Clinical History Parameters" },
       ],

@@ -70,7 +70,7 @@ function DiagnosisResults({ results, loading }) {
   const diagnosisData = results.patient.hcv_result;
   const hcvProbability = diagnosisData.hcv_status_probability || 0;
   const confidence = diagnosisData.confidence || 0;
-  const stagePredictions = diagnosisData.stage_predictions;
+  const stagePredictions = diagnosisData.hcv_stage_probability;
   const featureImportance = results.feature_importance || {};
 
   const recommendation =
@@ -103,10 +103,10 @@ function DiagnosisResults({ results, loading }) {
   };
   const getStageColor = (stage) => {
     const colors = {
-      "Class 0 (Blood Donors)": "#10B981",
-      "Class 1 (Hepatitis)": "#F59E0B",
-      "Class 2 (Fibrosis)": "#EF4444",
-      "Class 3 (Cirrhosis)": "#DC2626",
+      "Blood Donors": "#10B981",
+      Hepatitis: "#F59E0B",
+      Fibrosis: "#EF4444",
+      Cirrhosis: "#DC2626",
     };
     return colors[stage] || "#6B7280";
   };
@@ -184,7 +184,7 @@ function DiagnosisResults({ results, loading }) {
                 results={{
                   hcv_status_probability: hcvProbability,
                   confidence: confidence,
-                  stage_predictions: stagePredictions,
+                  hcv_stage_probability: stagePredictions,
                 }}
                 getProbabilityColor={(prob) =>
                   getProbabilityColor(prob, hcvRisk)
@@ -333,7 +333,7 @@ DiagnosisResults.propTypes = {
         hcv_risk: PropTypes.string,
         hcv_stage: PropTypes.string,
         confidence: PropTypes.number,
-        stage_predictions: PropTypes.objectOf(PropTypes.number),
+        hcv_stage_probability: PropTypes.objectOf(PropTypes.number),
         recommendation: PropTypes.string,
         diagnosis_completed: PropTypes.bool,
         analysis_duration: PropTypes.number,

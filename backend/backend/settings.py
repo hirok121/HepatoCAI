@@ -188,17 +188,19 @@ ADDITIONAL_CORS_ORIGINS = [
     url.strip() for url in ADDITIONAL_CORS_ORIGINS if url.strip()
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    FRONTEND_URL,
-    BACKEND_URL,
-    "http://localhost:5173",  # Development fallback
-    "http://127.0.0.1:5173",  # Development fallback
-    "http://localhost:8000",  # Backend fallback
-    "http://127.0.0.1:8000",  # Backend fallback
-] + ADDITIONAL_CORS_ORIGINS
+# CORS_ALLOWED_ORIGINS = [
+#     FRONTEND_URL,
+#     BACKEND_URL,
+#     "http://localhost:5173",  # Development fallback
+#     "http://127.0.0.1:5173",  # Development fallback
+#     "http://localhost:8000",  # Backend fallback
+#     "http://127.0.0.1:8000",  # Backend fallback
+# ] + ADDITIONAL_CORS_ORIGINS
 
-# Remove duplicates and empty strings
-CORS_ALLOWED_ORIGINS = list(set([url for url in CORS_ALLOWED_ORIGINS if url]))
+# # Remove duplicates and empty strings
+# CORS_ALLOWED_ORIGINS = list(set([url for url in CORS_ALLOWED_ORIGINS if url]))
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

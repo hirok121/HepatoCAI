@@ -17,7 +17,7 @@ class HCVPatientAdmin(ImportExportModelAdmin):
         ("Basic Information", {"fields": ("patient_name", "age", "sex")}),
         (
             "Required Laboratory Values",
-            {"fields": ("alp", "ast", "che", "crea", "ggt")},
+            {"fields": ("alp", "ast", "che", "crea", "cgt")},
         ),
         (
             "Optional Laboratory Values",
@@ -70,7 +70,7 @@ class HCVResultAdmin(admin.ModelAdmin):
         (
             "AI Analysis",
             {
-                "fields": ("stage_predictions", "recommendation"),
+                "fields": ("hcv_stage_probability", "recommendation"),
                 "classes": ("collapse",),
             },
         ),

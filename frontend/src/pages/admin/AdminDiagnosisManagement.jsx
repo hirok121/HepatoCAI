@@ -251,15 +251,17 @@ function AdminDiagnosisManagement() {
   const stageDistributionData = Object.entries(
     analyticsData.stage_distribution || {}
   ).map(([stage, count]) => ({
-    name: stage.replace(/^Class\s*/, "Stage "),
+    name: stage,
     value: count,
-    color: stage.includes("3")
+    color: stage.toLowerCase().includes("cirrhosis")
       ? COLORS.error
-      : stage.includes("2")
+      : stage.toLowerCase().includes("fibrosis")
       ? COLORS.warning
-      : stage.includes("1")
+      : stage.toLowerCase().includes("hepatitis")
       ? COLORS.info
-      : COLORS.success,
+      : stage.toLowerCase().includes("blood donors")
+      ? COLORS.success
+      : COLORS.primary, // fallback color
   }));
 
   // Component definitions

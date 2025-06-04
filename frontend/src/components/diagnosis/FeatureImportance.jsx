@@ -250,7 +250,7 @@ FeatureImportance.propTypes = {
     AST: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     CHE: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     CREA: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    GGT: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    CGT: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }).isRequired,
 };
 

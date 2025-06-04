@@ -13,7 +13,7 @@ const randomValueGenerators = {
   ast: () => Math.floor(Math.random() * (60 - 10) + 10), // 10-60 U/L
   che: () => Math.floor(Math.random() * (12000 - 3500) + 3500), // 3500-12000 U/L
   crea: () => (Math.random() * (1.5 - 0.6) + 0.6).toFixed(2), // 0.6-1.5 mg/dL
-  ggt: () => Math.floor(Math.random() * (60 - 5) + 5), // 5-60 U/L
+  cgt: () => Math.floor(Math.random() * (60 - 5) + 5), // 5-60 U/L
 };
 
 function LabResultsStep({ formData, handleChange }) {
@@ -22,7 +22,7 @@ function LabResultsStep({ formData, handleChange }) {
     { name: "ast", label: "AST (Aspartate Aminotransferase)", unit: "U/L" },
     { name: "che", label: "CHE (Cholinesterase)", unit: "U/L" },
     { name: "crea", label: "CREA (Creatinine)", unit: "mg/dL" },
-    { name: "ggt", label: "GGT (Gamma-Glutamyl Transferase)", unit: "U/L" },
+    { name: "cgt", label: "CGT (C-Glutamyl Transferase)", unit: "U/L" },
   ];
 
   return (

@@ -39,7 +39,7 @@ const DiagnosisForm = ({ onSuccess, onCancel }) => {
       ast: "",
       che: "",
       crea: "",
-      ggt: "",
+      cgt: "",
     },
   });
 
@@ -95,11 +95,11 @@ const DiagnosisForm = ({ onSuccess, onCancel }) => {
         message: "CREA value must be positive",
       },
     },
-    ggt: {
-      required: "GGT value is required",
+    cgt: {
+      required: "CGT value is required",
       min: {
         value: 0,
-        message: "GGT value must be positive",
+        message: "CGT value must be positive",
       },
     },
   };
@@ -113,7 +113,7 @@ const DiagnosisForm = ({ onSuccess, onCancel }) => {
         ast: parseFloat(data.ast),
         che: parseFloat(data.che),
         crea: parseFloat(data.crea),
-        ggt: parseFloat(data.ggt),
+        cgt: parseFloat(data.cgt),
       });
 
       if (onSuccess) {
@@ -311,19 +311,19 @@ const DiagnosisForm = ({ onSuccess, onCancel }) => {
 
             <Grid item xs={12} md={6} lg={2.4}>
               <Controller
-                name="ggt"
+                name="cgt"
                 control={control}
-                rules={validationRules.ggt}
+                rules={validationRules.cgt}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     fullWidth
-                    label="GGT (U/L)"
+                    label="CGT (U/L)"
                     type="number"
                     step="0.1"
-                    error={!!errors.ggt}
+                    error={!!errors.cgt}
                     helperText={
-                      errors.ggt?.message || "Gamma-Glutamyl Transferase"
+                      errors.cgt?.message || "Gamma-Glutamyl Transferase"
                     }
                     disabled={createDiagnosisMutation.isLoading}
                   />

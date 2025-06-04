@@ -218,7 +218,7 @@ const DiagnosisTable = ({
                     <div>
                       CHE: {diagnosis.che} | CREA: {diagnosis.crea}
                     </div>
-                    <div>GGT: {diagnosis.ggt}</div>
+                    <div>CGT: {diagnosis.cgt}</div>
                   </Box>
                 </TableCell>
                 {/* Created */}
@@ -385,10 +385,10 @@ const DiagnosisTable = ({
                 </Box>
                 <Box>
                   <Typography variant="body2" color="text.secondary">
-                    GGT
+                    CGT
                   </Typography>
                   <Typography variant="body1" fontWeight="bold">
-                    {selectedDiagnosis.ggt || "N/A"}
+                    {selectedDiagnosis.cgt || "N/A"}
                   </Typography>
                 </Box>
                 <Box>
@@ -456,8 +456,8 @@ const DiagnosisTable = ({
               )}
             {/* Stage Predictions Section */}
             <Divider sx={{ mb: 3 }} />
-            {selectedDiagnosis.hcv_result?.stage_predictions &&
-              Object.keys(selectedDiagnosis.hcv_result.stage_predictions)
+            {selectedDiagnosis.hcv_result?.hcv_stage_probability &&
+              Object.keys(selectedDiagnosis.hcv_result.hcv_stage_probability)
                 .length > 0 && (
                 <Box mb={3}>
                   <Typography variant="h6" color="primary" gutterBottom>
@@ -465,7 +465,7 @@ const DiagnosisTable = ({
                   </Typography>
                   <Box display="flex" gap={2} flexWrap="wrap">
                     {Object.entries(
-                      selectedDiagnosis.hcv_result.stage_predictions
+                      selectedDiagnosis.hcv_result.hcv_stage_probability
                     ).map(([stage, probability]) => (
                       <Chip
                         key={stage}
@@ -477,8 +477,8 @@ const DiagnosisTable = ({
                   </Box>
                 </Box>
               )}
-            {selectedDiagnosis.hcv_result?.stage_predictions &&
-              Object.keys(selectedDiagnosis.hcv_result.stage_predictions)
+            {selectedDiagnosis.hcv_result?.hcv_stage_probability &&
+              Object.keys(selectedDiagnosis.hcv_result.hcv_stage_probability)
                 .length > 0 && <Divider sx={{ mb: 3 }} />}
             {/* Recommendation Section */}
             {selectedDiagnosis.hcv_result?.recommendation &&

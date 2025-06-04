@@ -20,7 +20,7 @@ class PatientWithResultResource(resources.ModelResource):
     ast = fields.Field(column_name="ast", attribute="ast")
     che = fields.Field(column_name="che", attribute="che")
     crea = fields.Field(column_name="crea", attribute="crea")
-    ggt = fields.Field(column_name="ggt", attribute="ggt")
+    cgt = fields.Field(column_name="cgt", attribute="cgt")
     alb = fields.Field(column_name="alb", attribute="alb")
     bil = fields.Field(column_name="bil", attribute="bil")
     chol = fields.Field(column_name="chol", attribute="chol")
@@ -43,9 +43,9 @@ class PatientWithResultResource(resources.ModelResource):
         column_name="recommendation", attribute="hcv_result__recommendation"
     )
     # Stage predictions as JSON
-    stage_predictions = fields.Field(
-        column_name="stage_predictions",
-        attribute="hcv_result__stage_predictions",
+    hcv_stage_probability = fields.Field(
+        column_name="hcv_stage_probability",
+        attribute="hcv_result__hcv_stage_probability",
         widget=JSONWidget(),
     )
 
@@ -65,7 +65,7 @@ class PatientWithResultResource(resources.ModelResource):
             "ast",
             "che",
             "crea",
-            "ggt",
+            "cgt",
             "alb",
             "bil",
             "chol",
@@ -80,7 +80,7 @@ class PatientWithResultResource(resources.ModelResource):
             "hcv_risk",
             "hcv_stage",
             "confidence",
-            "stage_predictions",
+            "hcv_stage_probability",
             "recommendation",
         )
         export_order = fields
@@ -141,10 +141,10 @@ class PatientWithResultResource(resources.ModelResource):
             else None
         )
 
-    def dehydrate_stage_predictions(self, patient):
+    def dehydrate_hcv_status_probability(self, patient):
         """Handle cases where hcv_result might not exist"""
         return (
-            getattr(patient.hcv_result, "stage_predictions", None)
+            getattr(patient.hcv_result, "hcv_status_probability", None)
             if hasattr(patient, "hcv_result") and patient.hcv_result
             else None
         )

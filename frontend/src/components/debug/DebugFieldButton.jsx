@@ -56,7 +56,7 @@ const randomValueGenerators = {
   ast: () => Math.floor(Math.random() * (60 - 10) + 10), // 10-60 U/L
   che: () => Math.floor(Math.random() * (12000 - 3500) + 3500), // 3500-12000 U/L
   crea: () => (Math.random() * (1.5 - 0.6) + 0.6).toFixed(2), // 0.6-1.5 mg/dL
-  ggt: () => Math.floor(Math.random() * (60 - 5) + 5), // 5-60 U/L
+  cgt: () => Math.floor(Math.random() * (60 - 5) + 5), // 5-60 U/L
 
   // Optional Parameters generators
   alb: () => (Math.random() * (5.0 - 3.5) + 3.5).toFixed(1), // 3.5-5.0 g/dL

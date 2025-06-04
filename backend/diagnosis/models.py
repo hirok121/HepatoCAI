@@ -32,7 +32,7 @@ class HCVPatient(models.Model):
         help_text="Cholinesterase", validators=[MinValueValidator(0)]
     )
     crea = models.FloatField(help_text="Creatinine", validators=[MinValueValidator(0)])
-    ggt = models.FloatField(
+    cgt = models.FloatField(
         help_text="Gamma-Glutamyl Transferase", validators=[MinValueValidator(0)]
     )
 
@@ -85,7 +85,7 @@ class HCVPatient(models.Model):
             "ast": self.ast,
             "che": self.che,
             "crea": self.crea,
-            "ggt": self.ggt,
+            "cgt": self.cgt,
         }
 
     def get_optional_lab_values(self):
@@ -99,7 +99,7 @@ class HCVPatient(models.Model):
 
     def is_complete_profile(self):
         """Check if all required fields are present"""
-        required_fields = ["alp", "ast", "che", "crea", "ggt"]
+        required_fields = ["alp", "ast", "che", "crea", "cgt"]
         return all(getattr(self, field) is not None for field in required_fields)
 
 
@@ -154,7 +154,7 @@ class HCVResult(models.Model):
     )
 
     # Stage predictions as JSON field
-    stage_predictions = models.JSONField(help_text="Probability for each stage")
+    hcv_stage_probability = models.JSONField(help_text="Probability for each stage")
 
     # Clinical recommendation
     recommendation = models.TextField(help_text="AI-generated clinical recommendation")

@@ -46,7 +46,7 @@ const DiagnosisCard = ({ diagnosis }) => {
   const ast = diagnosis?.ast || "N/A";
   const che = diagnosis?.che || "N/A";
   const crea = diagnosis?.crea || "N/A";
-  const ggt = diagnosis?.ggt || "N/A";
+  const cgt = diagnosis?.cgt || "N/A";
   const alb = diagnosis?.alb || "N/A";
   const bil = diagnosis?.bil || "N/A";
   const chol = diagnosis?.chol || "N/A";
@@ -55,7 +55,7 @@ const DiagnosisCard = ({ diagnosis }) => {
 
   // Extract additional data from nested structure
   const recommendation = diagnosis?.hcv_result?.recommendation || "N/A";
-  const stagePredictions = diagnosis?.hcv_result?.stage_predictions || {};
+  const stagePredictions = diagnosis?.hcv_result?.hcv_stage_probability || {};
   const hcvStatusProbability =
     diagnosis?.hcv_result?.hcv_status_probability || 0;
   const symptoms = diagnosis?.symptoms || []; // Handle download functionality
@@ -273,10 +273,10 @@ const DiagnosisCard = ({ diagnosis }) => {
               </Box>
               <Box>
                 <Typography variant="body2" color="text.secondary">
-                  GGT
+                  CGT
                 </Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  {ggt}
+                  {cgt}
                 </Typography>
               </Box>
               <Box>

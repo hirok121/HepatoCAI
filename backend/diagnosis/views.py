@@ -72,7 +72,9 @@ class DiagnoseAPIView(APIView):
 
         # Generate diagnosis using AI tool
         try:
-            ai_result = AiDiagnosisTool()
+            print(f"request.data: {request.data}")
+            print(f"data type: {type(request.data)}")
+            ai_result = AiDiagnosisTool().diagnose(request.data)
             logger.info(f"AI Diagnosis Result: {ai_result}")
 
             # Create HCV Result record
@@ -83,7 +85,7 @@ class DiagnoseAPIView(APIView):
                 hcv_risk=ai_result.get("hcv_risk"),
                 hcv_stage=ai_result.get("hcv_stage"),
                 confidence=ai_result.get("confidence"),
-                stage_predictions=ai_result.get("stage_predictions"),
+                hcv_stage_probability=ai_result.get("hcv_stage_probability"),
                 recommendation=ai_result.get("recommendation"),
             )
 
@@ -387,7 +389,7 @@ class UserDiagnosisAnalyticsView(APIView):
                 "age_distribution": age_stats,
                 "risk_distribution": risk_distribution,
                 "hcv_status_distribution": hcv_status_distribution,
-                "stage_distribution": stage_stats,
+                "hcv_stage_distribution": stage_stats,
                 "gender_distribution": gender_stats,
                 "monthly_trends": monthly_trends,
                 "average_confidence": (

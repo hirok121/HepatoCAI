@@ -15,7 +15,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 function HCVAnalysis({ results, getProbabilityColor, getStageColor }) {
   const hcvProbability = results.hcv_status_probability || 0;
-  const stagePredictions = results.stage_predictions || {};
+  const stagePredictions = results.hcv_stage_probability || {};
 
   const pieData = [
     {
@@ -259,7 +259,7 @@ HCVAnalysis.propTypes = {
   results: PropTypes.shape({
     hcv_status_probability: PropTypes.number,
     confidence: PropTypes.number.isRequired,
-    stage_predictions: PropTypes.object,
+    hcv_stage_probability: PropTypes.object,
   }).isRequired,
   getProbabilityColor: PropTypes.func.isRequired,
   getStageColor: PropTypes.func,

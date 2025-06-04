@@ -39,7 +39,7 @@ function Diagnosis() {
     ast: "",
     che: "",
     crea: "",
-    ggt: "",
+    cgt: "",
     alb: "",
     bil: "",
     chol: "",
@@ -77,7 +77,7 @@ function Diagnosis() {
         return;
       }
     } else if (activeStep === 1) {
-      const step2Required = ["alp", "ast", "che", "crea", "ggt"];
+      const step2Required = ["alp", "ast", "che", "crea", "cgt"];
       const missing = step2Required.filter((field) => !formData[field]);
       if (missing.length > 0) {
         alert(`Please fill in required lab results: ${missing.join(", ")}`);
@@ -112,7 +112,7 @@ function Diagnosis() {
         ast: formData.ast,
         che: formData.che,
         crea: formData.crea,
-        ggt: formData.ggt,
+        cgt: formData.cgt,
         alb: formData.alb || null,
         bil: formData.bil || null,
         chol: formData.chol || null,
@@ -149,7 +149,7 @@ function Diagnosis() {
       ast: "",
       che: "",
       crea: "",
-      ggt: "",
+      cgt: "",
       alb: "",
       bil: "",
       chol: "",
