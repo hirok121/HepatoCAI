@@ -19,18 +19,18 @@ function AIAssistant() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI assistant for hepatitis-related questions. How can I help you today?",
+      text: "Hello! I'm HepatoCAI Assistant, your specialized AI companion for Hepatitis C education and support. I can help you understand HCV stages, laboratory results, treatment options, and provide evidence-based information about liver health. How can I assist you today?",
       sender: "ai",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
-
   const quickQuestions = [
-    "What are the symptoms of hepatitis?",
-    "How is hepatitis transmitted?",
-    "What are the treatment options?",
-    "How can I prevent hepatitis?",
+    "What are the HCV fibrosis stages (F0-F4)?",
+    "How do I interpret my liver function test results?",
+    "What are the latest DAA treatment options?",
+    "How can I prevent hepatitis transmission?",
+    "What lifestyle changes support liver health?",
   ];
 
   const handleSend = () => {
@@ -69,15 +69,17 @@ function AIAssistant() {
           <Box sx={{ textAlign: "center", mb: 4 }}>
             <PsychologyIcon
               sx={{ fontSize: "4rem", color: "#2563EB", mb: 2 }}
-            />
+            />{" "}
             <Typography
               variant="h3"
               sx={{ fontWeight: 700, mb: 2, color: "#2563EB" }}
             >
-              AI Assistant
+              HepatoCAI Assistant
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Ask me anything about hepatitis - I'm here to help 24/7
+              Your specialized AI companion for Hepatitis C education and
+              support - Ask me anything about HCV, liver health, and treatment
+              options
             </Typography>
           </Box>
 

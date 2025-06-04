@@ -29,6 +29,7 @@ urlpatterns = [
     # API endpoints
     path("users/", include("users.urls")),
     path("diagnosis/", include("diagnosis.urls")),
+    path("ai/", include("aiassistant.urls")),
     # DRF browsable API
     path("api-auth/", include("rest_framework.urls")),
 ]
