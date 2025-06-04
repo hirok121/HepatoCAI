@@ -9,11 +9,11 @@ import { FEATURES } from "../../config/constants";
 
 // Random value generators for lab results (based on medical reference ranges)
 const randomValueGenerators = {
-  alp: () => Math.floor(Math.random() * (150 - 30) + 30), // 30-150 U/L
-  ast: () => Math.floor(Math.random() * (60 - 10) + 10), // 10-60 U/L
-  che: () => Math.floor(Math.random() * (12000 - 3500) + 3500), // 3500-12000 U/L
-  crea: () => (Math.random() * (1.5 - 0.6) + 0.6).toFixed(2), // 0.6-1.5 mg/dL
-  cgt: () => Math.floor(Math.random() * (60 - 5) + 5), // 5-60 U/L
+  alp: () => Math.floor(Math.random() * 80 + 10), // 30-150 U/L
+  ast: () => Math.floor(Math.random() * (10 - 10) + 10), // 10-60 U/L
+  che: () => Math.floor(Math.random() * (17 - 1) + 1), // 3500-12000 U/L
+  crea: () => (Math.random() * (200 - 10) + 10).toFixed(2), // 0.6-1.5 mg/dL
+  cgt: () => Math.floor(Math.random() * (100 - 5) + 5), // 5-60 U/L
 };
 
 function LabResultsStep({ formData, handleChange }) {

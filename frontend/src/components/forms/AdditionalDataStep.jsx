@@ -9,11 +9,11 @@ import { FEATURES } from "../../config/constants";
 
 // Random value generators for optional parameters and symptoms
 const randomValueGenerators = {
-  alb: () => (Math.random() * (5.0 - 3.5) + 3.5).toFixed(1), // 3.5-5.0 g/dL
-  bil: () => (Math.random() * (1.2 - 0.2) + 0.2).toFixed(2), // 0.2-1.2 mg/dL
-  chol: () => Math.floor(Math.random() * (300 - 120) + 120), // 120-300 mg/dL
-  prot: () => (Math.random() * (8.5 - 6.0) + 6.0).toFixed(1), // 6.0-8.5 g/dL
-  alt: () => Math.floor(Math.random() * (60 - 7) + 7), // 7-60 U/L
+  alb: () => (Math.random() * (80 - 20) + 20).toFixed(1), // 3.5-5.0 g/dL
+  bil: () => (Math.random() * (50 - 2) + 2).toFixed(2), // 0.2-1.2 mg/dL
+  chol: () => Math.floor(Math.random() * (10 - 1) + 1), // 120-300 mg/dL
+  prot: () => (Math.random() * (90 - 51.0) + 51.0).toFixed(1), // 6.0-8.5 g/dL
+  alt: () => Math.floor(Math.random() * (60 - 0) + 0), // 7-60 U/L
   symptoms: () => {
     const allSymptoms = [
       "Fatigue",

@@ -55,7 +55,7 @@ const randomValueGenerators = {
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     return `${firstName} ${lastName}`;
   },
-  age: () => Math.floor(Math.random() * 80) + 18, // 18-98 years
+  age: () => Math.floor(Math.random() * 60) + 18, // 18-98 years
   sex: () => (Math.random() > 0.5 ? "Male" : "Female"),
 };
 

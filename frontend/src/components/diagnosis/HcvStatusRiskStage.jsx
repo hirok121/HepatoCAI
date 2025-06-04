@@ -314,7 +314,7 @@ const HcvStageCard = ({ stage }) => {
         textColor: "#a16207",
         description: "Moderate Fibrosis",
       },
-      Chirosis: {
+      Cirrhosis: {
         color: "#ea580c",
         bgColor: "linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)",
         borderColor: "#fdba74",
