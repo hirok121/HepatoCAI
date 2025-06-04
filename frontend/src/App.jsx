@@ -133,7 +133,11 @@ function App() {
             />
             <Route
               path="/ai-assistant"
-              element={<LazyComponents.AIAssistant />}
+              element={
+                <ProtectedRoute>
+                  <LazyComponents.AIAssistant />
+                </ProtectedRoute>
+              }
             />
             <Route
               path="/patient-education"

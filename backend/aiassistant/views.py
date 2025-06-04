@@ -389,11 +389,6 @@ class ChatMessageView(APIView):
             # Check if this is the first message exchange for title generation
             is_first_exchange = chat.messages.count() == 0 and not chat.title
 
-            # Create user message
-            user_message = Message.objects.create(
-                chat=chat, content=user_message_content, is_from_user=True
-            )
-
             # Prepare context from previous messages
             previous_messages = chat.messages.order_by("created_at")[
                 :10
@@ -407,12 +402,16 @@ class ChatMessageView(APIView):
                 for msg in previous_messages
             ]
 
-            # Get AI response
+            # Get AI response FIRST - don't save user message until AI succeeds
             ai_response = gemini_assistant.get_response(
                 prompt=user_message_content, chat_history=chat_history
             )
 
             if ai_response.get("success"):
+                # Only create messages if AI response is successful
+                user_message = Message.objects.create(
+                    chat=chat, content=user_message_content, is_from_user=True
+                )
                 # Create AI message
                 ai_message = Message.objects.create(
                     chat=chat, content=ai_response["response"], is_from_user=False
@@ -456,16 +455,11 @@ class ChatMessageView(APIView):
                 )
 
             else:
+                # AI response failed - don't save any messages
                 return Response(
                     {
                         "success": False,
-                        "error": "Failed to get AI response",
-                        "user_message": {
-                            "id": str(user_message.id),
-                            "content": user_message.content,
-                            "is_from_user": True,
-                            "created_at": user_message.created_at.isoformat(),
-                        },
+                        "error": ai_response.get("error", "Failed to get AI response"),
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
