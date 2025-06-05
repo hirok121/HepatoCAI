@@ -34,16 +34,27 @@ export const LazyComponents = {
   AdminSystem: lazy(() => import('../pages/admin/AdminSystem')),
   AdminDebugConsole: lazy(() => import('../pages/admin/AdminDebugConsole')),
   AdminDiagnosisManagement: lazy(() => import('../pages/admin/AdminDiagnosisManagement')),
-  
-  // Main Application Components
+    // Main Application Components
   Home: lazy(() => import('../pages/Home')),
   Diagnosis: lazy(() => import('../pages/diagnosis/Diagnosis')),
   Analytics: lazy(() => import('../pages/AnalyticsPage')),
   AIAssistant: lazy(() => import('../pages/AIAssistant')),
-  PatientEducation: lazy(() => import('../pages/PatientEducation')),  Research: lazy(() => import('../pages/Research')),
+  PatientEducation: lazy(() => import('../pages/PatientEducation')),
+  Research: lazy(() => import('../pages/Research')),
   ProfileDashboard: lazy(() => import('../pages/ProfileDashboard')),
   ProfilePage: lazy(() => import('../pages/ProfilePage')),
   CommunityForum: lazy(() => import('../pages/public/CommunityForum')),
+  
+  // Blog Pages
+  UnderstandingHepatitisTypes: lazy(() => import('../pages/blogs/understanding-hepatitis-types')),
+  PreventionGuidelines: lazy(() => import('../pages/blogs/prevention-guidelines')),
+  TreatmentOptions: lazy(() => import('../pages/blogs/treatment-options')),
+  LivingWithHepatitis: lazy(() => import('../pages/blogs/living-with-hepatitis')),
+  NutritionGuide: lazy(() => import('../pages/blogs/nutrition-guide')),
+  FaqsAboutHepatitis: lazy(() => import('../pages/blogs/faqs-about-hepatitis')),
+  UnderstandingHcv: lazy(() => import('../pages/blogs/understanding-hcv')),
+  MachineLearningLiverDisease: lazy(() => import('../pages/blogs/machine-learning-liver-disease')),
+  BiomarkerAnalysis: lazy(() => import('../pages/blogs/biomarker-analysis')),
   
   // Public Pages
   About: lazy(() => import('../pages/public/About')),

@@ -138,10 +138,47 @@ function App() {
                   <LazyComponents.AIAssistant />
                 </ProtectedRoute>
               }
-            />
+            />{" "}
             <Route
               path="/patient-education"
               element={<LazyComponents.PatientEducation />}
+            />
+            {/* Blog Pages */}
+            <Route
+              path="/blogs/understanding-hepatitis-types"
+              element={<LazyComponents.UnderstandingHepatitisTypes />}
+            />
+            <Route
+              path="/blogs/prevention-guidelines"
+              element={<LazyComponents.PreventionGuidelines />}
+            />
+            <Route
+              path="/blogs/treatment-options"
+              element={<LazyComponents.TreatmentOptions />}
+            />
+            <Route
+              path="/blogs/living-with-hepatitis"
+              element={<LazyComponents.LivingWithHepatitis />}
+            />
+            <Route
+              path="/blogs/nutrition-guide"
+              element={<LazyComponents.NutritionGuide />}
+            />
+            <Route
+              path="/blogs/faqs-about-hepatitis"
+              element={<LazyComponents.FaqsAboutHepatitis />}
+            />
+            <Route
+              path="/blogs/understanding-hcv"
+              element={<LazyComponents.UnderstandingHcv />}
+            />
+            <Route
+              path="/blogs/machine-learning-liver-disease"
+              element={<LazyComponents.MachineLearningLiverDisease />}
+            />
+            <Route
+              path="/blogs/biomarker-analysis"
+              element={<LazyComponents.BiomarkerAnalysis />}
             />
             <Route path="/research" element={<LazyComponents.Research />} />
             <Route path="/faq" element={<LazyComponents.FAQ />} />
