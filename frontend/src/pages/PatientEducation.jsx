@@ -22,75 +22,94 @@ function PatientEducation() {
   const navigate = useNavigate();
   const educationResources = [
     {
-      title:
-        "Understanding Hepatitis C Virus (HCV): From Detection to Treatment",
+      title: "Understanding Hepatitis C Virus: From Detection to Treatment",
       description:
-        "Understanding HCV through advanced AI diagnostic tools and biomarker analysis",
+        "Explore how advanced AI diagnostic tools and biomarker analysis are changing HCV care. Learn why early detection matters and how modern treatments improve outcomes. Follow the journey from diagnosis to recovery with expert insights.",
       type: "article",
-      image: "/src/assets/blogimages/hcv_symptoms.jpg",
+      image: "/src/assets/blogimages/test.jpg",
       link: "/blogs/understanding-hcv",
       tags: ["AI", "Diagnostics", "HCV"],
-    },
-    {
-      title: "Understanding Hepatitis Types",
-      description:
-        "Learn about different types of hepatitis and their characteristics",
-      type: "article",
-      image: "/src/assets/blogimages/virus.jpg",
-      link: "/blogs/understanding-hepatitis-types",
-    },
-    {
-      title: "Prevention Guidelines",
-      description: "Essential steps to prevent hepatitis transmission",
-      type: "guide",
-      image: "/src/assets/blogimages/virus2.jpg",
-      link: "/blogs/prevention-guidelines",
-    },
-    {
-      title: "Treatment Options",
-      description: "Modern treatment approaches for hepatitis management",
-      type: "guide",
-      image: "/src/assets/blogimages/image4.jpg",
-      link: "/blogs/treatment-options",
-    },
-    {
-      title: "Living with Hepatitis",
-      description: "Lifestyle tips for hepatitis patients",
-      type: "article",
-      image: "/src/assets/blogimages/livingwithhcv.png",
-      link: "/blogs/living-with-hepatitis",
-    },
-    {
-      title: "Nutrition Guide",
-      description: "Dietary recommendations for hepatitis patients",
-      type: "guide",
-      image: "/src/assets/blogimages/image5.jpg",
-      link: "/blogs/nutrition-guide",
-    },
-    {
-      title: "FAQs About Hepatitis",
-      description: "Common questions and answers about hepatitis",
-      type: "article",
-      image: "/src/assets/blogimages/image2.png",
-      link: "/blogs/faqs-about-hepatitis",
+      readTime: "8 min read",
     },
     {
       title: "Machine Learning in Liver Disease",
       description:
-        "Logistic regression models and SHAP explainability for hepatitis diagnosis",
+        "See how AI and machine learning are transforming liver disease detection and prognosis. Learn about logistic regression models and SHAP explainability. Understand the benefits and limitations in healthcare.",
       type: "article",
       image: "/src/assets/blogimages/image.png",
       link: "/blogs/machine-learning-liver-disease",
       tags: ["Machine Learning", "SHAP", "Explainability"],
+      readTime: "15 min read",
     },
     {
       title: "Biomarker Analysis & Precision Medicine",
       description:
-        "Multi-parameter analysis for precise hepatitis diagnosis and treatment",
+        "Learn how multi-parameter biomarker analysis guides personalized hepatitis care. Discover how precision medicine improves outcomes. Explore the future of targeted therapies in liver health.",
       type: "guide",
-      image: "/src/assets/blogimages/hcv_symptoms2.jpg",
+      image: "/src/assets/blogimages/virushuman3.jpg",
       link: "/blogs/biomarker-analysis",
       tags: ["Biomarkers", "Precision Medicine", "Analysis"],
+      readTime: "12 min read",
+    },
+    {
+      title: "Understanding Hepatitis Types",
+      description:
+        "Discover the differences between hepatitis types and how each affects the liver. Learn about symptoms, causes, and prevention strategies. Get clarity on the unique challenges of each type.",
+      type: "article",
+      image: "/src/assets/blogimages/virus.jpg",
+      link: "/blogs/understanding-hepatitis-types",
+      tags: ["Hepatitis Types", "Symptoms", "Education"],
+      readTime: "6 min read",
+    },
+    {
+      title: "Prevention Guidelines",
+      description:
+        "Find out how lifestyle choices, vaccination, and hygiene can reduce hepatitis risk. Get practical, up-to-date prevention tips for you and your family. Protect yourself with essential steps.",
+      type: "guide",
+      image: "/src/assets/blogimages/virus2.jpg",
+      link: "/blogs/prevention-guidelines",
+      tags: ["Prevention", "Vaccination", "Safety"],
+      readTime: "5 min read",
+    },
+    {
+      title: "Treatment Options",
+      description:
+        "Explore modern approaches for hepatitis management, including medications and therapies. Learn what to expect during your treatment journey. Stay informed about the latest advancements in care.",
+      type: "guide",
+      image: "/src/assets/blogimages/image4.jpg",
+      link: "/blogs/treatment-options",
+      tags: ["Treatment", "Therapy", "Medication"],
+      readTime: "10 min read",
+    },
+    {
+      title: "Living with Hepatitis",
+      description:
+        "Get lifestyle tips for managing hepatitis day-to-day. Learn how to maintain emotional well-being and build a support network. Practical advice for living healthier and happier with hepatitis.",
+      type: "article",
+      image: "/src/assets/blogimages/livingwithhcv.png",
+      link: "/blogs/living-with-hepatitis",
+      tags: ["Lifestyle", "Wellness", "Support"],
+      readTime: "7 min read",
+    },
+    {
+      title: "Nutrition Guide",
+      description:
+        "Discover foods that support liver health and those to avoid. Get meal planning tips and nutrition advice tailored for hepatitis patients. Learn how diet can help your recovery.",
+      type: "guide",
+      image: "/src/assets/blogimages/image5.jpg",
+      link: "/blogs/nutrition-guide",
+      tags: ["Nutrition", "Diet", "Liver Health"],
+      readTime: "12 min read",
+    },
+    {
+      title: "FAQs About Hepatitis",
+      description:
+        "Find clear, concise answers to common hepatitis questions. Empower yourself with reliable information and expert guidance. Get quick responses to your most frequent concerns.",
+      type: "article",
+      image: "/src/assets/blogimages/image2.png",
+      link: "/blogs/faqs-about-hepatitis",
+      tags: ["FAQ", "Questions", "Information"],
+      readTime: "4 min read",
     },
   ];
   const getIcon = (type) => {
@@ -129,7 +148,7 @@ function PatientEducation() {
               manage hepatitis with evidence-based information and AI-powered
               insights
             </Typography>
-          </Box>
+          </Box>{" "}
           {/* Introduction Section */}
           <Box
             sx={{
@@ -138,26 +157,49 @@ function PatientEducation() {
               backgroundColor: "#f8fafc",
               borderRadius: "16px",
               border: "1px solid #e2e8f0",
+              textAlign: "center",
             }}
           >
-            <Grid container spacing={4} alignItems="center">
+            <Grid
+              container
+              spacing={4}
+              alignItems="center"
+              justifyContent="center"
+            >
               <Grid item xs={12} md={6}>
                 <Typography
                   variant="h4"
-                  sx={{ fontWeight: 700, mb: 2, color: "#1e40af" }}
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2,
+                    color: "#1e40af",
+                    textAlign: "center",
+                  }}
                 >
                   Why Patient Education Matters
                 </Typography>
                 <Typography
                   variant="body1"
-                  sx={{ mb: 3, color: "#64748b", lineHeight: 1.7 }}
+                  sx={{
+                    mb: 3,
+                    color: "#64748b",
+                    lineHeight: 1.7,
+                    textAlign: "center",
+                  }}
                 >
                   Understanding hepatitis is crucial for effective management
                   and prevention. Our educational resources combine traditional
                   medical knowledge with cutting-edge AI insights to provide you
                   with comprehensive, personalized information.
                 </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    justifyContent: "center",
+                  }}
+                >
                   <Chip
                     label="Evidence-Based"
                     sx={{
@@ -271,7 +313,7 @@ function PatientEducation() {
                 </Box>
               </Grid>
             </Grid>
-          </Box>
+          </Box>{" "}
           {/* Education Resources Section */}
           <Box>
             <Typography
@@ -280,40 +322,61 @@ function PatientEducation() {
             >
               Educational Resources
             </Typography>
-            <Grid container spacing={3}>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 3,
+                justifyContent: "center",
+                alignItems: "stretch",
+              }}
+            >
               {educationResources.map((resource, index) => (
-                <Grid item xs={12} md={6} lg={4} key={index}>
-                  <Card
+                <Card
+                  key={index}
+                  sx={{
+                    minWidth: "320px",
+                    maxWidth: "380px",
+                    flex: "1 1 320px",
+                    display: "flex",
+                    flexDirection: "column",
+                    borderRadius: "16px",
+                    cursor: "pointer",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                    },
+                  }}
+                  onClick={() => handleCardClick(resource.link)}
+                >
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={resource.image}
+                    alt={resource.title}
                     sx={{
-                      height: "100%",
-                      borderRadius: "16px",
-                      cursor: "pointer",
-                      transition: "transform 0.2s, box-shadow 0.2s",
+                      objectFit: "cover",
+                      width: "100%",
+                      maxHeight: "200px",
+                      minHeight: "200px",
+                      backgroundColor: "#f5f5f5",
+                      transition: "transform 0.3s ease",
                       "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                        transform: "scale(1.02)",
                       },
                     }}
-                    onClick={() => handleCardClick(resource.link)}
+                  />
+                  <CardContent
+                    sx={{
+                      p: 3,
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    }}
                   >
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={resource.image}
-                      alt={resource.title}
-                      sx={{
-                        objectFit: "cover",
-                        width: "100%",
-                        maxHeight: "200px",
-                        minHeight: "200px",
-                        backgroundColor: "#f5f5f5",
-                        transition: "transform 0.3s ease",
-                        "&:hover": {
-                          transform: "scale(1.02)",
-                        },
-                      }}
-                    />
-                    <CardContent sx={{ p: 3 }}>
+                    <Box>
                       {resource.tags && (
                         <Box sx={{ mb: 2 }}>
                           {resource.tags.map((tag, tagIndex) => (
@@ -334,14 +397,22 @@ function PatientEducation() {
                       )}
                       <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                         {resource.title}
-                      </Typography>
+                      </Typography>{" "}
                       <Typography
                         variant="body2"
                         color="text.secondary"
-                        sx={{ mb: 2 }}
+                        sx={{ mb: 2, lineHeight: 1.6 }}
                       >
                         {resource.description}
                       </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
                       <Button
                         variant="outlined"
                         startIcon={getIcon(resource.type)}
@@ -364,11 +435,23 @@ function PatientEducation() {
                           ? "Read Guide"
                           : "Read Article"}
                       </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}{" "}
-            </Grid>
+                      {resource.readTime && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6b7280",
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                          }}
+                        >
+                          📖 {resource.readTime}
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
           </Box>
           {/* Quick Tips Section */}
           <Box
@@ -392,10 +475,10 @@ function PatientEducation() {
               }}
             >
               Quick Health Tips
-            </Typography>
+            </Typography>{" "}
             <Grid container spacing={3}>
               {" "}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{ textAlign: "center", p: 2 }}>
                   <Box
                     sx={{
@@ -435,7 +518,7 @@ function PatientEducation() {
                   </Typography>
                 </Box>
               </Grid>{" "}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{ textAlign: "center", p: 2 }}>
                   <Box
                     sx={{
@@ -475,7 +558,7 @@ function PatientEducation() {
                   </Typography>
                 </Box>
               </Grid>{" "}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <Box sx={{ textAlign: "center", p: 2 }}>
                   <Box
                     sx={{
@@ -512,6 +595,46 @@ function PatientEducation() {
                   >
                     Schedule regular medical checkups for early detection and
                     monitoring
+                  </Typography>
+                </Box>
+              </Grid>{" "}
+              <Grid item xs={12} md={6}>
+                <Box sx={{ textAlign: "center", p: 2 }}>
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: "50%",
+                      backgroundColor: "#fdf2f8",
+                      border: "2px solid #dc2626",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mx: "auto",
+                      mb: 2,
+                    }}
+                  >
+                    <Typography variant="h4">🚫</Typography>
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1,
+                      color: "#dc2626",
+                    }}
+                  >
+                    Avoid Risk Factors
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#374151",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Limit alcohol consumption and avoid sharing personal items
+                    like razors or toothbrushes
                   </Typography>
                 </Box>
               </Grid>{" "}
