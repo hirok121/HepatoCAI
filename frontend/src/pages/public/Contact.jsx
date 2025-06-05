@@ -10,7 +10,11 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
+import api from "../../services/api";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -26,6 +30,12 @@ function Contact() {
     subject: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -33,11 +43,38 @@ function Contact() {
       [e.target.name]: e.target.value,
     }));
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
+    setLoading(true);
+
+    try {
+      const response = await api.post("users/contact/me/", formData);
+      console.log("Response:", response.data);
+
+      if (response.data.status === "success") {
+        setNotification({
+          open: true,
+          message: response.data.message,
+          severity: "success",
+        });
+
+        // Reset form after successful submission
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      }
+    } catch (error) {
+      setNotification({
+        open: true,
+        message: "Failed to send message. Please try again.",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   const contactInfo = [
     {
@@ -143,12 +180,15 @@ function Contact() {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                    />
+                    />{" "}
                     <Button
                       type="submit"
                       variant="contained"
                       size="large"
-                      startIcon={<SendIcon />}
+                      startIcon={
+                        loading ? <CircularProgress size={20} /> : <SendIcon />
+                      }
+                      disabled={loading}
                       sx={{
                         px: 4,
                         py: 1.5,
@@ -158,7 +198,7 @@ function Contact() {
                         alignSelf: "flex-end",
                       }}
                     >
-                      Send Message
+                      {loading ? "Sending..." : "Send Message"}
                     </Button>
                   </Box>
                 </form>
@@ -225,10 +265,25 @@ function Contact() {
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
               Emergency Hotline: 911
-            </Typography>
+            </Typography>{" "}
           </Paper>
         </Box>
-      </Container>
+      </Container>{" "}
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={() => setNotification({ ...notification, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setNotification({ ...notification, open: false })}
+          severity={notification.severity}
+          sx={{ width: "100%" }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

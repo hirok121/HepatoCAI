@@ -900,6 +900,13 @@ class ContactMeView(APIView):
                         f"Failed to send confirmation email to {email}: {str(conf_e)}"
                     )
                     # Don't fail the main request if confirmation email fails
+                    return StandardResponse.success(
+                        data={
+                            "message_sent": True,
+                            "confirmation_sent": False,
+                        },
+                        message="Your message has been sent successfully! We'll get back to you soon.",
+                    )
 
                 return StandardResponse.success(
                     data={
