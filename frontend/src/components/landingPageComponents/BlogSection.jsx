@@ -10,23 +10,16 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Chip,
-  Avatar,
 } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import {
   Article,
-  Person,
-  Schedule,
   ArrowForward,
   Biotech,
   Psychology,
   Science,
-  LocalHospital,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom"; // Add this import for navigation
-
-import tempImg from "../../assets/hope.png";
 
 // Animations
 const fadeInAnimation = keyframes`
@@ -62,17 +55,6 @@ const BlogCard = styled(Card)(({ theme }) => ({
     transform: "translateY(-8px)",
     boxShadow: theme.shadows[8],
   },
-}));
-
-const CategoryChip = styled(Chip)(({ theme }) => ({
-  position: "absolute",
-  top: "12px",
-  left: "12px",
-  backgroundColor: theme.palette.primary.main,
-  color: "white",
-  fontWeight: 600,
-  fontSize: "0.75rem",
-  zIndex: 1,
 }));
 
 // Theme matching DiagnosticToolSection
@@ -166,7 +148,7 @@ const BlogSection = ({ id }) => {
       author: "Dr. Sarah Johnson",
       date: "May 20, 2025",
       readTime: "5 min read",
-      image: tempImg,
+      image: "/src/assets/blogimages/image5.jpg",
       category: "Research",
       icon: <Biotech />,
       featured: true,
@@ -179,7 +161,7 @@ const BlogSection = ({ id }) => {
       author: "Dr. Michael Chen",
       date: "May 18, 2025",
       readTime: "7 min read",
-      image: tempImg,
+      image: "/src/assets/blogimages/image.png",
       category: "AI Technology",
       icon: <Psychology />,
       featured: false,
@@ -192,46 +174,43 @@ const BlogSection = ({ id }) => {
       author: "Dr. Emily Rodriguez",
       date: "May 15, 2025",
       readTime: "6 min read",
-      image: tempImg,
+      image: "/src/assets/blogimages/virus2.jpg",
       category: "Clinical Science",
       icon: <Science />,
       featured: false,
     },
   ];
 
-  const getCategoryIcon = (category) => {
-    switch (category) {
-      case "Research":
-        return <Biotech />;
-      case "AI Technology":
-        return <Psychology />;
-      case "Clinical Science":
-        return <Science />;
-      default:
-        return <LocalHospital />;
-    }
-  };
-
   // Navigation handlers
   const handleReadArticle = (post) => {
-    // TODO: Navigate to individual blog post page
-    // Example route: /blog/post-slug or /blog/1
-    const slug = post.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-    navigate(`/patient-education/${slug}`);
-    // Alternative: navigate(`/blog/${post.id}`);
+    // Navigate to specific blog post pages
+    let route = "";
+    switch (post.id) {
+      case 1:
+        route = "/blogs/understanding-hcv";
+        break;
+      case 2:
+        route = "/blogs/machine-learning-liver-disease";
+        break;
+      case 3:
+        route = "/blogs/biomarker-analysis";
+        break;
+      default:
+        route = `/blogs/${post.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")}`;
+    }
+    navigate(route);
   };
 
   const handleCardClick = (post) => {
     // Same navigation as read article button
     handleReadArticle(post);
   };
-
   const handleViewAllArticles = () => {
-    // TODO: Navigate to blog listing page
-    navigate("/patient-education"); // Adjust the route as needed
+    // Navigate to blog listing page
+    navigate("/patient-education"); // Keep this route for the general education page
   };
 
   return (
@@ -295,18 +274,23 @@ const BlogSection = ({ id }) => {
                 animationDelay={`${0.2 + index * 0.1}s`}
               >
                 <BlogCard onClick={() => handleCardClick(post)}>
-                  <Box sx={{ position: "relative" }}>
-                    <CategoryChip
-                      label={post.category}
-                      icon={getCategoryIcon(post.category)}
-                      size="small"
-                    />
+                  {" "}
+                  <Box
+                    sx={{
+                      position: "relative",
+                      height: "200px",
+                      overflow: "hidden",
+                    }}
+                  >
                     <CardMedia
                       component="img"
-                      height="200"
                       image={post.image}
                       alt={post.title}
                       sx={{
+                        width: "100%",
+                        height: "200px",
+                        objectFit: "cover",
+                        objectPosition: "center",
                         transition: "transform 0.3s ease",
                         "&:hover": {
                           transform: "scale(1.05)",
@@ -314,15 +298,15 @@ const BlogSection = ({ id }) => {
                       }}
                     />
                   </Box>
-
-                  <CardContent sx={{ p: 3, height: "calc(100% - 200px)" }}>
+                  <CardContent sx={{ p: 2.5, height: "calc(100% - 200px)" }}>
+                    {" "}
                     <Typography
                       variant="h6"
                       gutterBottom
                       sx={{
-                        mb: 2,
+                        mb: 1.5,
                         lineHeight: 1.4,
-                        minHeight: "2.8em",
+                        minHeight: "2.2em",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
@@ -330,78 +314,18 @@ const BlogSection = ({ id }) => {
                       }}
                     >
                       {post.title}
-                    </Typography>
-
+                    </Typography>{" "}
                     <Typography
                       variant="body2"
                       sx={{
-                        mb: 3,
+                        mb: 2,
                         color: "#64748B",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        minHeight: "3.6em",
+                        lineHeight: 1.6,
                       }}
                     >
                       {post.excerpt}
                     </Typography>
-
-                    {/* Author and Meta Info */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                        mt: "auto",
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Avatar
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            mr: 1,
-                            backgroundColor: theme.palette.primary.main,
-                          }}
-                        >
-                          <Person fontSize="small" />
-                        </Avatar>
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 600,
-                              color: "#374151",
-                              fontSize: "0.8rem",
-                            }}
-                          >
-                            {post.author}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "#9CA3AF", fontSize: "0.75rem" }}
-                          >
-                            {post.date}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Schedule
-                          sx={{ fontSize: "16px", mr: 0.5, color: "#6B7280" }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "#6B7280", fontSize: "0.75rem" }}
-                        >
-                          {post.readTime}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    {/* Update the Read Article button */}
+                    {/* Read Article button */}
                     <Button
                       variant="outlined"
                       color="primary"
