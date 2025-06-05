@@ -313,6 +313,20 @@ function AIAssistant() {
         flexDirection: "column",
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         minHeight: "100vh",
+        position: "relative",
+        // Add subtle pattern overlay
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                       radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%)`,
+          pointerEvents: "none",
+        },
+        // Enhanced pulse animation
         "@keyframes pulse": {
           "0%": {
             transform: "translate(-50%, -50%) scale(1)",
@@ -326,6 +340,11 @@ function AIAssistant() {
             transform: "translate(-50%, -50%) scale(1)",
             opacity: 0.7,
           },
+        },
+        // Add floating animation for background elements
+        "@keyframes float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
         },
       }}
     >
@@ -378,11 +397,16 @@ function AIAssistant() {
               width: sidebarOpen ? 280 : 0,
               transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               overflow: "hidden",
-              background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+              background:
+                "linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(226, 232, 240, 0.95) 100%)",
               borderRight: sidebarOpen
-                ? "1px solid rgba(255, 255, 255, 0.2)"
+                ? "1px solid rgba(255, 255, 255, 0.3)"
                 : "none",
-              backdropFilter: "blur(20px)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              // Add subtle inner shadow
+              boxShadow: sidebarOpen
+                ? "inset -1px 0 0 rgba(255, 255, 255, 0.1)"
+                : "none",
             }}
           >
             <ChatSidebar
@@ -471,10 +495,21 @@ function AIAssistant() {
                     px: 3,
                     py: 3,
                     background: "rgba(255, 255, 255, 0.95)",
-                    backdropFilter: "blur(20px)",
-                    borderBottom: "1px solid rgba(226, 232, 240, 0.5)",
+                    backdropFilter: "blur(20px) saturate(180%)",
+                    borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
                     position: "relative",
                     zIndex: 1,
+                    // Add subtle top border glow
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: "1px",
+                      background:
+                        "linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent)",
+                    },
                   }}
                 >
                   <IconButton
@@ -572,7 +607,10 @@ function AIAssistant() {
                     WebkitTextFillColor: "transparent",
                     fontSize: { xs: "2.5rem", md: "3.5rem" },
                     letterSpacing: "-0.02em",
-                    textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    // Add this for better text rendering
+                    textShadow: "none",
+                    WebkitFontSmoothing: "antialiased",
+                    MozOsxFontSmoothing: "grayscale",
                   }}
                 >
                   HepatoCAI Assistant
@@ -612,16 +650,22 @@ function AIAssistant() {
                       icon: "🩺",
                       title: "Medical Insights",
                       desc: "Get expert information about Hepatitis C",
+                      gradient:
+                        "linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)",
                     },
                     {
                       icon: "📊",
                       title: "Lab Results",
                       desc: "Understand your test results and values",
+                      gradient:
+                        "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                     },
                     {
                       icon: "💊",
                       title: "Treatment Options",
                       desc: "Learn about available therapies",
+                      gradient:
+                        "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
                     },
                   ].map((feature, index) => (
                     <Box
@@ -630,19 +674,50 @@ function AIAssistant() {
                         p: 3,
                         background: "rgba(255, 255, 255, 0.7)",
                         backdropFilter: "blur(10px)",
-                        borderRadius: "16px",
+                        borderRadius: "20px", // Slightly more rounded
                         border: "1px solid rgba(255, 255, 255, 0.3)",
                         textAlign: "center",
-                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        position: "relative",
+                        overflow: "hidden",
+                        transition:
+                          "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)", // Smoother bounce
                         cursor: "pointer",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: feature.gradient,
+                          opacity: 0,
+                          transition: "opacity 0.3s ease",
+                          borderRadius: "20px",
+                        },
                         "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: "0 12px 28px rgba(0, 0, 0, 0.15)",
-                          background: "rgba(255, 255, 255, 0.9)",
+                          transform: "translateY(-8px) scale(1.02)", // Enhanced lift effect
+                          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
+                          background: "rgba(255, 255, 255, 0.95)",
+                          "&::before": {
+                            opacity: 0.05,
+                          },
+                          "& .feature-icon": {
+                            transform: "scale(1.2) rotate(5deg)",
+                            filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))",
+                          },
                         },
                       }}
                     >
-                      <Typography variant="h4" sx={{ mb: 2 }}>
+                      <Typography
+                        variant="h4"
+                        className="feature-icon"
+                        sx={{
+                          mb: 2,
+                          transition:
+                            "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                          display: "block",
+                        }}
+                      >
                         {feature.icon}
                       </Typography>
                       <Typography
