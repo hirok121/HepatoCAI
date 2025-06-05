@@ -18,6 +18,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model, logout, authenticate
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.utils import timezone
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.views import View
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
@@ -37,6 +38,7 @@ from .serializers import (
     ProfileSerializer,
     EmailCheckSerializer,
     CustomTokenObtainPairSerializer,
+    ContactFormSerializer,
 )
 from utils.responses import StandardResponse, handle_exceptions
 from utils.security import SecurityValidator, RateLimitManager, AuditLogger
@@ -45,12 +47,12 @@ from utils.url_utils import URLBuilder
 
 import json
 import logging
+import csv
 from dotenv import load_dotenv
 import os
 
 User = get_user_model()
 load_dotenv()
-logger = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 
 
@@ -723,3 +725,195 @@ class UserManagementView(APIView):
         except Exception as e:
             logger.error(f"Error in export_users: {str(e)}")
             return StandardResponse.server_error("Failed to export users", e)
+
+
+class ContactMeView(APIView):
+    """
+    API endpoint for sending contact emails.
+    Allows users to send contact messages via the contact form.
+    """
+
+    permission_classes = [AllowAny]
+    serializer_class = ContactFormSerializer
+
+    @extend_schema(
+        operation_id="contact_me",
+        summary="Send contact email",
+        description="Send a contact message via email. This endpoint accepts contact form data and sends an email to the site administrator.",
+        request=ContactFormSerializer,
+        responses={
+            200: OpenApiResponse(description="Contact email sent successfully"),
+            400: OpenApiResponse(description="Validation error - invalid form data"),
+            429: OpenApiResponse(
+                description="Rate limit exceeded - too many contact attempts"
+            ),
+            500: OpenApiResponse(
+                description="Internal server error - failed to send email"
+            ),
+        },
+        tags=["Contact"],
+    )
+    @handle_exceptions
+    @RateLimitManager.rate_limit_decorator(
+        "contact"
+    )  # Specific rate limit for contact form
+    def post(self, request):
+        """Send contact email endpoint"""
+        client_ip = request.META.get("REMOTE_ADDR")
+
+        logger.info(f"Contact form submission from IP: {client_ip}")
+
+        # Security validation
+        if not SecurityValidator.validate_input_data(request.data):
+            logger.warning(f"Invalid contact form input from IP: {client_ip}")
+            return StandardResponse.error(
+                message="Invalid input data detected",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+
+                # Extract validated data
+                name = validated_data["name"]
+                email = validated_data["email"]
+                subject = validated_data["subject"]
+                message = validated_data["message"]
+
+                # Send email to admin
+                admin_email = getattr(
+                    settings, "CONTACT_EMAIL", settings.EMAIL_HOST_USER
+                )
+
+                # Create email context
+                email_context = {
+                    "name": name,
+                    "email": email,
+                    "subject": subject,
+                    "message": message,
+                    "ip_address": client_ip,
+                    "timestamp": timezone.now().strftime("%Y-%m-%d %H:%M:%S UTC"),
+                }
+
+                # Create HTML message (you can create a template for this)
+                html_message = f"""
+                <html>
+                <body>
+                    <h2>New Contact Form Submission - HepatoCAI</h2>
+                    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px;">
+                        <p><strong>From:</strong> {name} ({email})</p>
+                        <p><strong>Subject:</strong> {subject}</p>
+                        <p><strong>IP Address:</strong> {client_ip}</p>
+                        <p><strong>Timestamp:</strong> {email_context['timestamp']}</p>
+                    </div>
+                    <div style="margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h3>Message:</h3>
+                        <p style="white-space: pre-wrap;">{message}</p>
+                    </div>
+                    <div style="margin-top: 20px; padding: 10px; background-color: #e8f4f8; border-radius: 5px;">
+                        <p><em>This message was sent via the HepatoCAI contact form.</em></p>
+                        <p><em>Reply directly to this email to respond to the sender.</em></p>
+                    </div>
+                </body>
+                </html>
+                """
+
+                plain_message = f"""
+                New Contact Form Submission - HepatoCAI
+
+                From: {name} ({email})
+                Subject: {subject}
+                IP Address: {client_ip}
+                Timestamp: {email_context['timestamp']}
+
+                Message:
+                {message}
+
+                ---
+                This message was sent via the HepatoCAI contact form.
+                Reply directly to this email to respond to the sender.
+                """
+
+                # Send email
+                msg = EmailMultiAlternatives(
+                    subject=f"[HepatoCAI Contact] {subject}",
+                    body=plain_message,
+                    from_email=f"HepatoCAI Contact <{settings.EMAIL_HOST_USER}>",
+                    to=[admin_email],
+                    reply_to=[email],  # Set reply-to as the sender's email
+                )
+
+                msg.attach_alternative(html_message, "text/html")
+                msg.send()
+
+                logger.info(f"Contact email sent successfully from {name} ({email})")
+
+                # Optional: Send confirmation email to sender
+                try:
+                    confirmation_html = f"""
+                    <html>
+                    <body>
+                        <h2>Thank You for Contacting HepatoCAI</h2>
+                        <p>Dear {name},</p>
+                        <p>Thank you for reaching out to us. We have received your message and will respond as soon as possible.</p>
+                        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <p><strong>Your Message Summary:</strong></p>
+                            <p><strong>Subject:</strong> {subject}</p>
+                            <p><strong>Message:</strong> {message[:100]}{"..." if len(message) > 100 else ""}</p>
+                        </div>
+                        <p>Best regards,<br>The HepatoCAI Team</p>
+                    </body>
+                    </html>
+                    """
+
+                    confirmation_plain = f"""
+                    Thank You for Contacting HepatoCAI
+
+                    Dear {name},
+
+                    Thank you for reaching out to us. We have received your message and will respond as soon as possible.
+
+                    Your Message Summary:
+                    Subject: {subject}
+                    Message: {message[:100]}{"..." if len(message) > 100 else ""}
+
+                    Best regards,
+                    The HepatoCAI Team
+                    """
+
+                    confirmation_msg = EmailMultiAlternatives(
+                        subject="Thank you for contacting HepatoCAI",
+                        body=confirmation_plain,
+                        from_email=f"HepatoCAI Team <{settings.EMAIL_HOST_USER}>",
+                        to=[email],
+                    )
+
+                    confirmation_msg.attach_alternative(confirmation_html, "text/html")
+                    confirmation_msg.send()
+
+                    logger.info(f"Confirmation email sent to {email}")
+
+                except Exception as conf_e:
+                    logger.warning(
+                        f"Failed to send confirmation email to {email}: {str(conf_e)}"
+                    )
+                    # Don't fail the main request if confirmation email fails
+
+                return StandardResponse.success(
+                    data={
+                        "message_sent": True,
+                        "confirmation_sent": True,
+                    },
+                    message="Your message has been sent successfully! We'll get back to you soon.",
+                )
+
+            return StandardResponse.validation_error(
+                errors=serializer.errors,
+                message="Please check the form data and try again",
+            )
+
+        except Exception as e:
+            logger.error(f"Error in ContactMeView: {str(e)}")
+            return StandardResponse.server_error("Failed to send contact message", e)

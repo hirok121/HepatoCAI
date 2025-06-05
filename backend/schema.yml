@@ -94,6 +94,23 @@ paths:
         '500':
           description: Internal server error
   /users/profile/me/:
+    get:
+      operationId: user_profile
+      description: Get or update the authenticated user's profile information.
+      summary: User profile operations
+      tags:
+      - User Profile
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Profile operation successful
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+        '500':
+          description: Internal server error
     patch:
       operationId: user_profile_2
       description: Get or update the authenticated user's profile information.
@@ -111,23 +128,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedProfileRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: Profile operation successful
-        '400':
-          description: Validation error
-        '401':
-          description: Authentication required
-        '500':
-          description: Internal server error
-    get:
-      operationId: user_profile
-      description: Get or update the authenticated user's profile information.
-      summary: User profile operations
-      tags:
-      - User Profile
       security:
       - jwtAuth: []
       responses:
@@ -249,12 +249,18 @@ paths:
           description: Rate limit exceeded
         '500':
           description: Internal server error
-  /users/admin/users/:
+  /users/admin/users/{user_id}/:
     get:
       operationId: user_management_list
       description: Get comprehensive list of all users for admin management. Accessible
         by staff, only superusers can modify.
       summary: List all users
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
       tags:
       - User Management
       security:
@@ -318,81 +324,38 @@ paths:
           description: User not found
         '500':
           description: Internal server error
-  /users/admin/users/{user_id}/:
-    get:
-      operationId: user_management_list_2
-      description: Get comprehensive list of all users for admin management. Accessible
-        by staff, only superusers can modify.
-      summary: List all users
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: integer
-        required: true
+  /users/contact/me/:
+    post:
+      operationId: contact_me
+      description: Send a contact message via email. This endpoint accepts contact
+        form data and sends an email to the site administrator.
+      summary: Send contact email
       tags:
-      - User Management
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: Users retrieved successfully
-        '403':
-          description: Permission denied - staff required
-        '500':
-          description: Internal server error
-    patch:
-      operationId: user_management_update_2
-      description: Update user permissions following hierarchy (user -> staff -> superuser).
-        Only accessible by superusers.
-      summary: Update user permissions
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: integer
-        description: ID of the user to update
-        required: true
-      tags:
-      - User Management
+      - Contact
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                action:
-                  type: string
-                  enum:
-                  - promote_to_staff
-                  - promote_to_superuser
-                  - demote_from_staff
-                  - demote_from_superuser
-                  - activate
-                  - deactivate
-                  description: Action to perform on user
-                is_staff:
-                  type: boolean
-                  description: Staff status (deprecated - use action instead)
-                is_superuser:
-                  type: boolean
-                  description: Superuser status (deprecated - use action instead)
-                is_active:
-                  type: boolean
-                  description: Account activation status
+              $ref: '#/components/schemas/ContactFormRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactFormRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactFormRequest'
+        required: true
       security:
       - jwtAuth: []
+      - {}
       responses:
         '200':
-          description: User permissions updated successfully
+          description: Contact email sent successfully
         '400':
-          description: Bad request - invalid data
-        '403':
-          description: Permission denied
-        '404':
-          description: User not found
+          description: Validation error - invalid form data
+        '429':
+          description: Rate limit exceeded - too many contact attempts
         '500':
-          description: Internal server error
+          description: Internal server error - failed to send email
   /diagnosis/analyze-hcv/:
     get:
       operationId: diagnosis_analyze_hcv_retrieve
@@ -858,7 +821,7 @@ paths:
           description: Authentication required
         '500':
           description: Internal server error
-  /ai/chats/:
+  /aiassistant/chats/:
     get:
       operationId: list_chats
       description: Retrieve all chat conversations for the authenticated user with
@@ -913,7 +876,7 @@ paths:
           description: Authentication required
         '500':
           description: Internal server error
-  /ai/chats/{chat_id}/:
+  /aiassistant/chats/{chat_id}/:
     get:
       operationId: get_chat_detail
       description: Retrieve complete chat conversation with all messages for the authenticated
@@ -1008,7 +971,7 @@ paths:
           description: Chat not found
         '500':
           description: Internal server error
-  /ai/chats/{chat_id}/messages/:
+  /aiassistant/chats/{chat_id}/messages/:
     post:
       operationId: send_message
       description: Send a message to the AI assistant in a specific chat and receive
@@ -1086,7 +1049,7 @@ paths:
           description: Chat not found
         '500':
           description: AI service error or internal server error
-  /ai/profile/:
+  /aiassistant/profile/:
     get:
       operationId: get_user_profile
       description: Retrieve AI assistant usage statistics and preferences for the
@@ -1236,6 +1199,36 @@ components:
           type: string
           description: Chat title, auto-generated from first message if empty
           maxLength: 255
+    ContactFormRequest:
+      type: object
+      description: |-
+        Serializer for contact form submissions.
+        Handles validation of contact form data from the frontend.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Full name of the person sending the message
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Email address for response
+        subject:
+          type: string
+          minLength: 1
+          description: Subject line for the message
+          maxLength: 200
+        message:
+          type: string
+          minLength: 1
+          description: The main message content
+      required:
+      - email
+      - message
+      - name
+      - subject
     CustomTokenObtainPairRequest:
       type: object
       description: Custom JWT token serializer with additional user data

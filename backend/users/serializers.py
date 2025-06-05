@@ -340,3 +340,60 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         }
 
         return data
+
+
+class ContactFormSerializer(serializers.Serializer):
+    """
+    Serializer for contact form submissions.
+    Handles validation of contact form data from the frontend.
+    """
+
+    name = serializers.CharField(
+        max_length=100,
+        required=True,
+        help_text="Full name of the person sending the message",
+    )
+    email = serializers.EmailField(
+        required=True, help_text="Email address for response"
+    )
+    subject = serializers.CharField(
+        max_length=200,
+        required=True,
+        help_text="Subject line for the message",
+    )
+    message = serializers.CharField(
+        required=True,
+        help_text="The main message content",
+        style={"base_template": "textarea.html"},
+    )
+
+    def validate_name(self, value):
+        """Validate name field"""
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters long")
+        return value.strip()
+
+    def validate_subject(self, value):
+        """Validate subject field"""
+        if len(value.strip()) < 5:
+            raise serializers.ValidationError(
+                "Subject must be at least 5 characters long"
+            )
+        return value.strip()
+
+    def validate_message(self, value):
+        """Validate message field"""
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError(
+                "Message must be at least 10 characters long"
+            )
+        return value.strip()
+
+    def validate_email(self, value):
+        """Validate email format"""
+        import re
+
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_pattern, value):
+            raise serializers.ValidationError("Please provide a valid email address")
+        return value.lower()

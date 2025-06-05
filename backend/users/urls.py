@@ -7,6 +7,7 @@ from .views import (
     CheckEmailView,
     login_redirect_view,
     UserManagementView,
+    ContactMeView,
 )
 from django.urls import include
 
@@ -26,11 +27,11 @@ urlpatterns += [
     path("accounts/google/login/redirect/", login_redirect_view, name="login-redirect"),
     path(
         "check-email/", CheckEmailView.as_view(), name="check-email"
-    ),  # User Management endpoints
-    path("admin/users/", UserManagementView.as_view(), name="user-management"),
+    ),  # User Management endpoints    path("admin/users/", UserManagementView.as_view(), name="user-management"),
     path(
         "admin/users/<int:user_id>/",
         UserManagementView.as_view(),
         name="user-management-detail",
     ),
+    path("contact/me/", ContactMeView.as_view(), name="contact-me"),
 ]
