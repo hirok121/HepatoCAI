@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
   Container,
-  Grid,
   Paper,
   TextField,
   Button,
@@ -40,24 +39,24 @@ function Contact() {
     // Handle form submission here
     console.log("Form submitted:", formData);
   };
-
   const contactInfo = [
     {
       icon: <EmailIcon />,
       title: "Email",
-      content: "support@hepatocai.com",
+      content: "hirokrezawww1@gmail.com",
       description: "Send us an email anytime",
     },
     {
       icon: <PhoneIcon />,
       title: "Phone",
-      content: "+1 (555) 123-4567",
+      content: "(+88) 01516562365",
       description: "Call us during business hours",
     },
     {
       icon: <LocationOnIcon />,
       title: "Address",
-      content: "123 Medical Center Drive, Health City, HC 12345",
+      content:
+        "Station Rd, Rajshahi 6204, Rajshahi University of Engineering & Technology(RUET)",
       description: "Visit our main office",
     },
     {
@@ -82,18 +81,33 @@ function Contact() {
             <Typography variant="body1" color="text.secondary">
               Get in touch with our team for support, questions, or feedback
             </Typography>
-          </Box>
-
-          <Grid container spacing={4}>
+          </Box>{" "}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 4,
+              flexDirection: { xs: "column", lg: "row" },
+              alignItems: "stretch",
+              mb: 4,
+            }}
+          >
             {/* Contact Form */}
-            <Grid item xs={12} lg={8}>
-              <Paper sx={{ p: 4, borderRadius: "16px" }}>
+            <Box sx={{ flex: { lg: 2 } }}>
+              <Paper sx={{ p: 4, borderRadius: "16px", height: "100%" }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
                   Send us a Message
                 </Typography>
                 <form onSubmit={handleSubmit}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 3,
+                        flexDirection: { xs: "column", md: "row" },
+                      }}
+                    >
                       <TextField
                         fullWidth
                         label="Full Name"
@@ -102,8 +116,6 @@ function Contact() {
                         onChange={handleChange}
                         required
                       />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
                         label="Email Address"
@@ -113,54 +125,48 @@ function Contact() {
                         onChange={handleChange}
                         required
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Message"
-                        name="message"
-                        multiline
-                        rows={6}
-                        value={formData.message}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        size="large"
-                        startIcon={<SendIcon />}
-                        sx={{
-                          px: 4,
-                          py: 1.5,
-                          fontSize: "1rem",
-                          borderRadius: "12px",
-                          background:
-                            "linear-gradient(135deg, #2563EB, #7C3AED)",
-                        }}
-                      >
-                        Send Message
-                      </Button>
-                    </Grid>
-                  </Grid>
+                    </Box>
+                    <TextField
+                      fullWidth
+                      label="Subject"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                    />
+                    <TextField
+                      fullWidth
+                      label="Message"
+                      name="message"
+                      multiline
+                      rows={10}
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      size="large"
+                      startIcon={<SendIcon />}
+                      sx={{
+                        px: 4,
+                        py: 1.5,
+                        fontSize: "1rem",
+                        borderRadius: "12px",
+                        background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                        alignSelf: "flex-end",
+                      }}
+                    >
+                      Send Message
+                    </Button>
+                  </Box>
                 </form>
               </Paper>
-            </Grid>
+            </Box>
             {/* Contact Information */}
-            <Grid item xs={12} lg={4}>
-              <Paper sx={{ p: 4, borderRadius: "16px", height: "fit-content" }}>
+            <Box sx={{ flex: { lg: 1 } }}>
+              <Paper sx={{ p: 4, borderRadius: "16px", height: "100%" }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
                   Get in Touch
                 </Typography>
@@ -197,32 +203,30 @@ function Contact() {
                   ))}
                 </List>
               </Paper>
-
-              {/* Emergency Contact */}
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: "16px",
-                  mt: 3,
-                  backgroundColor: "#f8f9fa",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 700, mb: 2, color: "#dc3545" }}
-                >
-                  Emergency?
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  For medical emergencies, please contact your healthcare
-                  provider immediately or call emergency services.
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  Emergency Hotline: 911
-                </Typography>
-              </Paper>
-            </Grid>{" "}
-          </Grid>
+            </Box>
+          </Box>
+          {/* Emergency Contact - Full Width */}
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: "16px",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, mb: 2, color: "#dc3545" }}
+            >
+              Emergency?
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              For medical emergencies, please contact your healthcare provider
+              immediately or call emergency services.
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Emergency Hotline: 911
+            </Typography>
+          </Paper>
         </Box>
       </Container>
     </Box>
