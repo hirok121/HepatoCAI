@@ -31,24 +31,25 @@ function LivingWithHepatitis() {
 
   const lifestyleTips = [
     {
-      title: "Regular Exercise",
+      title: "Stay Active",
       description:
-        "Maintain physical activity to boost immune system and overall health",
+        "Regular movement helps boost energy and supports your immune system.",
       icon: <FitnessCenter color="primary" />,
     },
     {
-      title: "Mental Health",
-      description: "Manage stress and seek support when needed",
+      title: "Care for Your Mind",
+      description:
+        "Managing stress and seeking support can improve well-being.",
       icon: <Psychology color="primary" />,
     },
     {
-      title: "Regular Check-ups",
-      description: "Follow up with healthcare providers consistently",
+      title: "Routine Checkups",
+      description: "Keep up with medical appointments to monitor your health.",
       icon: <Schedule color="primary" />,
     },
     {
       title: "Heart Health",
-      description: "Monitor cardiovascular health as part of overall wellness",
+      description: "A healthy heart supports your overall wellness.",
       icon: <Favorite color="primary" />,
     },
   ];
@@ -81,23 +82,23 @@ function LivingWithHepatitis() {
               Living with Hepatitis
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Lifestyle tips for hepatitis patients
+              Practical advice for managing hepatitis in daily life.
             </Typography>
           </CardContent>
         </Card>
 
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" gutterBottom>
-            Maintaining Quality of Life
+            Living Well with Hepatitis
           </Typography>
           <Typography paragraph>
-            A hepatitis diagnosis doesn't mean your life has to change
-            dramatically. With proper management and lifestyle adjustments, many
-            people with hepatitis live full, healthy lives.
+            A hepatitis diagnosis can be managed with healthy habits and
+            support. Many people continue to enjoy active, fulfilling lives by
+            making a few adjustments.
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Key Lifestyle Areas
+            Healthy Habits
           </Typography>
           <Grid container spacing={3} sx={{ mt: 1 }}>
             {lifestyleTips.map((tip, index) => (
@@ -116,67 +117,61 @@ function LivingWithHepatitis() {
           </Grid>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-            Daily Life Management
+            Everyday Tips
           </Typography>
           <List>
             <ListItem>
               <ListItemText
-                primary="Energy Management"
-                secondary="Plan activities around energy levels and rest when needed"
+                primary="Balance Your Energy"
+                secondary="Plan your day to include rest and activity."
               />
             </ListItem>
             <ListItem>
               <ListItemText
-                primary="Work Life"
-                secondary="Communicate with employers about any accommodations needed"
+                primary="Work and School"
+                secondary="Talk to your employer or teachers if you need adjustments."
               />
             </ListItem>
             <ListItem>
               <ListItemText
-                primary="Social Relationships"
-                secondary="Educate family and friends about hepatitis to reduce stigma"
+                primary="Relationships"
+                secondary="Share information with loved ones to build understanding."
               />
             </ListItem>
             <ListItem>
               <ListItemText
-                primary="Travel Considerations"
-                secondary="Plan ahead for medications and healthcare access when traveling"
+                primary="Travel Planning"
+                secondary="Prepare ahead for medications and care when away from home."
               />
             </ListItem>
           </List>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Avoiding Liver Damage
+            Protecting Your Liver
           </Typography>
           <Typography paragraph>
-            Protecting your liver is crucial when living with hepatitis:
+            Take steps to keep your liver healthy:
           </Typography>
           <Typography component="div" sx={{ ml: 2 }}>
-            • Avoid alcohol completely
-            <br />
-            • Be cautious with medications and supplements
-            <br />
-            • Avoid exposure to toxins and chemicals
-            <br />
-            • Get vaccinated against hepatitis A and B if not already immune
-            <br />• Practice safe behaviors to avoid reinfection
+            • Avoid alcohol
+            <br />• Use medicines and supplements only as directed
+            <br />• Stay away from harmful chemicals
+            <br />• Get vaccinated for hepatitis A and B if needed
+            <br />• Practice safe habits to prevent reinfection
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Building Support Networks
+            Building Support
           </Typography>
           <Typography paragraph>
-            Having strong support systems is essential:
+            Support from others can make a big difference:
           </Typography>
           <Typography component="div" sx={{ ml: 2 }}>
-            • Join hepatitis support groups
-            <br />
-            • Connect with online communities
-            <br />
-            • Work with healthcare teams
-            <br />
-            • Involve family and friends in your care
-            <br />• Consider counseling if needed
+            • Join support groups
+            <br />• Connect online
+            <br />• Work with your healthcare team
+            <br />• Involve family and friends
+            <br />• Seek counseling if you need it
           </Typography>
 
           {/* YouTube Video Section */}
@@ -216,8 +211,7 @@ function LivingWithHepatitis() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Inspirational stories and practical advice for living well with
-              hepatitis
+              Hear from others and get tips for living well with hepatitis
             </Typography>
           </Box>
         </Box>
@@ -228,9 +222,8 @@ function LivingWithHepatitis() {
               Living Well
             </Typography>
             <Typography>
-              Remember that hepatitis is just one part of your health story.
-              With proper management, most people with hepatitis can live
-              normal, productive lives.
+              Hepatitis is only one part of your life. With the right care and
+              support, you can continue to thrive.
             </Typography>
           </CardContent>
         </Card>

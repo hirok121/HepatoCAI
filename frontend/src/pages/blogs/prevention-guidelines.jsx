@@ -37,7 +37,7 @@ function PreventionGuidelines() {
           sx={{ mb: 3 }}
         >
           Back to Education
-        </Button>{" "}
+        </Button>
         <Card sx={{ mb: 4 }}>
           <CardMedia
             component="img"
@@ -54,18 +54,18 @@ function PreventionGuidelines() {
               Prevention Guidelines
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Essential steps to prevent hepatitis transmission
+              Learn how to protect yourself and others from hepatitis.
             </Typography>
           </CardContent>
         </Card>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" gutterBottom>
-            General Prevention Strategies
+            How to Prevent Hepatitis
           </Typography>
           <Typography paragraph>
-            Preventing hepatitis involves understanding transmission routes and
-            taking appropriate precautions. Here are the most effective
-            prevention strategies for different types of hepatitis.
+            Preventing hepatitis starts with understanding how it spreads.
+            Simple steps can greatly reduce your risk and help keep your
+            community safe.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Vaccination
@@ -77,7 +77,7 @@ function PreventionGuidelines() {
               </ListItemIcon>
               <ListItemText
                 primary="Hepatitis A Vaccine"
-                secondary="Highly effective, recommended for travelers and high-risk individuals"
+                secondary="Recommended for children, travelers, and those at higher risk."
               />
             </ListItem>
             <ListItem>
@@ -86,12 +86,12 @@ function PreventionGuidelines() {
               </ListItemIcon>
               <ListItemText
                 primary="Hepatitis B Vaccine"
-                secondary="Part of routine childhood immunizations, also recommended for adults at risk"
+                secondary="Part of routine immunizations and important for adults at risk."
               />
             </ListItem>
-          </List>{" "}
+          </List>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Safe Practices
+            Safe Habits
           </Typography>
           <Box sx={{ my: 3, textAlign: "center" }}>
             <CardMedia
@@ -112,7 +112,7 @@ function PreventionGuidelines() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Essential safety practices for hepatitis prevention
+              Good hygiene and safe practices help prevent hepatitis
             </Typography>
           </Box>
           <List>
@@ -121,8 +121,8 @@ function PreventionGuidelines() {
                 <Shield color="primary" />
               </ListItemIcon>
               <ListItemText
-                primary="Safe Food and Water"
-                secondary="Avoid contaminated food and water, especially when traveling"
+                primary="Clean Food and Water"
+                secondary="Drink safe water and eat well-cooked food, especially when traveling."
               />
             </ListItem>
             <ListItem>
@@ -130,8 +130,8 @@ function PreventionGuidelines() {
                 <Shield color="primary" />
               </ListItemIcon>
               <ListItemText
-                primary="Safe Sex Practices"
-                secondary="Use protection and get tested regularly with partners"
+                primary="Safe Sex"
+                secondary="Use protection and get tested regularly."
               />
             </ListItem>
             <ListItem>
@@ -139,8 +139,8 @@ function PreventionGuidelines() {
                 <Shield color="primary" />
               </ListItemIcon>
               <ListItemText
-                primary="Avoid Sharing Personal Items"
-                secondary="Never share needles, razors, toothbrushes, or other personal items"
+                primary="Don't Share Personal Items"
+                secondary="Avoid sharing needles, razors, or toothbrushes."
               />
             </ListItem>
             <ListItem>
@@ -148,39 +148,34 @@ function PreventionGuidelines() {
                 <Shield color="primary" />
               </ListItemIcon>
               <ListItemText
-                primary="Blood Safety"
-                secondary="Ensure blood transfusions and medical procedures use sterile equipment"
+                primary="Medical Safety"
+                secondary="Ensure sterile equipment is used for medical and dental care."
               />
             </ListItem>
           </List>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            High-Risk Groups
+            Who Needs Extra Care?
           </Typography>
           <Typography paragraph>
-            Certain groups should take extra precautions:
+            Some people are at higher risk and should be especially careful:
           </Typography>
           <Typography component="div">
             • Healthcare workers
-            <br />
-            • People with multiple sexual partners
-            <br />
-            • Injection drug users
-            <br />
-            • Travelers to endemic areas
-            <br />
-            • People with chronic liver disease
-            <br />• Household contacts of infected individuals
+            <br />• People with multiple partners
+            <br />• Injection drug users
+            <br />• Travelers to certain countries
+            <br />• People with chronic liver disease
+            <br />• Family members of those with hepatitis
           </Typography>
         </Box>
         <Card sx={{ bgcolor: "success.light", color: "white" }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Remember
+              Stay Protected
             </Typography>
             <Typography>
-              Prevention is always better than treatment. Regular testing and
-              following these guidelines can significantly reduce your risk of
-              hepatitis infection.
+              Prevention is the best defense. Stay informed, get vaccinated, and
+              practice safe habits to lower your risk of hepatitis.
             </Typography>
           </CardContent>
         </Card>

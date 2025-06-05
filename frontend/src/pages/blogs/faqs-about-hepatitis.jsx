@@ -21,54 +21,54 @@ function FAQsAboutHepatitis() {
 
   const faqs = [
     {
-      question: "What is the difference between hepatitis A, B, and C?",
+      question: "What is hepatitis?",
       answer:
-        "Hepatitis A is typically acute and transmitted through contaminated food/water. Hepatitis B can be acute or chronic and is transmitted through blood and bodily fluids. Hepatitis C is usually chronic and primarily transmitted through blood contact. Vaccines are available for A and B, but not for C.",
+        "Hepatitis refers to inflammation of the liver, which can be caused by viruses, toxins, or immune responses. It can affect liver function and overall health.",
     },
     {
-      question: "How is hepatitis C transmitted?",
+      question: "How do people get hepatitis?",
       answer:
-        "Hepatitis C is primarily transmitted through blood-to-blood contact. This can happen through sharing needles, unsterilized medical equipment, blood transfusions (before 1992), and rarely through sexual contact or from mother to child during birth.",
+        "Hepatitis can be contracted through contaminated food or water, contact with infected blood, or unprotected sex. Some types are also spread from mother to child during birth.",
     },
     {
-      question: "Can hepatitis C be cured?",
+      question: "Is hepatitis always a lifelong condition?",
       answer:
-        "Yes! Modern direct-acting antiviral (DAA) medications can cure hepatitis C in over 95% of cases. Treatment typically lasts 8-12 weeks and has minimal side effects compared to older treatments.",
+        "Not always. Some forms, like hepatitis A, are usually short-term. Others, such as hepatitis B and C, can become chronic if not treated.",
     },
     {
-      question: "Do I need to tell people I have hepatitis?",
+      question: "Can hepatitis be prevented?",
       answer:
-        "You're not legally required to disclose your hepatitis status in most situations. However, you should inform healthcare providers, sexual partners, and anyone who might be at risk of exposure. Close family members should also be informed for their safety and support.",
+        "Vaccines are available for hepatitis A and B. Practicing good hygiene, safe sex, and avoiding sharing needles can help prevent infection.",
     },
     {
-      question: "Can I drink alcohol if I have hepatitis?",
+      question: "What are the signs of hepatitis?",
       answer:
-        "No, alcohol should be completely avoided if you have hepatitis. Alcohol can accelerate liver damage and interfere with treatment effectiveness. Even small amounts can be harmful to an already compromised liver.",
+        "Symptoms may include tiredness, nausea, abdominal pain, dark urine, pale stools, and yellowing of the skin or eyes. Some people have no symptoms at all.",
     },
     {
-      question: "What symptoms should I watch for?",
+      question: "How is hepatitis diagnosed?",
       answer:
-        "Many people with hepatitis have no symptoms. When symptoms occur, they may include fatigue, abdominal pain, loss of appetite, nausea, dark urine, light-colored stools, and yellowing of skin/eyes (jaundice). Report any new or worsening symptoms to your healthcare provider.",
+        "Doctors use blood tests to check for liver enzymes and specific viruses. Imaging and sometimes a liver biopsy may be needed for further evaluation.",
     },
     {
-      question: "How often should I see my doctor?",
+      question: "What treatments are available?",
       answer:
-        "Follow-up frequency depends on your specific situation, but typically every 3-6 months for monitoring. During treatment, visits may be more frequent. Your healthcare provider will determine the appropriate schedule based on your condition and treatment response.",
+        "Treatment depends on the type of hepatitis. Some require only supportive care, while others may need antiviral medications or ongoing monitoring.",
     },
     {
-      question: "Can I have children if I have hepatitis?",
+      question: "Can I live a normal life with hepatitis?",
       answer:
-        "Yes, people with hepatitis can have children. However, there's a small risk of transmission from mother to child during birth. Work closely with your healthcare team to minimize risks and ensure proper monitoring during pregnancy.",
+        "Many people with hepatitis can lead healthy lives with proper care, regular checkups, and by following medical advice.",
     },
     {
-      question: "Is hepatitis contagious through casual contact?",
+      question: "Should I tell others about my diagnosis?",
       answer:
-        "No, hepatitis is not spread through casual contact like hugging, shaking hands, sharing utensils, or being in the same room. Hepatitis A can be spread through contaminated food/water, while B and C require blood or bodily fluid contact.",
+        "It is important to inform healthcare providers and those at risk of exposure. Discuss with your doctor about who else should be notified.",
     },
     {
-      question: "What foods should I avoid?",
+      question: "Where can I find more information?",
       answer:
-        "Avoid alcohol completely, limit processed and fried foods, reduce sodium intake, and be cautious with raw or undercooked foods. Focus on a balanced diet with plenty of fruits, vegetables, lean proteins, and whole grains.",
+        "Trusted sources include your healthcare provider, national health organizations, and patient support groups.",
     },
   ];
 
@@ -100,7 +100,8 @@ function FAQsAboutHepatitis() {
               FAQs About Hepatitis
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Common questions and answers about hepatitis
+              Answers to important questions about hepatitis and how it affects
+              your health.
             </Typography>
           </CardContent>
         </Card>
@@ -110,9 +111,8 @@ function FAQsAboutHepatitis() {
             Frequently Asked Questions
           </Typography>
           <Typography paragraph>
-            Here are answers to the most common questions people have about
-            hepatitis. If you have additional questions, don't hesitate to ask
-            your healthcare provider.
+            Find clear answers to common concerns about hepatitis. For more
+            details, consult your healthcare provider.
           </Typography>
 
           <Box sx={{ mt: 3 }}>
@@ -141,7 +141,7 @@ function FAQsAboutHepatitis() {
             Additional Resources
           </Typography>
           <Typography paragraph>
-            For more detailed information, consider these resources:
+            Explore these organizations for more information:
           </Typography>
           <Typography component="div" sx={{ ml: 2 }}>
             • Centers for Disease Control and Prevention (CDC)
@@ -151,7 +151,7 @@ function FAQsAboutHepatitis() {
             • American Liver Foundation
             <br />
             • Hepatitis B Foundation
-            <br />• Your healthcare provider and hepatitis specialist
+            <br />• Speak with your healthcare provider
           </Typography>
         </Box>
 
@@ -161,9 +161,8 @@ function FAQsAboutHepatitis() {
               Remember
             </Typography>
             <Typography>
-              Every person's situation is unique. While these FAQs provide
-              general information, always consult with your healthcare provider
-              for personalized advice and treatment recommendations.
+              Information here is general. Always follow your healthcare
+              provider's advice for your specific situation.
             </Typography>
           </CardContent>
         </Card>

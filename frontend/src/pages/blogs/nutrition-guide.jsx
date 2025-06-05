@@ -31,30 +31,30 @@ function NutritionGuide() {
       category: "Foods to Include",
       icon: <Restaurant color="success" />,
       items: [
-        "Lean proteins (fish, poultry, legumes)",
-        "Fresh fruits and vegetables",
-        "Whole grains",
-        "Healthy fats (olive oil, avocados, nuts)",
+        "Lean meats, fish, and plant-based proteins",
+        "A variety of colorful fruits and vegetables",
+        "Whole grains like brown rice and oats",
+        "Healthy fats such as olive oil and nuts",
       ],
     },
     {
       category: "Foods to Limit",
       icon: <Warning color="warning" />,
       items: [
-        "Processed and fried foods",
-        "High sodium foods",
-        "Refined sugars",
-        "Saturated fats",
+        "Fried and processed foods",
+        "Salty snacks and canned foods",
+        "Sugary drinks and desserts",
+        "Foods high in saturated fat",
       ],
     },
     {
       category: "Hydration",
       icon: <LocalDrink color="primary" />,
       items: [
-        "Drink plenty of water",
-        "Herbal teas are beneficial",
+        "Drink water throughout the day",
+        "Choose herbal teas for variety",
         "Avoid alcohol completely",
-        "Limit caffeine intake",
+        "Limit drinks with caffeine",
       ],
     },
   ];
@@ -87,23 +87,23 @@ function NutritionGuide() {
               Nutrition Guide
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Dietary recommendations for hepatitis patients
+              Tips for healthy eating with hepatitis.
             </Typography>
           </CardContent>
         </Card>
 
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" gutterBottom>
-            Nutrition for Liver Health
+            Eating for Liver Health
           </Typography>
           <Typography paragraph>
-            Proper nutrition plays a crucial role in supporting liver function
-            and overall health for people with hepatitis. A well-balanced diet
-            can help your liver heal and reduce inflammation.
+            Good nutrition supports your liver and helps your body fight
+            infection. A balanced diet can reduce inflammation and help you feel
+            your best.
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Dietary Guidelines
+            Nutrition Tips
           </Typography>
           <Grid container spacing={3} sx={{ mt: 1 }}>
             {nutritionTips.map((tip, index) => (
@@ -126,7 +126,7 @@ function NutritionGuide() {
           </Grid>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-            Sample Daily Meal Plan
+            Example Meal Plan
           </Typography>
 
           <Paper sx={{ p: 3, mb: 3 }}>
@@ -134,10 +134,9 @@ function NutritionGuide() {
               Breakfast
             </Typography>
             <Typography paragraph>
-              • Oatmeal with fresh berries and chopped walnuts
-              <br />
-              • Green tea or herbal tea
-              <br />• Small glass of freshly squeezed orange juice
+              • Whole grain toast with nut butter
+              <br />• Fresh fruit salad
+              <br />• Herbal tea
             </Typography>
             <Divider sx={{ my: 2 }} />
 
@@ -145,12 +144,10 @@ function NutritionGuide() {
               Lunch
             </Typography>
             <Typography paragraph>
-              • Grilled salmon with quinoa
-              <br />
-              • Mixed green salad with olive oil dressing
-              <br />
-              • Steamed broccoli
-              <br />• Water with lemon
+              • Grilled chicken or tofu with quinoa
+              <br />• Steamed vegetables
+              <br />• Mixed greens with olive oil
+              <br />• Water
             </Typography>
             <Divider sx={{ my: 2 }} />
 
@@ -158,11 +155,9 @@ function NutritionGuide() {
               Dinner
             </Typography>
             <Typography paragraph>
-              • Lean chicken breast with brown rice
-              <br />
-              • Roasted vegetables (carrots, bell peppers, zucchini)
-              <br />
-              • Small portion of avocado
+              • Baked fish or beans with brown rice
+              <br />• Roasted vegetables
+              <br />• Sliced avocado
               <br />• Herbal tea
             </Typography>
             <Divider sx={{ my: 2 }} />
@@ -172,28 +167,25 @@ function NutritionGuide() {
             </Typography>
             <Typography>
               • Fresh fruit
-              <br />
-              • Handful of unsalted nuts
-              <br />• Greek yogurt with honey
+              <br />• Unsalted nuts
+              <br />• Low-fat yogurt
             </Typography>
           </Paper>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Special Considerations
+            Special Tips
           </Typography>
           <Typography paragraph>
-            <strong>Iron Management:</strong> Some people with hepatitis may
-            have excess iron. Discuss iron supplements and iron-rich foods with
-            your healthcare provider.
+            <strong>Iron:</strong> Some people with hepatitis need to limit
+            iron. Ask your doctor before taking supplements.
           </Typography>
           <Typography paragraph>
-            <strong>Vitamin D:</strong> Many people with liver disease are
-            deficient in vitamin D. Consider supplementation under medical
-            supervision.
+            <strong>Vitamin D:</strong> If you have low vitamin D, your provider
+            may recommend supplements.
           </Typography>
           <Typography paragraph>
-            <strong>Salt Restriction:</strong> If you have fluid retention or
-            high blood pressure, you may need to limit sodium intake further.
+            <strong>Salt:</strong> If you have swelling or high blood pressure,
+            reduce salt in your diet.
           </Typography>
 
           {/* YouTube Video Section */}
@@ -233,8 +225,7 @@ function NutritionGuide() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Educational video about nutrition guidelines for liver health and
-              hepatitis management
+              Watch this video for more nutrition tips for hepatitis
             </Typography>
           </Box>
         </Box>
@@ -243,12 +234,11 @@ function NutritionGuide() {
           <CardContent>
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Healing sx={{ mr: 1 }} />
-              <Typography variant="h6">Nutrition Consultation</Typography>
+              <Typography variant="h6">Nutrition Support</Typography>
             </Box>
             <Typography>
-              Consider working with a registered dietitian who specializes in
-              liver disease to create a personalized nutrition plan that meets
-              your specific needs.
+              A registered dietitian can help you create a meal plan that fits
+              your needs and supports your liver health.
             </Typography>
           </CardContent>
         </Card>

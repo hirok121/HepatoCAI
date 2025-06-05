@@ -6,60 +6,20 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Button,
-  Chip,
-  Avatar,
   Divider,
   Paper,
   Grid,
 } from "@mui/material";
-import {
-  ArrowBack,
-  Psychology,
-  AccessTime,
-  Category,
-  Analytics,
-  Timeline,
-} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { Psychology, Analytics, Timeline } from "@mui/icons-material";
 import NavBar from "../../components/layout/NavBar";
 import virusImg from "../../assets/blogimages/virus2.jpg";
 import virusHuman3Img from "../../assets/blogimages/virushuman3.jpg";
 
 function MachineLearningLiverDisease() {
-  const navigate = useNavigate();
-
-  const mlFeatures = [
-    {
-      title: "Logistic Regression",
-      description:
-        "Statistical model for binary classification of fibrosis stages",
-      icon: <Analytics color="primary" />,
-    },
-    {
-      title: "SHAP Analysis",
-      description:
-        "Explainable AI providing insights into model decision-making",
-      icon: <Timeline color="primary" />,
-    },
-    {
-      title: "Predictive Analytics",
-      description: "Forecasting disease progression and treatment outcomes",
-      icon: <Psychology color="primary" />,
-    },
-  ];
-
   return (
     <>
       <NavBar />
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={() => navigate("/patient-education")}
-          sx={{ mb: 3 }}
-        >
-          Back to Education
-        </Button>{" "}
         <Card sx={{ mb: 4 }}>
           <CardMedia
             component="img"
@@ -68,96 +28,104 @@ function MachineLearningLiverDisease() {
             alt="Machine Learning in Liver Disease"
           />
           <CardContent>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Psychology sx={{ mr: 1, color: "primary.main" }} />
-              <Chip
-                label="AI Technology"
-                color="secondary"
-                variant="outlined"
-                icon={<Category />}
-              />
-            </Box>
             <Typography variant="h3" component="h1" gutterBottom>
               Machine Learning in Liver Disease: Predictive Analytics
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              How logistic regression and SHAP explainability are
-              revolutionizing hepatitis C fibrosis stage prediction in clinical
-              practice.
+              Artificial intelligence is reshaping the landscape of liver
+              disease management. By harnessing the power of machine learning,
+              clinicians and researchers are uncovering new ways to diagnose,
+              monitor, and treat conditions such as hepatitis C, cirrhosis, and
+              fatty liver disease.
             </Typography>
-
-            <Box sx={{ display: "flex", alignItems: "center", mt: 3 }}>
-              <Avatar sx={{ mr: 2 }}>MC</Avatar>
-              <Box>
-                <Typography variant="body1" fontWeight="bold">
-                  Dr. Michael Chen
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                  <AccessTime
-                    sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    May 18, 2025 • 7 min read
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
           </CardContent>
         </Card>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" gutterBottom>
-            The Power of Predictive Analytics
+            Revolutionizing Diagnosis and Prognosis
           </Typography>
           <Typography paragraph>
-            Machine learning has transformed how we approach liver disease
-            diagnosis and prognosis. By leveraging advanced algorithms and
-            explainable AI techniques, clinicians can now predict fibrosis
-            stages with unprecedented accuracy, enabling more personalized
-            treatment approaches.
+            Machine learning models can analyze vast amounts of clinical,
+            laboratory, and imaging data to identify subtle patterns that may be
+            missed by traditional methods. These models are capable of
+            predicting disease progression, identifying high-risk patients, and
+            supporting early intervention strategies. For example, algorithms
+            can assess liver stiffness from elastography images or predict the
+            likelihood of advanced fibrosis using routine blood tests.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Key Machine Learning Components
-          </Typography>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            {mlFeatures.map((feature, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <Paper sx={{ p: 3, height: "100%", textAlign: "center" }}>
-                  {feature.icon}
-                  <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2">{feature.description}</Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-          <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-            Logistic Regression in Hepatitis C
+            Ensuring Data Quality and Model Validation
           </Typography>
           <Typography paragraph>
-            Logistic regression serves as the foundation for fibrosis stage
-            prediction in our AI models. This statistical approach analyzes the
-            relationship between multiple biomarkers and disease outcomes,
-            providing probabilistic assessments of fibrosis severity.
+            According to recent research, the effectiveness of AI-driven liver
+            disease prediction depends heavily on the quality and diversity of
+            the data used for model training. The PDF highlights that rigorous
+            validation across multiple cohorts is essential to ensure that
+            machine learning models are robust and generalizable in real-world
+            clinical settings. This approach minimizes bias and enhances the
+            reliability of AI-assisted diagnosis and prognosis.
+          </Typography>
+          <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
+            Key Technologies in Use
+          </Typography>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12} md={4}>
+              <Paper sx={{ p: 3, height: "100%", textAlign: "center" }}>
+                <Analytics color="primary" />
+                <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
+                  Deep Learning
+                </Typography>
+                <Typography variant="body2">
+                  Neural networks process imaging and histopathology data for
+                  automated feature extraction and classification.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper sx={{ p: 3, height: "100%", textAlign: "center" }}>
+                <Timeline color="primary" />
+                <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
+                  Ensemble Methods
+                </Typography>
+                <Typography variant="body2">
+                  Random forests and gradient boosting improve prediction
+                  accuracy by combining multiple models.
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper sx={{ p: 3, height: "100%", textAlign: "center" }}>
+                <Psychology color="primary" />
+                <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
+                  Explainable AI
+                </Typography>
+                <Typography variant="body2">
+                  SHAP and LIME provide transparency, helping clinicians
+                  understand model decisions and build trust.
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+          <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+            Data Sources and Model Inputs
           </Typography>
           <Paper sx={{ p: 3, my: 3, bgcolor: "grey.50" }}>
             <Typography variant="h6" gutterBottom color="primary">
-              Model Input Variables
+              Typical Features Used
             </Typography>
             <Typography component="div">
-              • <strong>Laboratory Values:</strong> ALT, AST, Bilirubin,
-              Platelet Count
-              <br />• <strong>Patient Demographics:</strong> Age, Gender, BMI
-              <br />• <strong>Clinical History:</strong> Duration of infection,
-              comorbidities
-              <br />• <strong>Imaging Data:</strong> Ultrasound and elastography
-              results
-              <br />• <strong>Genetic Factors:</strong> IL28B polymorphisms,
-              fibrosis susceptibility genes
+              • <strong>Blood Markers:</strong> ALT, AST, GGT, Albumin,
+              Platelets
+              <br />• <strong>Imaging:</strong> Ultrasound, MRI, elastography
+              <br />• <strong>Demographics:</strong> Age, sex, BMI, ethnicity
+              <br />• <strong>Clinical History:</strong> Alcohol use, diabetes,
+              viral status
+              <br />• <strong>Genomics:</strong> Risk alleles, gene expression
+              profiles
             </Typography>
-          </Paper>{" "}
+          </Paper>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            SHAP Explainability
+            Visualizing AI Insights
           </Typography>
           <Box sx={{ my: 3, textAlign: "center" }}>
             <CardMedia
@@ -178,69 +146,72 @@ function MachineLearningLiverDisease() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Machine learning analysis of hepatitis C virus interaction
-              patterns
+              AI-driven analysis reveals complex interactions between viral
+              factors and host response in liver disease.
             </Typography>
           </Box>
           <Typography paragraph>
-            SHAP (SHapley Additive exPlanations) values provide crucial insights
-            into how our machine learning models make decisions. This
-            explainable AI technique helps clinicians understand which factors
-            contribute most significantly to predictions, building trust in
-            AI-assisted diagnosis.
-          </Typography>
-          <Typography paragraph>
-            For each patient prediction, SHAP analysis reveals:
-          </Typography>
-          <Typography component="div" sx={{ ml: 2 }}>
-            • Which biomarkers had the strongest influence on the prediction
-            <br />
-            • How each variable contributed positively or negatively to the
-            outcome
-            <br />
-            • The relative importance of different risk factors
-            <br />• Confidence intervals for the prediction
+            Modern machine learning tools not only predict outcomes but also
+            provide visual explanations. Feature importance plots, risk
+            heatmaps, and individualized prediction breakdowns help clinicians
+            and patients understand the rationale behind each assessment.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Clinical Implementation
+            Clinical Impact and Integration
           </Typography>
           <Typography paragraph>
-            Our predictive analytics platform integrates seamlessly with
-            electronic health records, providing real-time risk assessments
-            during patient consultations. The system generates easy-to-interpret
-            visualizations that help clinicians communicate risk factors to
-            patients effectively.
+            Integrating AI into clinical workflows enables real-time decision
+            support. Automated alerts, risk stratification dashboards, and
+            personalized care recommendations are now possible within electronic
+            health record systems. These innovations support earlier diagnosis,
+            targeted surveillance, and optimized treatment plans.
           </Typography>
           <Divider sx={{ my: 3 }} />
           <Typography variant="h5" gutterBottom>
-            Validation and Performance
+            Challenges and Future Directions
           </Typography>
           <Typography paragraph>
-            Extensive validation studies have demonstrated that our machine
-            learning models achieve over 85% accuracy in predicting fibrosis
-            stages, significantly outperforming traditional scoring systems. The
-            models have been tested across diverse patient populations to ensure
-            generalizability and reduce bias.
+            While machine learning offers tremendous promise, challenges remain.
+            Ensuring data quality, addressing bias, and validating models across
+            diverse populations are critical for safe deployment. Ongoing
+            research is focused on federated learning, multi-omics integration,
+            and continuous model updating to keep pace with evolving clinical
+            knowledge.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Future Developments
+            Looking Ahead
           </Typography>
           <Typography paragraph>
-            Ongoing research focuses on incorporating additional data sources,
-            including genetic information, advanced imaging biomarkers, and
-            longitudinal patient data to further improve prediction accuracy and
-            expand the scope of predictive capabilities.
+            The future of liver disease care will be shaped by increasingly
+            sophisticated AI systems. As models become more accurate and
+            interpretable, they will empower clinicians to deliver more precise,
+            proactive, and patient-centered care.
+          </Typography>
+          <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
+            Research Highlights
+          </Typography>
+          <Typography paragraph>
+            Recent studies demonstrate that advanced machine learning
+            algorithms, including deep neural networks and ensemble approaches,
+            are achieving high accuracy in detecting liver fibrosis and
+            differentiating between disease stages. Integrating laboratory,
+            imaging, and clinical data has been shown to significantly improve
+            predictive performance. Furthermore, transparent model
+            interpretation and close collaboration between clinicians and data
+            scientists are essential for safe and effective adoption of AI in
+            real-world hepatology practice.
           </Typography>
         </Box>
         <Card sx={{ bgcolor: "secondary.light", color: "white" }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Transforming Patient Care
+              Advancing Liver Health with AI
             </Typography>
             <Typography>
-              Machine learning and explainable AI are not just technological
-              advances—they represent a fundamental shift toward more precise,
-              personalized, and transparent healthcare delivery.
+              The integration of machine learning into hepatology is not just a
+              technological leap—it is a new era of medicine, offering hope for
+              earlier detection, better outcomes, and improved quality of life
+              for patients worldwide.
             </Typography>
           </CardContent>
         </Card>

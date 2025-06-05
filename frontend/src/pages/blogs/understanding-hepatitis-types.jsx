@@ -44,7 +44,7 @@ function UnderstandingHepatitisTypes() {
               Understanding Hepatitis Types
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Learn about different types of hepatitis and their characteristics
+              A guide to the main types of hepatitis and what makes each unique.
             </Typography>
           </CardContent>
         </Card>
@@ -54,52 +54,49 @@ function UnderstandingHepatitisTypes() {
             What is Hepatitis?
           </Typography>
           <Typography paragraph>
-            Hepatitis is inflammation of the liver. It can be caused by viruses,
-            alcohol, toxins, medications, and certain medical conditions.
-            Understanding the different types is crucial for proper treatment
-            and prevention.
+            Hepatitis is a condition where the liver becomes inflamed. This can
+            be caused by viruses, alcohol, certain medications, or other health
+            problems. The liver is vital for filtering toxins and supporting
+            digestion, so keeping it healthy is important.
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Hepatitis A (HAV)
           </Typography>
           <Typography paragraph>
-            Hepatitis A is a viral infection that causes liver inflammation and
-            damage. It's usually transmitted through contaminated food or water,
-            or close contact with an infected person. It's typically acute and
-            doesn't cause chronic infection.
+            Hepatitis A is a short-term infection spread mainly through
+            contaminated food or water. It usually resolves on its own and does
+            not cause long-term liver problems.
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Hepatitis B (HBV)
           </Typography>
           <Typography paragraph>
-            Hepatitis B is a serious liver infection caused by the hepatitis B
-            virus. It can be acute or chronic. Chronic hepatitis B can lead to
-            liver cirrhosis, liver failure, or liver cancer if left untreated.
+            Hepatitis B can be both short-term and long-term. It spreads through
+            blood, sexual contact, or from mother to baby. Chronic hepatitis B
+            can lead to serious liver issues if not managed.
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Hepatitis C (HCV)
           </Typography>
           <Typography paragraph>
-            Hepatitis C is a viral infection that causes liver inflammation.
-            It's primarily spread through blood contact. Many people with
-            hepatitis C don't have symptoms until liver damage occurs, which can
-            take years or decades.
+            Hepatitis C is mainly spread through blood. Many people do not
+            notice symptoms until the liver is already damaged. With new
+            treatments, most people can be cured.
           </Typography>
 
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Key Differences
+            Comparing the Types
           </Typography>
           <Typography paragraph>
-            • <strong>Transmission:</strong> A and E are usually foodborne, B
-            and D are bloodborne and sexually transmitted, C is primarily
-            bloodborne
+            • <strong>How they spread:</strong> A is foodborne, B and C are
+            bloodborne, B can also be sexually transmitted
           </Typography>
           <Typography paragraph>
-            • <strong>Chronicity:</strong> A and E are typically acute, B, C,
-            and D can become chronic
+            • <strong>Chronic vs. Acute:</strong> A is always short-term, B and
+            C can become long-term
           </Typography>
           <Typography paragraph>
             • <strong>Prevention:</strong> Vaccines are available for A and B,
@@ -110,12 +107,12 @@ function UnderstandingHepatitisTypes() {
         <Card sx={{ bgcolor: "primary.light", color: "white" }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Important Note
+              Take Action
             </Typography>
             <Typography>
-              If you suspect you may have been exposed to hepatitis or are
-              experiencing symptoms, consult with a healthcare provider
-              immediately for proper testing and treatment options.
+              If you think you may have been exposed to hepatitis, see a
+              healthcare provider for testing and advice. Early detection makes
+              a big difference.
             </Typography>
           </CardContent>
         </Card>

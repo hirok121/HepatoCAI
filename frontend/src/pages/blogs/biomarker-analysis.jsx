@@ -36,25 +36,26 @@ function BiomarkerAnalysis() {
   const biomarkers = [
     {
       name: "ALT (Alanine Aminotransferase)",
-      description: "Primary indicator of liver cell damage and inflammation",
+      description: "Enzyme that signals liver cell injury or inflammation.",
     },
     {
       name: "AST (Aspartate Aminotransferase)",
       description:
-        "Secondary liver enzyme marker, also found in heart and muscle",
+        "Another enzyme that, when elevated, may indicate liver or muscle issues.",
     },
     {
       name: "Bilirubin",
-      description: "Measures liver's ability to process waste products",
+      description:
+        "A pigment that, when high, suggests liver processing problems.",
     },
     {
       name: "Platelet Count",
-      description: "Decreased levels may indicate liver fibrosis or cirrhosis",
+      description: "Low levels can be a sign of advanced liver disease.",
     },
     {
       name: "Albumin",
       description:
-        "Protein produced by liver, low levels suggest liver dysfunction",
+        "A protein made by the liver; low levels may reflect poor liver function.",
     },
   ];
 
@@ -68,7 +69,7 @@ function BiomarkerAnalysis() {
           sx={{ mb: 3 }}
         >
           Back to Education
-        </Button>{" "}
+        </Button>
         <Card sx={{ mb: 4 }}>
           <CardMedia
             component="img"
@@ -90,42 +91,23 @@ function BiomarkerAnalysis() {
               Biomarker Analysis: The Future of HCV Diagnosis
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Deep dive into multi-parameter analysis using liver enzymes,
-              demographic factors, and biochemical markers for precise
+              Discover how modern biomarker analysis is transforming hepatitis C
               diagnosis.
             </Typography>
-
-            <Box sx={{ display: "flex", alignItems: "center", mt: 3 }}>
-              <Avatar sx={{ mr: 2 }}>ER</Avatar>
-              <Box>
-                <Typography variant="body1" fontWeight="bold">
-                  Dr. Emily Rodriguez
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                  <AccessTime
-                    sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    May 15, 2025 • 6 min read
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
           </CardContent>
         </Card>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" gutterBottom>
-            The Science of Biomarker Analysis
+            Understanding Biomarkers
           </Typography>
           <Typography paragraph>
-            Biomarker analysis represents the cutting edge of hepatitis C
-            diagnosis, moving beyond single-parameter testing to comprehensive
-            multi-dimensional assessment. This approach combines traditional
-            liver function tests with demographic data and advanced biochemical
-            markers to create a complete diagnostic picture.
+            Biomarkers are measurable indicators in the body that help doctors
+            assess liver health and detect hepatitis C. By analyzing several
+            markers together, healthcare professionals can get a clearer picture
+            of disease stage and treatment needs.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Core Biomarkers in HCV Diagnosis
+            Key Biomarkers for Hepatitis C
           </Typography>
           <List>
             {biomarkers.map((biomarker, index) => (
@@ -141,56 +123,35 @@ function BiomarkerAnalysis() {
             ))}
           </List>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Multi-Parameter Analysis Approach
+            Why Multi-Parameter Analysis?
           </Typography>
           <Typography paragraph>
-            Traditional diagnostic methods often rely on single biomarkers or
-            simple ratios. Our advanced approach integrates multiple parameters
-            simultaneously, creating a comprehensive diagnostic profile that
-            accounts for individual patient variations and provides more
-            accurate assessments.
+            Looking at several biomarkers at once allows for more accurate
+            diagnosis and monitoring. This approach considers not just liver
+            enzymes, but also blood counts, proteins, and patient background,
+            leading to better care.
           </Typography>
           <Paper sx={{ p: 3, my: 3, bgcolor: "grey.50" }}>
             <Typography variant="h6" gutterBottom color="primary">
-              Integrated Analysis Components
+              What is Included in Analysis?
             </Typography>
             <Typography component="div">
-              <strong>Laboratory Parameters:</strong>
-              <br />
-              • Liver enzymes (ALT, AST, GGT)
-              <br />
-              • Bilirubin fractions (total, direct, indirect)
-              <br />
-              • Protein markers (albumin, globulin)
-              <br />
-              • Coagulation factors (PT/INR)
-              <br />
-              • Complete blood count with differential
+              <strong>Lab Tests:</strong>
+              <br />• Liver enzymes (ALT, AST, GGT)
+              <br />• Bilirubin levels
+              <br />• Proteins (albumin, globulin)
+              <br />• Blood clotting tests
+              <br />• Blood cell counts
               <br />
               <br />
-              <strong>Demographic Factors:</strong>
-              <br />
-              • Age and gender considerations
-              <br />
-              • Body mass index and metabolic factors
-              <br />
-              • Ethnicity and genetic predisposition
-              <br />
-              • Geographic and environmental factors
-              <br />
-              <br />
-              <strong>Clinical History:</strong>
-              <br />
-              • Duration of suspected infection
-              <br />
-              • Previous treatments and responses
-              <br />
-              • Comorbid conditions
-              <br />• Medication history and interactions
+              <strong>Patient Factors:</strong>
+              <br />• Age, gender, and body weight
+              <br />• Medical history and other conditions
+              <br />• Previous treatments
             </Typography>
-          </Paper>{" "}
+          </Paper>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Precision Diagnosis Benefits
+            Benefits of This Approach
           </Typography>
           <Box sx={{ my: 3, textAlign: "center" }}>
             <CardMedia
@@ -211,80 +172,47 @@ function BiomarkerAnalysis() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Advanced laboratory testing for comprehensive biomarker analysis
+              Laboratory testing helps guide hepatitis C care
             </Typography>
           </Box>
           <Typography paragraph>
-            The multi-parameter approach offers several advantages over
-            traditional diagnostic methods:
+            Using multiple biomarkers helps detect hepatitis C earlier, tailor
+            treatment, and monitor progress more effectively. It also reduces
+            the risk of misdiagnosis.
           </Typography>
           <Typography component="div" sx={{ ml: 2 }}>
-            • <strong>Increased Sensitivity:</strong> Detects early-stage
-            disease that single biomarkers might miss
-            <br />• <strong>Improved Specificity:</strong> Reduces false
-            positives by considering multiple factors
-            <br />• <strong>Personalized Assessment:</strong> Accounts for
-            individual patient characteristics
-            <br />• <strong>Risk Stratification:</strong> Provides more accurate
-            prognosis and treatment planning
-            <br />• <strong>Monitoring Capability:</strong> Tracks disease
-            progression and treatment response
+            • Early detection of liver problems
+            <br />• More precise treatment plans
+            <br />• Better tracking of recovery
+            <br />• Fewer unnecessary treatments
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Advanced Biochemical Markers
+            New Developments
           </Typography>
           <Typography paragraph>
-            Beyond traditional liver function tests, emerging biomarkers provide
-            additional diagnostic insights:
-          </Typography>
-          <Typography component="div" sx={{ ml: 2 }}>
-            • <strong>Hyaluronic Acid:</strong> Marker of liver fibrosis
-            <br />• <strong>Type IV Collagen:</strong> Indicates extracellular
-            matrix changes
-            <br />• <strong>Laminin:</strong> Basement membrane component,
-            elevated in fibrosis
-            <br />• <strong>Alpha-2-Macroglobulin:</strong> Protease inhibitor,
-            useful in fibrosis assessment
-            <br />• <strong>Haptoglobin:</strong> Acute phase protein with
-            diagnostic value
+            Researchers are finding new biomarkers that may further improve
+            diagnosis and monitoring. These include markers for liver scarring
+            and inflammation, as well as genetic and protein-based indicators.
           </Typography>
           <Divider sx={{ my: 3 }} />
           <Typography variant="h5" gutterBottom>
-            Clinical Implementation
+            Looking Ahead
           </Typography>
           <Typography paragraph>
-            Implementation of multi-parameter biomarker analysis requires
-            sophisticated laboratory capabilities and advanced data processing
-            systems. Our platform integrates seamlessly with existing laboratory
-            information systems, providing real-time analysis and interpretation
-            of complex biomarker panels.
-          </Typography>
-          <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
-            Future Directions
-          </Typography>
-          <Typography paragraph>
-            Research continues into novel biomarkers, including microRNAs,
-            proteomic signatures, and metabolomic profiles. These emerging
-            technologies promise even greater diagnostic precision and may
-            enable non-invasive monitoring of treatment response and disease
-            progression.
-          </Typography>
-          <Typography paragraph>
-            The integration of artificial intelligence with biomarker analysis
-            represents the next frontier in hepatitis C diagnosis, offering the
-            potential for truly personalized medicine approaches.
+            As technology advances, biomarker analysis will become even more
+            accurate and accessible, helping more people get the right care at
+            the right time.
           </Typography>
         </Box>
         <Card sx={{ bgcolor: "success.light", color: "white" }}>
           <CardContent>
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Biotech sx={{ mr: 1 }} />
-              <Typography variant="h6">Diagnostic Revolution</Typography>
+              <Typography variant="h6">Diagnostic Progress</Typography>
             </Box>
             <Typography>
-              Multi-parameter biomarker analysis is revolutionizing hepatitis C
-              diagnosis, providing unprecedented accuracy and enabling
-              personalized treatment strategies for better patient outcomes.
+              Multi-parameter biomarker analysis is changing how hepatitis C is
+              diagnosed and managed, leading to better outcomes for patients.
             </Typography>
           </CardContent>
         </Card>

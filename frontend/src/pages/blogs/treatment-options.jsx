@@ -30,20 +30,21 @@ function TreatmentOptions() {
       type: "Hepatitis A",
       approach: "Supportive Care",
       description:
-        "No specific treatment; focus on rest, nutrition, and symptom management",
+        "Rest, hydration, and a healthy diet help the body recover from hepatitis A. Most people recover fully without medication.",
       icon: <LocalHospital color="primary" />,
     },
     {
       type: "Hepatitis B",
       approach: "Antiviral Therapy",
       description:
-        "Oral antivirals like tenofovir or entecavir for chronic cases",
+        "Chronic hepatitis B may require antiviral medicines to control the virus and protect the liver. Regular monitoring is important.",
       icon: <Science color="primary" />,
     },
     {
       type: "Hepatitis C",
       approach: "Direct-Acting Antivirals",
-      description: "Highly effective DAAs with cure rates over 95%",
+      description:
+        "Modern medications can cure hepatitis C in most cases, often with few side effects.",
       icon: <Science color="primary" />,
     },
   ];
@@ -58,7 +59,7 @@ function TreatmentOptions() {
           sx={{ mb: 3 }}
         >
           Back to Education
-        </Button>{" "}
+        </Button>
         <Card sx={{ mb: 4 }}>
           <CardMedia
             component="img"
@@ -75,7 +76,7 @@ function TreatmentOptions() {
               Treatment Options
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" paragraph>
-              Modern treatment approaches for hepatitis management
+              Explore the latest approaches for managing hepatitis.
             </Typography>
           </CardContent>
         </Card>
@@ -84,9 +85,9 @@ function TreatmentOptions() {
             Modern Hepatitis Treatment
           </Typography>
           <Typography paragraph>
-            Treatment for hepatitis varies significantly depending on the type
-            and severity of the infection. Modern medicine has made remarkable
-            advances, especially in treating hepatitis C.
+            Hepatitis treatment depends on the type and stage of infection.
+            Advances in medicine have made it possible to cure or control most
+            forms of hepatitis, improving quality of life for many patients.
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Treatment by Type
@@ -113,26 +114,24 @@ function TreatmentOptions() {
             Direct-Acting Antivirals (DAAs)
           </Typography>
           <Typography paragraph>
-            DAAs represent a breakthrough in hepatitis C treatment. These
-            medications target specific steps in the hepatitis C virus
-            lifecycle, leading to sustained virologic response (cure) in over
-            95% of patients.
+            DAAs are a major breakthrough for hepatitis C. These medicines
+            target the virus directly, leading to high cure rates in a short
+            period. Most people experience few side effects.
           </Typography>
-          <Typography paragraph>Common DAA regimens include:</Typography>
+          <Typography paragraph>Examples of DAA treatments:</Typography>
           <Typography component="div" sx={{ ml: 2 }}>
-            • Sofosbuvir/Velpatasvir (Epclusa)
-            <br />
-            • Glecaprevir/Pibrentasvir (Mavyret)
-            <br />• Sofosbuvir/Velpatasvir/Voxilaprevir (Vosevi)
+            • Sofosbuvir/Velpatasvir
+            <br />• Glecaprevir/Pibrentasvir
+            <br />• Sofosbuvir/Velpatasvir/Voxilaprevir
           </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Treatment Duration
           </Typography>
           <Typography paragraph>
-            Most hepatitis C treatments now last 8-12 weeks, a significant
-            improvement from older treatments that could last up to 48 weeks
-            with lower cure rates and more side effects.
-          </Typography>{" "}
+            Most hepatitis C treatments last 8-12 weeks. Older therapies took
+            much longer and had more side effects. Today, most people can
+            complete treatment quickly and return to normal activities.
+          </Typography>
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Monitoring and Follow-up
           </Typography>
@@ -155,8 +154,7 @@ function TreatmentOptions() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Comprehensive monitoring and follow-up care during hepatitis
-              treatment
+              Ongoing monitoring ensures safe and effective treatment
             </Typography>
           </Box>
           {/* YouTube Video Section */}
@@ -167,7 +165,7 @@ function TreatmentOptions() {
             <Box
               sx={{
                 position: "relative",
-                paddingBottom: "56.25%", // 16:9 aspect ratio
+                paddingBottom: "56.25%" /* 16:9 aspect ratio */,
                 height: 0,
                 overflow: "hidden",
                 borderRadius: 2,
@@ -196,21 +194,18 @@ function TreatmentOptions() {
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              Educational video about hepatitis treatment approaches and options
+              Learn more about hepatitis treatment options in this video
             </Typography>
           </Box>
           <Typography paragraph>
-            Regular monitoring during and after treatment includes:
+            Regular checkups during and after treatment help track progress and
+            catch any issues early. Tests may include:
           </Typography>
           <Typography component="div" sx={{ ml: 2 }}>
-            • Viral load testing
-            <br />
-            • Liver function tests
-            <br />
-            • Assessment for drug interactions
-            <br />
-            • Monitoring for side effects
-            <br />• Post-treatment sustained virologic response testing
+            • Blood tests for viral load
+            <br />• Liver function tests
+            <br />• Checking for side effects
+            <br />• Post-treatment follow-up
           </Typography>
         </Box>
         <Card sx={{ bgcolor: "info.light", color: "white" }}>
@@ -219,9 +214,9 @@ function TreatmentOptions() {
               Treatment Success
             </Typography>
             <Typography>
-              With modern treatments, hepatitis C is now considered a curable
-              disease. Early detection and treatment can prevent liver damage
-              and improve quality of life significantly.
+              With new therapies, hepatitis C can often be cured. Early
+              diagnosis and treatment are key to preventing complications and
+              living well.
             </Typography>
           </CardContent>
         </Card>
