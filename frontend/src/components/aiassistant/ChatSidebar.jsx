@@ -92,7 +92,6 @@ const ChatSidebar = ({
       ? title.substring(0, maxLength) + "..."
       : title;
   };
-
   return (
     <Box
       sx={{
@@ -100,16 +99,19 @@ const ChatSidebar = ({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#f8fafc",
-        borderRight: "1px solid #e2e8f0",
+        background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+        backdropFilter: "blur(20px)",
+        borderRight: "1px solid rgba(255, 255, 255, 0.2)",
       }}
     >
+      {" "}
       {/* Header */}
       <Box
         sx={{
-          p: 2,
-          borderBottom: "1px solid #e2e8f0",
-          backgroundColor: "white",
+          p: 3,
+          borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+          background: "rgba(255, 255, 255, 0.9)",
+          backdropFilter: "blur(20px)",
         }}
       >
         {" "}
@@ -122,16 +124,23 @@ const ChatSidebar = ({
           sx={{
             borderColor: "#2563EB",
             color: "#2563EB",
+            background: "rgba(255, 255, 255, 0.7)",
+            backdropFilter: "blur(10px)",
             "&:hover": {
-              backgroundColor: "rgba(37, 99, 235, 0.04)",
+              backgroundColor: "rgba(37, 99, 235, 0.1)",
               borderColor: "#1D4ED8",
+              transform: "translateY(-1px)",
+              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.2)",
             },
-            borderRadius: "8px",
+            borderRadius: "16px",
             textTransform: "none",
-            fontWeight: 600,
+            fontWeight: 700,
+            fontSize: "0.95rem",
+            py: 2,
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
-          {isLoading ? "Loading..." : "New Chat"}
+          {isLoading ? "Loading..." : "✨ New Chat"}
         </Button>
       </Box>{" "}
       {/* Chat List */}
@@ -139,13 +148,14 @@ const ChatSidebar = ({
         {isLoading ? (
           // Loading skeleton for chat list
           <List sx={{ px: 1 }}>
+            {" "}
             {Array.from({ length: 5 }).map((_, index) => (
               <ListItem
                 key={index}
                 disablePadding
                 sx={{
                   mb: 0.5,
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   overflow: "hidden",
                 }}
               >
@@ -193,7 +203,7 @@ const ChatSidebar = ({
                   disablePadding
                   sx={{
                     mb: 0.5,
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                     overflow: "hidden",
                   }}
                 >
@@ -202,19 +212,38 @@ const ChatSidebar = ({
                     selected={currentChatId === chat.id}
                     onClick={() => onChatSelect(chat.id)}
                     sx={{
-                      borderRadius: "8px",
+                      borderRadius: "16px",
+                      background:
+                        currentChatId === chat.id
+                          ? "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)"
+                          : "rgba(255, 255, 255, 0.7)",
+                      backdropFilter: "blur(10px)",
+                      border:
+                        currentChatId === chat.id
+                          ? "none"
+                          : "1px solid rgba(255, 255, 255, 0.3)",
                       "&.Mui-selected": {
-                        backgroundColor: "#2563EB",
                         color: "white",
+                        boxShadow: "0 4px 16px rgba(37, 99, 235, 0.3)",
                         "&:hover": {
-                          backgroundColor: "#1D4ED8",
+                          background:
+                            "linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%)",
                         },
                       },
                       "&:hover": {
-                        backgroundColor: "rgba(37, 99, 235, 0.08)",
+                        backgroundColor:
+                          currentChatId === chat.id
+                            ? undefined
+                            : "rgba(37, 99, 235, 0.1)",
+                        transform: "translateY(-1px)",
+                        boxShadow:
+                          currentChatId === chat.id
+                            ? "0 6px 20px rgba(37, 99, 235, 0.4)"
+                            : "0 2px 8px rgba(0, 0, 0, 0.1)",
                       },
-                      px: 2,
-                      py: 1.5,
+                      px: 3,
+                      py: 2,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     {" "}
@@ -349,21 +378,26 @@ const ChatSidebar = ({
             Delete
           </MenuItem>
         </Menu>
-      </Box>
+      </Box>{" "}
       {/* Footer */}
-      <Divider />
+      <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.3)" }} />
       <Box
         sx={{
-          p: 2,
-          backgroundColor: "white",
+          p: 3,
+          background: "rgba(255, 255, 255, 0.9)",
+          backdropFilter: "blur(20px)",
         }}
       >
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ display: "block", textAlign: "center" }}
+          sx={{
+            display: "block",
+            textAlign: "center",
+            color: "#64748b",
+            fontWeight: 500,
+          }}
         >
-          {chats.length} conversation{chats.length !== 1 ? "s" : ""}
+          💬 {chats.length} conversation{chats.length !== 1 ? "s" : ""}
         </Typography>
       </Box>
     </Box>

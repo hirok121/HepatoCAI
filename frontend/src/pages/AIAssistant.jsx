@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -42,11 +42,11 @@ function AIAssistant() {
   useEffect(() => {
     loadChats();
   }, []);
+
   const loadChats = async () => {
     setSidebarLoading(true);
     setIsLoading(true);
     try {
-      // Fetch data from API
       const response = await aiAssistantService.getChats();
       console.log("API response getchats:", response);
       if (response.success) {
@@ -67,10 +67,7 @@ function AIAssistant() {
       setIsLoading(false);
     }
   };
-
-  const currentChat = chats.find((chat) => chat.id === currentChatId);
-
-  const handleNewChat = async () => {
+  const handleNewChat = useCallback(async () => {
     try {
       setSidebarLoading(true);
       setIsLoading(true);
@@ -94,21 +91,20 @@ function AIAssistant() {
       setSidebarLoading(false);
       setIsLoading(false);
     }
-  };
+  }, [isMobile]);
+
   const handleChatSelect = async (chatId) => {
     try {
       setCurrentChatId(chatId);
       setChatMessageLoading(true);
       setIsLoading(true);
-      setMessages([]); // Clear messages immediately
+      setMessages([]);
 
-      // Try to fetch chat details from backend
       const response = await aiAssistantService.getChatDetails(chatId);
       console.log("API response getChatDetails:", response);
 
       if (response.success && response.data) {
         const chatData = response.data;
-        // Handle different possible response structures
         const messages = chatData.chat?.messages;
         console.log("Loading messages for chat:", chatId, messages);
         setMessages(messages);
@@ -137,7 +133,7 @@ function AIAssistant() {
     let chatId = currentChatId;
     setmessageLoading(true);
     setIsLoading(true);
-    // Create new chat if none selected
+
     if (!chatId) {
       try {
         const response = await aiAssistantService.createChat();
@@ -153,7 +149,8 @@ function AIAssistant() {
         setError("Failed to create new chat");
         return;
       }
-    } // Add user message to UI immediately
+    }
+
     const userMessage = {
       id: generateUniqueId("user_"),
       content: messageContent,
@@ -161,8 +158,8 @@ function AIAssistant() {
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMessage]);
+
     try {
-      // Try to send message to backend
       console.log(
         "Sending message - chatId:",
         chatId,
@@ -174,14 +171,13 @@ function AIAssistant() {
         messageContent
       );
       console.log("API response sendMessage:", response);
+
       if (response.success) {
-        // The backend response should include both user message and AI response
-        const { user_message, ai_message, chat_title } = response.data; // Update messages with the actual server response
+        const { user_message, ai_message, chat_title } = response.data;
+
         setMessages((prev) => {
-          // Remove the temporary user message and add the server messages
           const withoutTemp = prev.filter((msg) => msg.id !== userMessage.id);
 
-          // Ensure server messages have valid IDs
           const validUserMessage = {
             ...user_message,
             id: user_message.id || generateUniqueId("server_user_"),
@@ -195,23 +191,19 @@ function AIAssistant() {
           return [...withoutTemp, validUserMessage, validAiMessage];
         });
 
-        // Update chat in the list if title was auto-generated
         if (chat_title) {
           setChats((prev) =>
             prev.map((c) => (c.id === chatId ? { ...c, title: chat_title } : c))
           );
         }
       } else {
-        // Backend API failed
         console.warn("Backend API failed");
         setError("Failed to send message");
-        // Remove the user message since sending failed
         setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
       }
     } catch (error) {
       console.warn("Backend not available:", error);
       setError("Backend service is currently unavailable");
-      // Remove the user message since sending failed
       setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id));
     } finally {
       setmessageLoading(false);
@@ -228,7 +220,6 @@ function AIAssistant() {
       if (response.success) {
         setChats((prev) => prev.filter((chat) => chat.id !== chatIdToDelete));
 
-        // If we're deleting the current chat, clear the current selection
         if (currentChatId === chatIdToDelete) {
           setCurrentChatId(null);
           setMessages([]);
@@ -246,7 +237,6 @@ function AIAssistant() {
   };
 
   const handleEditTitle = async (chatId) => {
-    // For now, show a simple prompt - in production, you'd use a proper modal
     const newTitle = prompt("Enter new chat title:");
     if (newTitle && newTitle.trim()) {
       try {
@@ -269,16 +259,94 @@ function AIAssistant() {
       }
     }
   };
-
-  const handleToggleSidebar = () => {
+  const handleToggleSidebar = useCallback(() => {
     setSidebarOpen(!sidebarOpen);
-  };
+  }, [sidebarOpen]);
+
+  // Enhanced animations and transitions
+  useEffect(() => {
+    const handleKeyboard = (e) => {
+      // Keyboard shortcuts for better UX
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case "n":
+            e.preventDefault();
+            handleNewChat();
+            break;
+          case "/":
+            e.preventDefault();
+            // Focus on input if chat is open
+            if (currentChatId) {
+              const inputElement = document.querySelector(
+                'textarea, input[type="text"]'
+              );
+              inputElement?.focus();
+            }
+            break;
+          case "b":
+            e.preventDefault();
+            handleToggleSidebar();
+            break;
+        }
+      }
+
+      // ESC to close sidebar on mobile
+      if (e.key === "Escape" && isMobile && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyboard);
+    return () => document.removeEventListener("keydown", handleKeyboard);
+  }, [
+    currentChatId,
+    isMobile,
+    sidebarOpen,
+    handleNewChat,
+    handleToggleSidebar,
+  ]);
 
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        minHeight: "100vh",
+        "@keyframes pulse": {
+          "0%": {
+            transform: "translate(-50%, -50%) scale(1)",
+            opacity: 0.7,
+          },
+          "50%": {
+            transform: "translate(-50%, -50%) scale(1.1)",
+            opacity: 0.4,
+          },
+          "100%": {
+            transform: "translate(-50%, -50%) scale(1)",
+            opacity: 0.7,
+          },
+        },
+      }}
+    >
       <NavBar />
+
       {/* Main Content Area */}
-      <Box sx={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          overflow: "hidden",
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          margin: { xs: 0, md: 1 },
+          borderRadius: { xs: 0, md: "16px 16px 0 0" },
+          boxShadow: {
+            xs: "none",
+            md: "0 -10px 25px rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
         {/* Sidebar */}
         {isMobile ? (
           <Drawer
@@ -286,7 +354,12 @@ function AIAssistant() {
             open={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             PaperProps={{
-              sx: { width: 280 },
+              sx: {
+                width: 280,
+                background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+                backdropFilter: "blur(20px)",
+                borderRight: "1px solid rgba(255, 255, 255, 0.2)",
+              },
             }}
           >
             <ChatSidebar
@@ -303,8 +376,13 @@ function AIAssistant() {
           <Box
             sx={{
               width: sidebarOpen ? 280 : 0,
-              transition: "width 0.3s ease",
+              transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               overflow: "hidden",
+              background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+              borderRight: sidebarOpen
+                ? "1px solid rgba(255, 255, 255, 0.2)"
+                : "none",
+              backdropFilter: "blur(20px)",
             }}
           >
             <ChatSidebar
@@ -320,7 +398,14 @@ function AIAssistant() {
         )}
 
         {/* Main Chat Area */}
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+          }}
+        >
           {currentChatId ? (
             <Paper
               elevation={0}
@@ -328,21 +413,24 @@ function AIAssistant() {
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
-                backgroundColor: "#ffffff",
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(226, 232, 240, 0.5)",
+                borderRadius: { xs: 0, md: "16px" },
+                margin: { xs: 0, md: 2 },
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                overflow: "hidden",
               }}
             >
-              {" "}
-              {/* Messages */}
               <ChatMessages
                 messages={messages}
                 isLoading={chatMessageLoading}
                 loadingMessage={messageLoading}
               />
-              {/* Input */}
               <ChatInput
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}
-                showQuickQuestions={messages.length == 0}
+                showQuickQuestions={messages.length === 0}
               />
             </Paper>
           ) : (
@@ -352,8 +440,26 @@ function AIAssistant() {
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                backgroundColor: "#f8fafc",
+                background:
+                  "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%)",
+                backdropFilter: "blur(20px)",
                 position: "relative",
+                margin: { xs: 0, md: 2 },
+                borderRadius: { xs: 0, md: "16px" },
+                overflow: "hidden",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background:
+                    'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23e2e8f0" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>\')',
+                  opacity: 0.3,
+                  zIndex: 0,
+                },
               }}
             >
               {/* Mobile Header with Hamburger Menu */}
@@ -362,18 +468,25 @@ function AIAssistant() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    px: 2,
-                    py: 2,
-                    backgroundColor: "white",
-                    borderBottom: "1px solid #e2e8f0",
+                    px: 3,
+                    py: 3,
+                    background: "rgba(255, 255, 255, 0.95)",
+                    backdropFilter: "blur(20px)",
+                    borderBottom: "1px solid rgba(226, 232, 240, 0.5)",
+                    position: "relative",
+                    zIndex: 1,
                   }}
                 >
                   <IconButton
                     onClick={handleToggleSidebar}
                     sx={{
                       color: "#2563EB",
+                      background: "rgba(37, 99, 235, 0.1)",
+                      borderRadius: "12px",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       "&:hover": {
-                        backgroundColor: "rgba(37, 99, 235, 0.08)",
+                        backgroundColor: "rgba(37, 99, 235, 0.15)",
+                        transform: "scale(1.05)",
                       },
                     }}
                   >
@@ -384,7 +497,12 @@ function AIAssistant() {
                     sx={{
                       fontWeight: 700,
                       color: "#1e293b",
-                      ml: 2,
+                      ml: 3,
+                      background:
+                        "linear-gradient(135deg, #2563EB 0%, #7c3aed 100%)",
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
                     }}
                   >
                     HepatoCAI Assistant
@@ -400,28 +518,76 @@ function AIAssistant() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  px: 3,
+                  px: 4,
+                  py: 6,
                   textAlign: "center",
+                  position: "relative",
+                  zIndex: 1,
                 }}
               >
-                <PsychologyIcon
-                  sx={{ fontSize: "4rem", color: "#2563EB", mb: 3 }}
-                />
-                <Typography
-                  variant="h3"
+                {/* Animated Icon */}
+                <Box
                   sx={{
-                    fontWeight: 700,
-                    mb: 2,
-                    color: "#1e293b",
-                    fontSize: { xs: "2rem", md: "3rem" },
+                    position: "relative",
+                    mb: 4,
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "120px",
+                      height: "120px",
+                      background:
+                        "linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%)",
+                      borderRadius: "50%",
+                      animation: "pulse 2s ease-in-out infinite",
+                    },
+                  }}
+                >
+                  <PsychologyIcon
+                    sx={{
+                      fontSize: "5rem",
+                      background:
+                        "linear-gradient(135deg, #2563EB 0%, #7c3aed 100%)",
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      position: "relative",
+                      zIndex: 1,
+                      filter: "drop-shadow(0 4px 8px rgba(37, 99, 235, 0.3))",
+                    }}
+                  />
+                </Box>
+
+                <Typography
+                  variant="h2"
+                  sx={{
+                    fontWeight: 800,
+                    mb: 3,
+                    background:
+                      "linear-gradient(135deg, #1e293b 0%, #2563EB 50%, #7c3aed 100%)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    fontSize: { xs: "2.5rem", md: "3.5rem" },
+                    letterSpacing: "-0.02em",
+                    textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   HepatoCAI Assistant
                 </Typography>
+
                 <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ maxWidth: 600, lineHeight: 1.6, mb: 4 }}
+                  variant="h6"
+                  sx={{
+                    color: "#64748b",
+                    mb: 4,
+                    maxWidth: 700,
+                    lineHeight: 1.7,
+                    fontWeight: 400,
+                    fontSize: { xs: "1.1rem", md: "1.25rem" },
+                  }}
                 >
                   Your specialized AI companion for Hepatitis C education and
                   support. Ask me anything about HCV stages, liver health, lab
@@ -429,31 +595,127 @@ function AIAssistant() {
                   information.
                 </Typography>
 
+                {/* Feature Cards */}
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+                    gap: 3,
+                    mt: 4,
+                    mb: 4,
+                    width: "100%",
+                    maxWidth: 900,
+                  }}
+                >
+                  {[
+                    {
+                      icon: "🩺",
+                      title: "Medical Insights",
+                      desc: "Get expert information about Hepatitis C",
+                    },
+                    {
+                      icon: "📊",
+                      title: "Lab Results",
+                      desc: "Understand your test results and values",
+                    },
+                    {
+                      icon: "💊",
+                      title: "Treatment Options",
+                      desc: "Learn about available therapies",
+                    },
+                  ].map((feature, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        p: 3,
+                        background: "rgba(255, 255, 255, 0.7)",
+                        backdropFilter: "blur(10px)",
+                        borderRadius: "16px",
+                        border: "1px solid rgba(255, 255, 255, 0.3)",
+                        textAlign: "center",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        cursor: "pointer",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 12px 28px rgba(0, 0, 0, 0.15)",
+                          background: "rgba(255, 255, 255, 0.9)",
+                        },
+                      }}
+                    >
+                      <Typography variant="h4" sx={{ mb: 2 }}>
+                        {feature.icon}
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 600,
+                          color: "#1e293b",
+                          mb: 1,
+                        }}
+                      >
+                        {feature.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#64748b",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {feature.desc}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+
                 {!isMobile && (
                   <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ opacity: 0.7 }}
+                    variant="body1"
+                    sx={{
+                      color: "#94a3b8",
+                      opacity: 0.8,
+                      fontStyle: "italic",
+                      fontSize: "0.95rem",
+                    }}
                   >
-                    Start a new conversation or select from your chat history
+                    ✨ Start a new conversation or select from your chat history
                   </Typography>
                 )}
               </Box>
             </Box>
           )}
         </Box>
-      </Box>{" "}
+      </Box>
+
       {/* Error Snackbar */}
       <Snackbar
         open={!!error}
         autoHideDuration={6000}
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          "& .MuiSnackbarContent-root": {
+            minWidth: "300px",
+          },
+        }}
       >
         <Alert
           onClose={() => setError(null)}
           severity="error"
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            borderRadius: "12px",
+            backgroundColor: "#fee2e2",
+            color: "#dc2626",
+            border: "1px solid #fecaca",
+            "& .MuiAlert-icon": {
+              color: "#dc2626",
+            },
+            "& .MuiAlert-action": {
+              color: "#dc2626",
+            },
+            boxShadow: "0 8px 25px rgba(220, 38, 38, 0.15)",
+          }}
         >
           {error}
         </Alert>

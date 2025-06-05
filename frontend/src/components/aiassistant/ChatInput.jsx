@@ -49,39 +49,57 @@ const ChatInput = ({
     if (isLoading) return;
     setInput(question);
   };
-
   return (
     <Box
       sx={{
-        backgroundColor: "white",
-        borderTop: "1px solid #e2e8f0",
+        background:
+          "linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)",
+        backdropFilter: "blur(20px)",
+        borderTop: "1px solid rgba(226, 232, 240, 0.5)",
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.3) 50%, transparent 100%)",
+        },
       }}
     >
+      {" "}
       {/* Quick Questions */}
       {showQuickQuestions && (
         <Box
           sx={{
-            px: { xs: 2, md: 3 },
-            py: 2,
-            borderBottom: "1px solid #f1f5f9",
+            px: { xs: 3, md: 4 },
+            py: 3,
+            borderBottom: "1px solid rgba(226, 232, 240, 0.3)",
+            background: "rgba(255, 255, 255, 0.7)",
+            backdropFilter: "blur(10px)",
           }}
         >
           <Typography
             variant="body2"
             sx={{
-              mb: 1,
-              color: "text.secondary",
-              fontWeight: 500,
-              fontSize: "0.8rem",
+              mb: 2,
+              color: "#64748b",
+              fontWeight: 600,
+              fontSize: "0.85rem",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
             }}
           >
-            Quick questions:
+            ✨ Quick questions to get started:
           </Typography>
           <Box
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 1,
+              gap: 1.5,
               maxHeight: "80px",
               overflowY: "auto",
             }}
@@ -95,12 +113,31 @@ const ChatInput = ({
                 disabled={isLoading}
                 sx={{
                   cursor: "pointer",
-                  fontSize: "0.75rem",
-                  backgroundColor: "#f8fafc",
-                  border: "1px solid #e2e8f0",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                  background: "rgba(255, 255, 255, 0.9)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(37, 99, 235, 0.2)",
+                  color: "#475569",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
+                  "@keyframes fadeInUp": {
+                    "0%": {
+                      opacity: 0,
+                      transform: "translateY(20px)",
+                    },
+                    "100%": {
+                      opacity: 1,
+                      transform: "translateY(0)",
+                    },
+                  },
                   "&:hover": {
-                    backgroundColor: "rgba(37, 99, 235, 0.04)",
+                    background:
+                      "linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%)",
                     borderColor: "#2563EB",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.15)",
+                    color: "#2563EB",
                   },
                   "&:disabled": {
                     opacity: 0.6,
@@ -112,7 +149,6 @@ const ChatInput = ({
           </Box>
         </Box>
       )}
-
       {/* Input Area */}
       <Box
         sx={{
@@ -127,12 +163,12 @@ const ChatInput = ({
             alignItems: "flex-end",
             gap: 1,
             p: 1,
-            border: "2px solid #e2e8f0",
+            border: "2px solid #E2E8F0",
             borderRadius: "16px",
-            backgroundColor: "#f8fafc",
+            backgroundColor: "#F0F4F8",
             "&:focus-within": {
               borderColor: "#2563EB",
-              backgroundColor: "white",
+              backgroundColor: "#FFFFFF",
             },
             transition: "all 0.2s ease",
           }}
@@ -165,14 +201,15 @@ const ChatInput = ({
 
           {/* Action Buttons */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            {" "}
             {/* Attach File Button */}
             <IconButton
               size="small"
               disabled={isLoading}
               sx={{
-                color: "#64748b",
+                color: "#475569",
                 "&:hover": {
-                  backgroundColor: "rgba(100, 116, 139, 0.08)",
+                  backgroundColor: "rgba(71, 85, 105, 0.08)",
                 },
                 "&:disabled": {
                   opacity: 0.5,
@@ -181,15 +218,14 @@ const ChatInput = ({
             >
               <AttachFileIcon fontSize="small" />
             </IconButton>
-
             {/* Voice Input Button */}
             <IconButton
               size="small"
               disabled={isLoading}
               sx={{
-                color: "#64748b",
+                color: "#475569",
                 "&:hover": {
-                  backgroundColor: "rgba(100, 116, 139, 0.08)",
+                  backgroundColor: "rgba(71, 85, 105, 0.08)",
                 },
                 "&:disabled": {
                   opacity: 0.5,
@@ -198,30 +234,30 @@ const ChatInput = ({
             >
               <MicIcon fontSize="small" />
             </IconButton>
-
             {/* Send Button */}
             <IconButton
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
               sx={{
                 backgroundColor:
-                  input.trim() && !isLoading ? "#2563EB" : "#e2e8f0",
-                color: input.trim() && !isLoading ? "white" : "#94a3b8",
+                  input.trim() && !isLoading ? "#2563EB" : "#E2E8F0",
+                color: input.trim() && !isLoading ? "white" : "#94A3B8",
                 width: 36,
                 height: 36,
                 "&:hover": {
                   backgroundColor:
-                    input.trim() && !isLoading ? "#1d4ed8" : "#e2e8f0",
+                    input.trim() && !isLoading ? "#1D4ED8" : "#E2E8F0",
                 },
                 "&:disabled": {
-                  backgroundColor: "#e2e8f0",
-                  color: "#94a3b8",
+                  backgroundColor: "#E2E8F0",
+                  color: "#94A3B8",
                 },
                 transition: "all 0.2s ease",
               }}
             >
+              {" "}
               {isLoading ? (
-                <CircularProgress size={16} sx={{ color: "#94a3b8" }} />
+                <CircularProgress size={16} sx={{ color: "#94A3B8" }} />
               ) : (
                 <SendIcon fontSize="small" />
               )}

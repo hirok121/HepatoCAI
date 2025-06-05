@@ -48,17 +48,46 @@ const ChatMessages = ({
       </Box>
     </Box>
   );
-
   return (
     <Box
       sx={{
         flex: 1,
         overflow: "auto",
-        py: 2,
-        backgroundColor: "#ffffff",
+        py: 3,
+        background:
+          "linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, rgba(255, 255, 255, 0.8) 100%)",
+        backdropFilter: "blur(10px)",
         minHeight: 0, // Important for flex scroll
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background:
+            'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23e2e8f0" opacity="0.4"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>\')',
+          opacity: 0.3,
+          zIndex: 0,
+        },
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "rgba(226, 232, 240, 0.3)",
+          borderRadius: "3px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "linear-gradient(180deg, #2563EB 0%, #7c3aed 100%)",
+          borderRadius: "3px",
+          "&:hover": {
+            background: "linear-gradient(180deg, #1D4ED8 0%, #6d28d9 100%)",
+          },
+        },
       }}
     >
+      {" "}
       {messages.length === 0 && !isLoading ? (
         <Box
           sx={{
@@ -67,53 +96,77 @@ const ChatMessages = ({
             alignItems: "center",
             justifyContent: "center",
             height: "100%",
-            px: 3,
+            px: 4,
             textAlign: "center",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Box
             sx={{
-              width: 80,
-              height: 80,
+              width: 120,
+              height: 120,
               borderRadius: "50%",
-              backgroundColor: "#f1f5f9",
+              background:
+                "linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              mb: 3,
+              mb: 4,
+              position: "relative",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "140px",
+                height: "140px",
+                background:
+                  "linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%)",
+                borderRadius: "50%",
+                animation: "pulse 3s ease-in-out infinite",
+              },
             }}
           >
             <Typography
-              variant="h4"
+              variant="h2"
               sx={{
-                background: "linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%)",
+                background: "linear-gradient(135deg, #2563EB 0%, #7c3aed 100%)",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                fontWeight: 700,
+                fontWeight: 800,
+                fontSize: "3rem",
+                position: "relative",
+                zIndex: 1,
               }}
             >
-              HepatoC AI Assistant
+              AI
             </Typography>
           </Box>
-
           <Typography
-            variant="h5"
+            variant="h4"
             sx={{
               fontWeight: 700,
-              color: "#1e293b",
-              mb: 2,
+              background: "linear-gradient(135deg, #1e293b 0%, #475569 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 3,
+              fontSize: { xs: "1.8rem", md: "2.2rem" },
             }}
           >
             How can I help you today?
           </Typography>
-
           <Typography
-            variant="body1"
-            color="text.secondary"
+            variant="h6"
             sx={{
-              maxWidth: 500,
-              lineHeight: 1.6,
+              maxWidth: 600,
+              lineHeight: 1.7,
+              color: "#64748b",
+              fontSize: { xs: "1rem", md: "1.1rem" },
+              fontWeight: 400,
             }}
           >
             I&apos;m HepatoCAI Assistant, your specialized AI companion for
