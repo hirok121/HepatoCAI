@@ -20,7 +20,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", default="http://localhost:5173")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -28,9 +29,10 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", default="http://localhost:5173")
 SECRET_KEY = os.getenv("SECRET_KEY", default="django-insecure-!@#4$%^&*()")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+# ALLOWED_HOSTS setting - required when DEBUG=False
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -77,6 +79,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Add this for static files
     "utils.security.SecurityMiddleware",  # Custom security middleware
     "utils.performance.PerformanceMiddleware",  # Performance monitoring
     "django.middleware.security.SecurityMiddleware",
@@ -169,6 +172,11 @@ USE_TZ = True  # Ensure timezone support is enabled
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Media files
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -176,31 +184,11 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS settings
-CORS_ALLOW_CREDENTIALS = True
-
-# Dynamic CORS configuration based on environment
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-
-# Parse additional CORS origins from environment variable
-ADDITIONAL_CORS_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-ADDITIONAL_CORS_ORIGINS = [
-    url.strip() for url in ADDITIONAL_CORS_ORIGINS if url.strip()
+CORS_ALLOWED_ORIGINS = [
+    FRONTEND_URL,  # Frontend development server
+    BACKEND_URL,  # Backend itself
 ]
-
-# CORS_ALLOWED_ORIGINS = [
-#     FRONTEND_URL,
-#     BACKEND_URL,
-#     "http://localhost:5173",  # Development fallback
-#     "http://127.0.0.1:5173",  # Development fallback
-#     "http://localhost:8000",  # Backend fallback
-#     "http://127.0.0.1:8000",  # Backend fallback
-# ] + ADDITIONAL_CORS_ORIGINS
-
-# # Remove duplicates and empty strings
-# CORS_ALLOWED_ORIGINS = list(set([url for url in CORS_ALLOWED_ORIGINS if url]))
-
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -222,15 +210,15 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 2
 
-LOGIN_REDIRECT_URL = "/users/accounts/google/login/redirect/"  # or whatever view you want to handle the final step
-LOGOUT_REDIRECT_URL = "/"  # TODO do something
+LOGIN_REDIRECT_URL = "/users/accounts/google/login/redirect/"
+LOGOUT_REDIRECT_URL = "/"
 
 # Optional: allauth settings
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional"
-SOCIALACCOUNT_LOGIN_ON_GET = True  # Automatically log in the user after social login
-SOCIALACCOUNT_AUTO_SIGNUP = True  # Automatically create a user account when a user logs in with a social account
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
 
 # google Oauth2 settings

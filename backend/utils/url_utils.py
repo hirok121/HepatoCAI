@@ -69,9 +69,8 @@ class URLBuilder:
 
         if params:
             return f"{base_url}?{'&'.join(params)}"
-        return base_url
+        return base_url @ staticmethod
 
-    @staticmethod
     def get_email_verification_url(uid, token):
         """
         Generate email verification URL
@@ -83,8 +82,7 @@ class URLBuilder:
         Returns:
             str: Complete verification URL
         """
-        domain = os.getenv("DOMAIN", "localhost:8000")
-        return f"http://{domain}/users/verify-email/{uid}/{token}/"
+        return URLBuilder.get_backend_url(f"/users/verify-email/{uid}/{token}/")
 
     @staticmethod
     def get_password_reset_url(uid, token):
