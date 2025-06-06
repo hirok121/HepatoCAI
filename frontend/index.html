@@ -8,7 +8,55 @@
       href="./src/assets/HepatoCAIminiIcon.png"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HepatoC AI</title>
+
+    <!-- Dynamic Meta Tags from Environment Variables -->
+    <title>%VITE_APP_TITLE%</title>
+    <meta name="description" content="%VITE_APP_DESCRIPTION%" />
+    <meta name="keywords" content="%VITE_APP_KEYWORDS%" />
+    <meta name="author" content="%VITE_APP_AUTHOR%" />
+
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="%VITE_APP_THEME_COLOR%" />
+    <meta
+      name="msapplication-navbutton-color"
+      content="%VITE_APP_THEME_COLOR%"
+    />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="%VITE_APP_TITLE%" />
+    <meta property="og:description" content="%VITE_APP_DESCRIPTION%" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="%VITE_FRONTEND_URL%" />
+    <meta
+      property="og:image"
+      content="%VITE_FRONTEND_URL%/src/assets/HepatoCAIminiIcon.png"
+    />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="%VITE_APP_TITLE%" />
+    <meta name="twitter:description" content="%VITE_APP_DESCRIPTION%" />
+    <meta
+      name="twitter:image"
+      content="%VITE_FRONTEND_URL%/src/assets/HepatoCAIminiIcon.png"
+    />
+
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="%VITE_APP_NAME%" />
+    <meta name="apple-mobile-web-app-title" content="%VITE_APP_NAME%" />
+
+    <!-- Preconnect to External Domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- CSP Header (if enabled) -->
+    <!-- This will be dynamically injected by Vite based on VITE_ENABLE_CSP -->
   </head>
   <body>
     <div id="root"></div>

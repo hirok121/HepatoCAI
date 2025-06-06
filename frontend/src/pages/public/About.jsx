@@ -14,6 +14,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import SecurityIcon from "@mui/icons-material/Security";
 import NavBar from "../../components/layout/NavBar";
+import me from "../../assets/me.jpg";
 
 function About() {
   const teamMembers = [
@@ -22,7 +23,7 @@ function About() {
       role: "AI Enthusiast",
       avatar: (
         <Avatar
-          src="/src/assets/me.jpg"
+          src={me}
           sx={{
             width: 80,
             height: 80,

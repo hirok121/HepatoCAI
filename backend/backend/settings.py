@@ -319,33 +319,9 @@ SUSPICIOUS_ACTIVITY_THRESHOLD = int(os.getenv("SUSPICIOUS_ACTIVITY_THRESHOLD", 5
 # APPLICATION FEATURES
 # =============================================================================
 
-# AI Features
-AI_ASSISTANT_ENABLED = os.getenv("AI_ASSISTANT_ENABLED", "True").lower() == "true"
-AI_MODEL_TIMEOUT = int(os.getenv("AI_MODEL_TIMEOUT", 30))
-AI_MAX_REQUESTS_PER_USER = int(os.getenv("AI_MAX_REQUESTS_PER_USER", 50))
-
-# File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 10485760))  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = FILE_UPLOAD_MAX_MEMORY_SIZE
-
 # Pagination
 REST_FRAMEWORK["PAGE_SIZE"] = int(os.getenv("DEFAULT_PAGE_SIZE", 20))
 
-# =============================================================================
-# DEVELOPMENT SETTINGS
-# =============================================================================
-
-# Development features
-DEV_BYPASS_EMAIL_VERIFICATION = (
-    os.getenv("DEV_BYPASS_EMAIL_VERIFICATION", "False").lower() == "true"
-)
-DEV_AUTO_LOGIN = os.getenv("DEV_AUTO_LOGIN", "False").lower() == "true"
-
-# Override CORS for development
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    CORS_ALLOW_ALL_ORIGINS = False
 
 # =============================================================================
 # API DOCUMENTATION SETTINGS

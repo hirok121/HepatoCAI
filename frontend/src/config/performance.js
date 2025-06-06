@@ -1,28 +1,22 @@
 // Performance optimization configuration for React frontend
 import React, { lazy } from 'react';
+import { PERFORMANCE_CONFIG, API_CONFIG } from './constants.js';
 
-// Environment-based configuration
-export const PERFORMANCE_CONFIG = {
-  // API Configuration
-  API_TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT) || 10000,
-  API_RETRY_ATTEMPTS: parseInt(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
-  API_RETRY_DELAY: parseInt(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
+// Re-export performance config for backward compatibility
+export { PERFORMANCE_CONFIG } from './constants.js';
+
+// Enhanced performance configuration
+export const ENHANCED_PERFORMANCE_CONFIG = {
+  ...PERFORMANCE_CONFIG,
   
-  // Caching Configuration
-  CACHE_ENABLED: import.meta.env.VITE_CACHE_ENABLED === 'true',
-  CACHE_TTL: parseInt(import.meta.env.VITE_CACHE_TTL) || 300000, // 5 minutes
-  
-  // UI Performance
-  DEBOUNCE_DELAY: parseInt(import.meta.env.VITE_DEBOUNCE_DELAY) || 300,
-  THROTTLE_DELAY: parseInt(import.meta.env.VITE_THROTTLE_DELAY) || 100,
-  
-  // Bundle Optimization
-  LAZY_LOADING_ENABLED: import.meta.env.VITE_LAZY_LOADING === 'true',
-  IMAGE_OPTIMIZATION: import.meta.env.VITE_IMAGE_OPTIMIZATION === 'true',
+  // API Configuration from constants
+  API_TIMEOUT: API_CONFIG.TIMEOUT,
+  API_RETRY_ATTEMPTS: API_CONFIG.RETRY_ATTEMPTS,
+  API_RETRY_DELAY: API_CONFIG.RETRY_DELAY,
   
   // Development vs Production
   IS_DEVELOPMENT: import.meta.env.DEV,
-  ENABLE_PERFORMANCE_MONITORING: import.meta.env.VITE_PERFORMANCE_MONITORING === 'true',
+  IS_PRODUCTION: import.meta.env.PROD,
 };
 
 // Lazy-loaded components for code splitting

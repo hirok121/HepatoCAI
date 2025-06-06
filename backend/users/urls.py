@@ -29,6 +29,11 @@ urlpatterns += [
         "check-email/", CheckEmailView.as_view(), name="check-email"
     ),  # User Management endpoints    path("admin/users/", UserManagementView.as_view(), name="user-management"),
     path(
+        "admin/users/",
+        UserManagementView.as_view(),
+        name="get-all-users",
+    ),
+    path(
         "admin/users/<int:user_id>/",
         UserManagementView.as_view(),
         name="user-management-detail",
