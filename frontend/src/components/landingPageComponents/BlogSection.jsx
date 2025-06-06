@@ -20,6 +20,9 @@ import {
   Science,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom"; // Add this import for navigation
+import image1 from "../../assets/blogimages/image5.jpg";
+import image2 from "../../assets/blogimages/image.jpg";
+import image3 from "../../assets/blogimages/virus2.jpg";
 
 // Animations
 const fadeInAnimation = keyframes`
@@ -148,7 +151,7 @@ const BlogSection = ({ id }) => {
       author: "Dr. Sarah Johnson",
       date: "May 20, 2025",
       readTime: "5 min read",
-      image: "/src/assets/blogimages/image5.jpg",
+      image: { image1 },
       category: "Research",
       icon: <Biotech />,
       featured: true,
@@ -161,7 +164,7 @@ const BlogSection = ({ id }) => {
       author: "Dr. Michael Chen",
       date: "May 18, 2025",
       readTime: "7 min read",
-      image: "/src/assets/blogimages/image.png",
+      image: { image2 },
       category: "AI Technology",
       icon: <Psychology />,
       featured: false,
@@ -174,7 +177,7 @@ const BlogSection = ({ id }) => {
       author: "Dr. Emily Rodriguez",
       date: "May 15, 2025",
       readTime: "6 min read",
-      image: "/src/assets/blogimages/virus2.jpg",
+      image: { image3 },
       category: "Clinical Science",
       icon: <Science />,
       featured: false,

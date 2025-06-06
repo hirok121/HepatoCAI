@@ -17,6 +17,15 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ScienceIcon from "@mui/icons-material/Science";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/layout/NavBar";
+import testImage from "../assets/blogimages/test.jpg";
+import image1 from "../assets/blogimages/image.png";
+import virusHuman3 from "../assets/blogimages/virushuman3.jpg";
+import virusImage from "../assets/blogimages/virus.jpg";
+import virus2Image from "../assets/blogimages/virus2.jpg";
+import image4 from "../assets/blogimages/image4.jpg";
+import livingWithHcv from "../assets/blogimages/livingwithhcv.png";
+import image5 from "../assets/blogimages/image5.jpg";
+import image2 from "../assets/blogimages/image2.png";
 
 function PatientEducation() {
   const navigate = useNavigate();
@@ -26,7 +35,7 @@ function PatientEducation() {
       description:
         "Explore how advanced AI diagnostic tools and biomarker analysis are changing HCV care. Learn why early detection matters and how modern treatments improve outcomes. Follow the journey from diagnosis to recovery with expert insights.",
       type: "article",
-      image: "/src/assets/blogimages/test.jpg",
+      image: testImage,
       link: "/blogs/understanding-hcv",
       tags: ["AI", "Diagnostics", "HCV"],
       readTime: "8 min read",
@@ -36,7 +45,7 @@ function PatientEducation() {
       description:
         "See how AI and machine learning are transforming liver disease detection and prognosis. Learn about logistic regression models and SHAP explainability. Understand the benefits and limitations in healthcare.",
       type: "article",
-      image: "/src/assets/blogimages/image.png",
+      image: image1,
       link: "/blogs/machine-learning-liver-disease",
       tags: ["Machine Learning", "SHAP", "Explainability"],
       readTime: "15 min read",
@@ -46,7 +55,7 @@ function PatientEducation() {
       description:
         "Learn how multi-parameter biomarker analysis guides personalized hepatitis care. Discover how precision medicine improves outcomes. Explore the future of targeted therapies in liver health.",
       type: "guide",
-      image: "/src/assets/blogimages/virushuman3.jpg",
+      image: virusHuman3,
       link: "/blogs/biomarker-analysis",
       tags: ["Biomarkers", "Precision Medicine", "Analysis"],
       readTime: "12 min read",
@@ -56,7 +65,7 @@ function PatientEducation() {
       description:
         "Discover the differences between hepatitis types and how each affects the liver. Learn about symptoms, causes, and prevention strategies. Get clarity on the unique challenges of each type.",
       type: "article",
-      image: "/src/assets/blogimages/virus.jpg",
+      image: virusImage,
       link: "/blogs/understanding-hepatitis-types",
       tags: ["Hepatitis Types", "Symptoms", "Education"],
       readTime: "6 min read",
@@ -66,7 +75,7 @@ function PatientEducation() {
       description:
         "Find out how lifestyle choices, vaccination, and hygiene can reduce hepatitis risk. Get practical, up-to-date prevention tips for you and your family. Protect yourself with essential steps.",
       type: "guide",
-      image: "/src/assets/blogimages/virus2.jpg",
+      image: virus2Image,
       link: "/blogs/prevention-guidelines",
       tags: ["Prevention", "Vaccination", "Safety"],
       readTime: "5 min read",
@@ -76,7 +85,7 @@ function PatientEducation() {
       description:
         "Explore modern approaches for hepatitis management, including medications and therapies. Learn what to expect during your treatment journey. Stay informed about the latest advancements in care.",
       type: "guide",
-      image: "/src/assets/blogimages/image4.jpg",
+      image: image4,
       link: "/blogs/treatment-options",
       tags: ["Treatment", "Therapy", "Medication"],
       readTime: "10 min read",
@@ -86,7 +95,7 @@ function PatientEducation() {
       description:
         "Get lifestyle tips for managing hepatitis day-to-day. Learn how to maintain emotional well-being and build a support network. Practical advice for living healthier and happier with hepatitis.",
       type: "article",
-      image: "/src/assets/blogimages/livingwithhcv.png",
+      image: livingWithHcv,
       link: "/blogs/living-with-hepatitis",
       tags: ["Lifestyle", "Wellness", "Support"],
       readTime: "7 min read",
@@ -96,7 +105,7 @@ function PatientEducation() {
       description:
         "Discover foods that support liver health and those to avoid. Get meal planning tips and nutrition advice tailored for hepatitis patients. Learn how diet can help your recovery.",
       type: "guide",
-      image: "/src/assets/blogimages/image5.jpg",
+      image: image5,
       link: "/blogs/nutrition-guide",
       tags: ["Nutrition", "Diet", "Liver Health"],
       readTime: "12 min read",
@@ -106,7 +115,7 @@ function PatientEducation() {
       description:
         "Find clear, concise answers to common hepatitis questions. Empower yourself with reliable information and expert guidance. Get quick responses to your most frequent concerns.",
       type: "article",
-      image: "/src/assets/blogimages/image2.png",
+      image: image2,
       link: "/blogs/faqs-about-hepatitis",
       tags: ["FAQ", "Questions", "Information"],
       readTime: "4 min read",
