@@ -69,8 +69,9 @@ class URLBuilder:
 
         if params:
             return f"{base_url}?{'&'.join(params)}"
-        return base_url @ staticmethod
+        return base_url
 
+    @staticmethod
     def get_email_verification_url(uid, token):
         """
         Generate email verification URL
