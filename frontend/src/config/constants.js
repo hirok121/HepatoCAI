@@ -32,11 +32,6 @@ export const APP_CONFIG = {
   BACKGROUND_COLOR: import.meta.env.VITE_APP_BACKGROUND_COLOR || '#ffffff',
 };
 
-// Google OAuth
-export const OAUTH_CONFIG = {
-  GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-};
-
 // Feature Flags
 export const FEATURES = {
   ENABLE_DEBUG_CONSOLE: import.meta.env.VITE_ENABLE_DEBUG_CONSOLE === 'true',
@@ -50,45 +45,14 @@ export const FEATURES = {
 // Performance Configuration
 export const PERFORMANCE_CONFIG = {
   CACHE_ENABLED: import.meta.env.VITE_CACHE_ENABLED === 'true',
-  CACHE_TTL: parseInt(import.meta.env.VITE_CACHE_TTL) || 300000,
+  CACHE_TTL: parseInt(import.meta.env.VITE_CACHE_TTL) || 300000, // 5 minutes
+  LAZY_LOADING: import.meta.env.VITE_LAZY_LOADING !== 'false', // Default true
+  IMAGE_OPTIMIZATION: import.meta.env.VITE_IMAGE_OPTIMIZATION !== 'false', // Default true
+  ENABLE_PERFORMANCE_MONITORING: import.meta.env.VITE_PERFORMANCE_MONITORING === 'true',
   DEBOUNCE_DELAY: parseInt(import.meta.env.VITE_DEBOUNCE_DELAY) || 300,
   THROTTLE_DELAY: parseInt(import.meta.env.VITE_THROTTLE_DELAY) || 100,
-  LAZY_LOADING: import.meta.env.VITE_LAZY_LOADING === 'true',
-  IMAGE_OPTIMIZATION: import.meta.env.VITE_IMAGE_OPTIMIZATION === 'true',
-  PERFORMANCE_MONITORING: import.meta.env.VITE_PERFORMANCE_MONITORING === 'true',
-  BUNDLE_ANALYZER: import.meta.env.VITE_BUNDLE_ANALYZER === 'true',
-};
-
-// Security Configuration
-export const SECURITY_CONFIG = {
-  ENABLE_CSP: import.meta.env.VITE_ENABLE_CSP === 'true',
-  CSP_REPORT_URI: import.meta.env.VITE_CSP_REPORT_URI || '',
-  ENABLE_HSTS: import.meta.env.VITE_ENABLE_HSTS === 'true',
-  SECURITY_HEADERS: import.meta.env.VITE_SECURITY_HEADERS === 'true',
-};
-
-// Analytics Configuration
-export const ANALYTICS_CONFIG = {
-  GOOGLE_ANALYTICS_ID: import.meta.env.VITE_GOOGLE_ANALYTICS_ID || '',
-  SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN || '',
-  HOTJAR_ID: import.meta.env.VITE_HOTJAR_ID || '',
-  MIXPANEL_TOKEN: import.meta.env.VITE_MIXPANEL_TOKEN || '',
-};
-
-// CDN Configuration
-export const CDN_CONFIG = {
-  CDN_URL: import.meta.env.VITE_CDN_URL || '',
-  IMAGE_CDN_URL: import.meta.env.VITE_IMAGE_CDN_URL || '',
-  STATIC_ASSETS_URL: import.meta.env.VITE_STATIC_ASSETS_URL || '',
-};
-
-// Deployment Configuration
-export const DEPLOYMENT_CONFIG = {
-  ENVIRONMENT: import.meta.env.VITE_DEPLOYMENT_ENVIRONMENT || 'development',
-  VERSION: import.meta.env.VITE_DEPLOYMENT_VERSION || '',
-  BUILD_TIMESTAMP: import.meta.env.VITE_BUILD_TIMESTAMP || '',
-  GIT_COMMIT_HASH: import.meta.env.VITE_GIT_COMMIT_HASH || '',
-  CI_BUILD_NUMBER: import.meta.env.VITE_CI_BUILD_NUMBER || '',
+  API_RETRY_ATTEMPTS: parseInt(import.meta.env.VITE_API_RETRY_ATTEMPTS) || API_CONFIG.RETRY_ATTEMPTS,
+  API_RETRY_DELAY: parseInt(import.meta.env.VITE_API_RETRY_DELAY) || API_CONFIG.RETRY_DELAY,
 };
 
 // UI Constants
@@ -134,75 +98,5 @@ export const API_ENDPOINTS = {
     MY_DIAGNOSES: '/diagnosis/my-diagnoses/',
     ANALYTICS: '/diagnosis/analytics/',
     EXPORT_CSV: '/diagnosis/export/csv/',
-    EXPORT_EXCEL: '/diagnosis/export/excel/',
-  },
+    EXPORT_EXCEL: '/diagnosis/export/excel/',  },
 };
-
-// Error Messages
-export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Network error. Please check your connection.',
-  UNAUTHORIZED: 'You are not authorized to perform this action.',
-  FORBIDDEN: 'Access denied.',
-  NOT_FOUND: 'The requested resource was not found.',
-  SERVER_ERROR: 'Internal server error. Please try again later.',
-  VALIDATION_ERROR: 'Please check your input and try again.',
-  TOKEN_EXPIRED: 'Your session has expired. Please sign in again.',
-};
-
-// Success Messages
-export const SUCCESS_MESSAGES = {
-  LOGIN_SUCCESS: 'Successfully signed in!',
-  REGISTER_SUCCESS: 'Account created successfully! Please check your email for verification.',
-  LOGOUT_SUCCESS: 'Successfully signed out!',
-  PROFILE_UPDATED: 'Profile updated successfully!',
-  PASSWORD_RESET: 'Password reset email sent!',
-  EMAIL_VERIFIED: 'Email verified successfully!',
-};
-
-// Form Validation
-export const VALIDATION = {
-  EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PASSWORD_MIN_LENGTH: 6,
-  NAME_MIN_LENGTH: 2,
-  NAME_MAX_LENGTH: 50,
-};
-
-// Diagnosis Constants
-export const DIAGNOSIS_CONFIG = {
-  RISK_LEVELS: {
-    LOW: 'low',
-    MEDIUM: 'medium',
-    HIGH: 'high',
-    CRITICAL: 'critical',
-  },
-  FIBROSIS_STAGES: {
-    F0: 'No fibrosis',
-    F1: 'Mild fibrosis',
-    F2: 'Moderate fibrosis',
-    F3: 'Severe fibrosis',
-    F4: 'Cirrhosis',
-  },
-};
-
-// Theme Constants
-export const THEME_CONFIG = {
-  COLORS: {
-    PRIMARY: '#2563EB',
-    SECONDARY: '#4F46E5',
-    SUCCESS: '#10B981',
-    WARNING: '#F59E0B',
-    ERROR: '#EF4444',
-    INFO: '#3B82F6',
-  },
-  BREAKPOINTS: {
-    XS: 0,
-    SM: 600,
-    MD: 960,
-    LG: 1280,
-    XL: 1920,
-  },
-};
-
-// Legacy constants for backward compatibility (to be removed)
-export const ACCESS_TOKEN = AUTH_CONFIG.ACCESS_TOKEN_KEY;
-export const REFRESH_TOKEN = AUTH_CONFIG.REFRESH_TOKEN_KEY;
