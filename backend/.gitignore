@@ -3,6 +3,9 @@
 .env.local
 .env.production
 
+# requirements-backup.txt
+requirements-backup.txt
+
 # Database
 db.sqlite3
 *.sqlite3
