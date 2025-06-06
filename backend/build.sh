@@ -13,6 +13,13 @@ pip install -r requirements.txt
 echo "📁 Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Make migrations for all apps
+echo "🗄️ Creating migrations for all apps..."
+python manage.py makemigrations users
+python manage.py makemigrations diagnosis
+python manage.py makemigrations aiassistant
+python manage.py makemigrations
+
 # Run database migrations
 echo "🗄️ Running database migrations..."
 python manage.py migrate
