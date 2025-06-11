@@ -11,8 +11,9 @@
       // Extract the search parameters
       const searchParams = window.location.search;
       
-      // Redirect to the React Router auth callback route
-      window.location.replace("/auth/callback" + searchParams);
+      // Redirect to the main React app homepage with tokens
+      // The TokenRedirectHandler will detect tokens and redirect to AuthCallback
+      window.location.replace("/" + searchParams);
     </script>
   </head>
   <body>
