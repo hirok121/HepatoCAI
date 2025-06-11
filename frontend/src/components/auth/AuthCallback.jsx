@@ -10,8 +10,13 @@ const AuthCallback = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { checkAuth } = useAuth(); // Get checkAuth function from AuthContext
-
   useEffect(() => {
+    // Add a debug log to confirm the component is loading
+    console.log(
+      "AuthCallback component mounted, current URL:",
+      window.location.href
+    );
+
     const access = params.get("access");
     const refresh = params.get("refresh");
     const error = params.get("error");
@@ -20,6 +25,7 @@ const AuthCallback = () => {
       access: !!access,
       refresh: !!refresh,
       error,
+      fullUrl: window.location.href,
     }); // Debug log
 
     if (error) {

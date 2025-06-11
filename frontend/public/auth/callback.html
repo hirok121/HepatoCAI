@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auth Callback - HepatoCAI</title>
+    <script>
+      // Immediate redirect to preserve URL parameters
+      const fullUrl = window.location.href;
+      console.log("Auth callback redirect from:", fullUrl);
+      window.location.replace("/index.html" + window.location.search);
+    </script>
+  </head>
+  <body>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+      "
+    >
+      <div style="text-align: center">
+        <h2>Redirecting...</h2>
+        <p>Please wait while we sign you in.</p>
+      </div>
+    </div>
+  </body>
+</html>

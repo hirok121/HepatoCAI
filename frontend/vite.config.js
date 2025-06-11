@@ -18,8 +18,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       open: false,
     },
-    
-    // Build configuration
+      // Build configuration
     build: {
       outDir: 'dist',
       sourcemap: isProduction ? false : true,
@@ -41,6 +40,15 @@ export default defineConfig(({ mode }) => {
           }
         }
       })
+    },
+    
+    // Preview configuration for SPA routing
+    preview: {
+      port: 4173,
+      host: true,
+      cors: true,
+      // Enable SPA fallback for preview server
+      spa: true
     },
     
     // Optimization
