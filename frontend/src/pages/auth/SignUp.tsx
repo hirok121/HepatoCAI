@@ -259,11 +259,15 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
               startIcon={<GoogleIcon />}
             >
               Sign up with Google
-            </Button>
-
+            </Button>{" "}
             <Typography textAlign="center">
               Already have an account?{" "}
-              <Link href="/signin" variant="body2">
+              <Link
+                component="button"
+                type="button"
+                onClick={() => navigate("/signin")}
+                variant="body2"
+              >
                 Sign in
               </Link>
             </Typography>

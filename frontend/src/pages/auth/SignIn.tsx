@@ -307,10 +307,16 @@ export default function SignIn(props) {
               startIcon={<FacebookIcon />}
             >
               Sign in with Facebook
-            </Button> */}
+            </Button> */}{" "}
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
-              <Link href="/signup" variant="body2" sx={{ alignSelf: "center" }}>
+              <Link
+                component="button"
+                type="button"
+                onClick={() => navigate("/signup")}
+                variant="body2"
+                sx={{ alignSelf: "center" }}
+              >
                 Sign up
               </Link>
             </Typography>

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useAuth } from "../../hooks/AuthContext";
+import { AUTH_CONFIG } from "../../config/constants";
 
 const AuthCallback = () => {
   const [params] = useSearchParams();
@@ -13,16 +14,32 @@ const AuthCallback = () => {
   useEffect(() => {
     const access = params.get("access");
     const refresh = params.get("refresh");
-    // console.log("Access Token:", access); // Uncomment this line to log the access token
-    // console.log("Refresh Token:", refresh); // Uncomment this line to log the refresh token
+    const error = params.get("error");
+
+    console.log("AuthCallback - URL params:", {
+      access: !!access,
+      refresh: !!refresh,
+      error,
+    }); // Debug log
+
+    if (error) {
+      console.error("AuthCallback - OAuth error:", error);
+      navigate("/signin?error=" + encodeURIComponent(error));
+      return;
+    }
+
     if (access && refresh) {
-      localStorage.setItem("access", access);
-      localStorage.setItem("refresh", refresh);
+      // Use AUTH_CONFIG constants for consistency
+      localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, access);
+      localStorage.setItem(AUTH_CONFIG.REFRESH_TOKEN_KEY, refresh);
       axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+
+      console.log("AuthCallback - Tokens stored, calling checkAuth");
 
       // Use checkAuth to properly update the AuthContext state
       checkAuth()
         .then((isValid) => {
+          console.log("AuthCallback - checkAuth result:", isValid);
           if (isValid) {
             navigate("/");
           } else {
@@ -31,12 +48,13 @@ const AuthCallback = () => {
         })
         .catch((error) => {
           console.error(
-            "Error verifying token:",
+            "AuthCallback - Error verifying token:",
             error.response ? error.response.data : error.message
           );
           navigate("/signin");
         });
     } else {
+      console.error("AuthCallback - Missing tokens");
       navigate("/signin?error=token_missing");
     }
   }, [params, navigate, checkAuth]);
