@@ -3,12 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Auth Callback - HepatoCAI</title>
-    <script>
+    <title>Auth Callback - HepatoCAI</title>    <script>
       // Immediate redirect to preserve URL parameters
       const fullUrl = window.location.href;
       console.log("Auth callback redirect from:", fullUrl);
-      window.location.replace("/index.html" + window.location.search);
+      
+      // Extract the search parameters
+      const searchParams = window.location.search;
+      
+      // Redirect to the React Router auth callback route
+      window.location.replace("/auth/callback" + searchParams);
     </script>
   </head>
   <body>
