@@ -27,35 +27,47 @@ const AuthCallback = () => {
       navigate("/signin?error=" + encodeURIComponent(error));
       return;
     }
-
     if (access && refresh) {
-      // Use AUTH_CONFIG constants for consistency
-      localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, access);
-      localStorage.setItem(AUTH_CONFIG.REFRESH_TOKEN_KEY, refresh);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+      try {
+        // Use AUTH_CONFIG constants for consistency
+        localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, access);
+        localStorage.setItem(AUTH_CONFIG.REFRESH_TOKEN_KEY, refresh);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
 
-      console.log("AuthCallback - Tokens stored, calling checkAuth");
+        console.log("AuthCallback - Tokens stored, calling checkAuth");
 
-      // Use checkAuth to properly update the AuthContext state
-      checkAuth()
-        .then((isValid) => {
-          console.log("AuthCallback - checkAuth result:", isValid);
-          if (isValid) {
-            navigate("/");
-          } else {
-            navigate("/signin");
+        // Add a small delay to ensure tokens are properly stored
+        setTimeout(async () => {
+          try {
+            const isValid = await checkAuth();
+            console.log("AuthCallback - checkAuth result:", isValid);
+            if (isValid) {
+              console.log("AuthCallback - Redirecting to home");
+              navigate("/", { replace: true });
+            } else {
+              console.log(
+                "AuthCallback - Invalid token, redirecting to signin"
+              );
+              navigate("/signin?error=invalid_token", { replace: true });
+            }
+          } catch (error) {
+            console.error(
+              "AuthCallback - Error verifying token:",
+              error.response ? error.response.data : error.message
+            );
+            navigate("/signin?error=auth_failed", { replace: true });
           }
-        })
-        .catch((error) => {
-          console.error(
-            "AuthCallback - Error verifying token:",
-            error.response ? error.response.data : error.message
-          );
-          navigate("/signin");
-        });
+        }, 100);
+      } catch (error) {
+        console.error("AuthCallback - Error storing tokens:", error);
+        navigate("/signin?error=storage_failed", { replace: true });
+      }
     } else {
-      console.error("AuthCallback - Missing tokens");
-      navigate("/signin?error=token_missing");
+      console.error("AuthCallback - Missing tokens", {
+        access: !!access,
+        refresh: !!refresh,
+      });
+      navigate("/signin?error=token_missing", { replace: true });
     }
   }, [params, navigate, checkAuth]);
 
