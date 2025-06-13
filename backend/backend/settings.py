@@ -213,7 +213,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-SITE_ID = os.getenv("SITE_ID", 3)
+SITE_ID = int(os.getenv("SITE_ID", 3))
 
 LOGIN_REDIRECT_URL = "/users/accounts/google/login/redirect/"
 LOGOUT_REDIRECT_URL = "/"
