@@ -11,6 +11,31 @@ logger = logging.getLogger(__name__)
 
 
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
+    def _normalize_locale(self, locale):
+        """
+        Normalize locale from Google OAuth to match our expected format.
+        Expected format: 'en' or 'en-US'
+        """
+        if not locale:
+            return "en-US"
+        
+        # Convert to lowercase and handle common variations
+        locale = locale.strip()
+        
+        # Handle common Google locale formats
+        if "-" in locale:
+            parts = locale.split("-")
+            if len(parts) >= 2:
+                # Format as 'en-US' (lowercase language, uppercase country)
+                return f"{parts[0].lower()}-{parts[1].upper()}"
+        
+        # If it's just a language code, return as is (e.g., 'en')
+        if len(locale) == 2 and locale.lower().isalpha():
+            return locale.lower()
+        
+        # Default fallback
+        return "en-US"
+
     def pre_social_login(self, request, sociallogin):
         if sociallogin.is_existing:
             # We no longer update login tracking here to avoid multiple counts
@@ -61,7 +86,9 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             user.first_name = extra_data.get("given_name", "")
             user.last_name = extra_data.get("family_name", "")
             user.profile_picture = extra_data.get("picture")
-            user.locale = extra_data.get("locale")
+            # Ensure locale is never None or empty and normalize format
+            raw_locale = extra_data.get("locale") or "en-US"
+            user.locale = self._normalize_locale(raw_locale)
             user.verified_email = extra_data.get("verified_email", False)
             user.is_social_user = True
             user.social_provider = "google"
@@ -75,7 +102,8 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             elif extra_data.get("name"):
                 user.full_name = extra_data.get("name")
 
-                # Set username from email if not provided            if not user.username:
+            # Set username from email if not provided
+            if not user.username:
                 user.username = user.email.split("@")[0]
 
             user.save()
@@ -100,7 +128,9 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             user.first_name = extra_data.get("given_name", "")
             user.last_name = extra_data.get("family_name", "")
             user.profile_picture = extra_data.get("picture")
-            user.locale = extra_data.get("locale")
+            # Ensure locale is never None or empty and normalize format
+            raw_locale = extra_data.get("locale") or "en-US"
+            user.locale = self._normalize_locale(raw_locale)
             user.verified_email = extra_data.get("verified_email", False)
             user.is_social_user = True
             user.social_provider = "google"

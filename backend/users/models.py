@@ -87,13 +87,13 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True,
         unique=True,
-        db_index=True,
-        help_text="Google account identifier",
+        db_index=True,        help_text="Google account identifier",
     )
     locale = models.CharField(
         max_length=10,
         blank=True,
-        default="en",
+        default="en-US",
+        null=False,
         validators=[
             RegexValidator(
                 regex=r"^[a-z]{2}(-[A-Z]{2})?$",

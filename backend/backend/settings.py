@@ -225,6 +225,15 @@ ACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
+# Add these to ensure user fields are properly populated
+SOCIALACCOUNT_STORE_TOKENS = False
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https" if not DEBUG else "http"
+
+# Additional settings to handle Google OAuth data gracefully
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+SOCIALACCOUNT_QUERY_EMAIL = True
+
 
 # google Oauth2 settings
 SOCIALACCOUNT_PROVIDERS = {
