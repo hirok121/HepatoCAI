@@ -18,21 +18,21 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         if not locale:
             return "en-US"
-        
+
         # Convert to lowercase and handle common variations
         locale = locale.strip()
-        
+
         # Handle common Google locale formats
         if "-" in locale:
             parts = locale.split("-")
             if len(parts) >= 2:
                 # Format as 'en-US' (lowercase language, uppercase country)
                 return f"{parts[0].lower()}-{parts[1].upper()}"
-        
+
         # If it's just a language code, return as is (e.g., 'en')
         if len(locale) == 2 and locale.lower().isalpha():
             return locale.lower()
-        
+
         # Default fallback
         return "en-US"
 

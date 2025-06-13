@@ -87,7 +87,8 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True,
         unique=True,
-        db_index=True,        help_text="Google account identifier",
+        db_index=True,
+        help_text="Google account identifier",
     )
     locale = models.CharField(
         max_length=10,
