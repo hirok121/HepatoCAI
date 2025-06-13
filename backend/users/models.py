@@ -93,7 +93,8 @@ class CustomUser(AbstractUser):
     locale = models.CharField(
         max_length=10,
         blank=True,
-        default="en",
+        default="en-US",
+        null=False,
         validators=[
             RegexValidator(
                 regex=r"^[a-z]{2}(-[A-Z]{2})?$",

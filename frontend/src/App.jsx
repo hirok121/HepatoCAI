@@ -9,6 +9,7 @@ import { LazyComponents, PerformanceMonitor } from "./config/performance";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthCallback from "./components/auth/AuthCallback";
 import AuthDebugPanel from "./components/auth/AuthDebugPanel";
+import TokenRedirectHandler from "./components/auth/TokenRedirectHandler";
 
 // add constants for API and AUTH configuration
 import { FEATURES } from "./config/constants";
@@ -40,14 +41,14 @@ function Signout() {
 function App() {
   useEffect(() => {
     PerformanceMonitor.init();
-  }, []);
-  return (
+  }, []);  return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
-          {/* Global AuthDebugPanel for development */}
-          {FEATURES.ENABLE_DEBUG_CONSOLE && <AuthDebugPanel />}
-          <Routes>
+        <TokenRedirectHandler>
+          <Suspense fallback={<LoadingFallback />}>
+            {/* Global AuthDebugPanel for development */}
+            {FEATURES.ENABLE_DEBUG_CONSOLE && <AuthDebugPanel />}
+            <Routes>
             {/* Main application routes */}
             <Route path="/" element={<LazyComponents.Home />} />{" "}
             <Route
@@ -206,9 +207,9 @@ function App() {
             />
             <Route path="/auth/callback" element={<AuthCallback />} />
             {/* 404 route */}
-            <Route path="*" element={<LazyComponents.NotFound />}></Route>
-          </Routes>
-        </Suspense>
+            <Route path="*" element={<LazyComponents.NotFound />}></Route>            </Routes>
+          </Suspense>
+        </TokenRedirectHandler>
       </BrowserRouter>
       {/* React Query Devtools - only in development */}
       {FEATURES.ENABLE_DEBUG_CONSOLE && (

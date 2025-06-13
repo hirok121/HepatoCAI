@@ -4,40 +4,76 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useAuth } from "../../hooks/AuthContext";
+import { AUTH_CONFIG } from "../../config/constants";
 
 const AuthCallback = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { checkAuth } = useAuth(); // Get checkAuth function from AuthContext
-
   useEffect(() => {
+    // Add a debug log to confirm the component is loading
+    console.log(
+      "AuthCallback component mounted, current URL:",
+      window.location.href
+    );
+
     const access = params.get("access");
     const refresh = params.get("refresh");
-    // console.log("Access Token:", access); // Uncomment this line to log the access token
-    // console.log("Refresh Token:", refresh); // Uncomment this line to log the refresh token
-    if (access && refresh) {
-      localStorage.setItem("access", access);
-      localStorage.setItem("refresh", refresh);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+    const error = params.get("error");
 
-      // Use checkAuth to properly update the AuthContext state
-      checkAuth()
-        .then((isValid) => {
-          if (isValid) {
-            navigate("/");
-          } else {
-            navigate("/signin");
+    console.log("AuthCallback - URL params:", {
+      access: !!access,
+      refresh: !!refresh,
+      error,
+      fullUrl: window.location.href,
+    }); // Debug log
+
+    if (error) {
+      console.error("AuthCallback - OAuth error:", error);
+      navigate("/signin?error=" + encodeURIComponent(error));
+      return;
+    }
+    if (access && refresh) {
+      try {
+        // Use AUTH_CONFIG constants for consistency
+        localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, access);
+        localStorage.setItem(AUTH_CONFIG.REFRESH_TOKEN_KEY, refresh);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+
+        console.log("AuthCallback - Tokens stored, calling checkAuth");
+
+        // Add a small delay to ensure tokens are properly stored
+        setTimeout(async () => {
+          try {
+            const isValid = await checkAuth();
+            console.log("AuthCallback - checkAuth result:", isValid);
+            if (isValid) {
+              console.log("AuthCallback - Redirecting to home");
+              navigate("/", { replace: true });
+            } else {
+              console.log(
+                "AuthCallback - Invalid token, redirecting to signin"
+              );
+              navigate("/signin?error=invalid_token", { replace: true });
+            }
+          } catch (error) {
+            console.error(
+              "AuthCallback - Error verifying token:",
+              error.response ? error.response.data : error.message
+            );
+            navigate("/signin?error=auth_failed", { replace: true });
           }
-        })
-        .catch((error) => {
-          console.error(
-            "Error verifying token:",
-            error.response ? error.response.data : error.message
-          );
-          navigate("/signin");
-        });
+        }, 100);
+      } catch (error) {
+        console.error("AuthCallback - Error storing tokens:", error);
+        navigate("/signin?error=storage_failed", { replace: true });
+      }
     } else {
-      navigate("/signin?error=token_missing");
+      console.error("AuthCallback - Missing tokens", {
+        access: !!access,
+        refresh: !!refresh,
+      });
+      navigate("/signin?error=token_missing", { replace: true });
     }
   }, [params, navigate, checkAuth]);
 

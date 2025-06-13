@@ -118,23 +118,27 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv("DB_NAME"),
-#         "USER": os.getenv("DB_USER"),
-#         "PASSWORD": os.getenv("DB_PWD"),
-#         "HOST": os.getenv("DB_HOST"),
-#         "PORT": os.getenv("DB_PORT"),
-#     }
-# }
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Production database configuration (PostgreSQL recommended)
+DATABASES = (
+    {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
+        }
     }
-}
+    if not DEBUG and os.getenv("DB_NAME")
+    else {
+        # Fallback to SQLite for development only
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+)
 
 
 # Password validation
@@ -208,7 +212,8 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",  # for allauth
 ]
 
-SITE_ID = 2
+
+SITE_ID = int(os.getenv("SITE_ID", 2))
 
 LOGIN_REDIRECT_URL = "/users/accounts/google/login/redirect/"
 LOGOUT_REDIRECT_URL = "/"
@@ -219,6 +224,15 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Add these to ensure user fields are properly populated
+SOCIALACCOUNT_STORE_TOKENS = False
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https" if not DEBUG else "http"
+
+# Additional settings to handle Google OAuth data gracefully
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 
 # google Oauth2 settings
@@ -258,13 +272,27 @@ from .logging_config import LOGGING
 # Cache configuration
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "unique-snowflake",
+        "BACKEND": (
+            "django_redis.cache.RedisCache"
+            if not DEBUG and os.getenv("REDIS_URL")
+            else "django.core.cache.backends.locmem.LocMemCache"
+        ),
+        "LOCATION": (
+            os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
+            if not DEBUG and os.getenv("REDIS_URL")
+            else "unique-snowflake"
+        ),
         "TIMEOUT": int(os.getenv("CACHE_TIMEOUT", 300)),
-        "OPTIONS": {
-            "MAX_ENTRIES": 1000,
-            "CULL_FREQUENCY": 3,
-        },
+        "OPTIONS": (
+            {
+                "MAX_ENTRIES": 1000,
+                "CULL_FREQUENCY": 3,
+            }
+            if DEBUG
+            else {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        ),
     }
 }
 
@@ -325,15 +353,23 @@ SPECTACULAR_SETTINGS = {
         "deepLinking": True,
         "persistAuthorization": True,
         "displayOperationId": True,
+        # Disable in production for security
+        "displayRequestDuration": DEBUG,
+        "docExpansion": "none" if not DEBUG else "list",
     },
     "COMPONENT_SPLIT_REQUEST": True,
     "SORT_OPERATIONS": False,
     "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
+    # CRITICAL: Secure API documentation access in production
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
-    "SERVERS": [
-        {"url": "http://127.0.0.1:8000", "description": "Development server"},
-        {"url": "https://api.hepatocai.com", "description": "Production server"},
-    ],
+    # Only include development server in DEBUG mode
+    "SERVERS": (
+        [{"url": "http://127.0.0.1:8000", "description": "Development server"}]
+        if DEBUG
+        else [
+            {"url": BACKEND_URL, "description": "Production server"},
+        ]
+    ),
     "EXTERNAL_DOCS": {
         "description": "Full documentation",
         "url": "https://docs.hepatocai.com/",
@@ -346,4 +382,7 @@ SPECTACULAR_SETTINGS = {
         "name": "MIT License",
         "url": "https://opensource.org/licenses/MIT",
     },
+    # Additional production security settings
+    "DISABLE_ERRORS_AND_WARNINGS": not DEBUG,
+    "SERVE_PUBLIC": DEBUG,  # Only serve publicly in development
 }

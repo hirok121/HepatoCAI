@@ -1,0 +1,7 @@
+# SPA routing redirects - all routes should serve the main React app
+/*    /index.html   200
+
+# Specific auth routes (these will be handled by React Router)
+/auth/*    /index.html   200
+/signin    /index.html   200
+/signup    /index.html   200

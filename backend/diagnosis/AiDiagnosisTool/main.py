@@ -155,9 +155,7 @@ class AiDiagnosisTool:
                 # Fallback if model doesn't have coefficients
                 self.sorted_features_importance = [
                     (f, 0.1) for f in self.lr_feature_names
-                ]
-
-            # Structure results to match get_ensemble_prediction expectations
+                ]  # Structure results to match get_ensemble_prediction expectations
             results = {
                 "xgboost": {
                     "prediction": hcv_status,
@@ -188,6 +186,7 @@ class AiDiagnosisTool:
     def get_ensemble_prediction(self, model_results: Dict[str, Any]) -> Dict[str, Any]:
         """
         Combine predictions from both models to get ensemble results.
+        XGBoost prediction is prioritized for consistency.
 
         Args:
             model_results: Results from both models
@@ -217,37 +216,86 @@ class AiDiagnosisTool:
                 logreg_data = model_results["logistic_regression"]
                 xgboost_data = model_results["xgboost"]
 
-                # Average the probabilities
-                logreg_prob = logreg_data["probability"]
-                xgboost_prob = xgboost_data["probability"]
-                max_probability = max(logreg_prob)
-
-                # Determine HCV status (assuming class 0 is negative, others positive)
+                # Get XGBoost prediction (prioritized)
                 hcv_positive = xgboost_data["prediction"]
+                xgboost_prob = xgboost_data["probability"]
+                logreg_prob = logreg_data["probability"]
+
+                # Set HCV status based on XGBoost prediction
                 ensemble_result["hcv_status"] = (
                     "Positive" if hcv_positive else "Negative"
                 )
                 ensemble_result["hcv_status_probability"] = max(xgboost_prob)
-                ensemble_result["hcv_risk"] = (
-                    "High"
-                    if max_probability > 0.7 and hcv_positive
-                    else "Medium" if hcv_positive else "Low"
-                )
-                ensemble_result["hcv_stage"] = self.get_stage_from_prediction(
-                    logreg_data["prediction"]
-                )
-                ensemble_result["confidence"] = (
-                    min(max(xgboost_data["probability"]) + max(logreg_prob) * 1.3, 2)
-                    / 2
-                )
 
-                # Update stage predictions
-                stage_names = ["Blood Donors", "Hepatitis", "Fibrosis", "Cirrhosis"]
-                for i, stage in enumerate(stage_names):
-                    if i < len(logreg_data["probability"]):
-                        ensemble_result["hcv_stage_probability"][stage] = logreg_data[
-                            "probability"
-                        ][i]
+                # Enforce consistency: If XGBoost says negative, force stage to be "Blood Donors"
+                if not hcv_positive:
+                    # Force stage to be 0 (Blood Donors) when XGBoost predicts negative
+                    ensemble_result["hcv_stage"] = "Blood Donors"
+                    ensemble_result["hcv_stage_probability"] = {
+                        "Blood Donors": 0.95,  # High confidence for negative cases
+                        "Hepatitis": 0.02,
+                        "Fibrosis": 0.02,
+                        "Cirrhosis": 0.01,
+                    }
+                    ensemble_result["hcv_risk"] = "Low"
+                    # Use XGBoost confidence for overall confidence
+                    ensemble_result["confidence"] = max(xgboost_prob)
+                else:
+                    # XGBoost predicts positive, use LR model for stage prediction
+                    lr_prediction = logreg_data["prediction"]
+
+                    # Additional consistency check: if LR predicts stage 0 but XGBoost says positive,
+                    # adjust to stage 1 (Hepatitis) as minimum
+                    if lr_prediction == 0:
+                        adjusted_stage = 1  # Force to Hepatitis stage
+                        ensemble_result["hcv_stage"] = self.get_stage_from_prediction(
+                            adjusted_stage
+                        )
+
+                        # Adjust probabilities to reflect this correction
+                        ensemble_result["hcv_stage_probability"] = {
+                            "Blood Donors": 0.05,  # Low probability since XGBoost says positive
+                            "Hepatitis": 0.70,  # Higher probability as adjusted stage
+                            "Fibrosis": (
+                                logreg_prob[2] if len(logreg_prob) > 2 else 0.15
+                            ),
+                            "Cirrhosis": (
+                                logreg_prob[3] if len(logreg_prob) > 3 else 0.10
+                            ),
+                        }
+                    else:
+                        # Use original LR prediction for stages 1-3
+                        ensemble_result["hcv_stage"] = self.get_stage_from_prediction(
+                            lr_prediction
+                        )
+
+                        # Use original LR probabilities
+                        stage_names = [
+                            "Blood Donors",
+                            "Hepatitis",
+                            "Fibrosis",
+                            "Cirrhosis",
+                        ]
+                        for i, stage in enumerate(stage_names):
+                            if i < len(logreg_prob):
+                                ensemble_result["hcv_stage_probability"][stage] = (
+                                    logreg_prob[i]
+                                )
+
+                    # Calculate risk and confidence for positive cases
+                    max_stage_prob = max(logreg_prob)
+                    max_xgb_prob = max(xgboost_prob)
+
+                    ensemble_result["hcv_risk"] = (
+                        "High"
+                        if max_stage_prob > 0.7 and lr_prediction >= 2
+                        else "Medium" if lr_prediction >= 1 else "Low"
+                    )
+
+                    # Combined confidence weighted towards XGBoost
+                    ensemble_result["confidence"] = (
+                        max_xgb_prob * 0.6 + max_stage_prob * 0.4
+                    )
 
         except Exception as e:
             print(f"Error in ensemble prediction: {e}")

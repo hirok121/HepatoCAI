@@ -105,17 +105,17 @@ Remember: You are a supportive educational resource, not a replacement for profe
         """
         try:
             # Prepare the content for the request
-            content_parts = [prompt]
-
-            # Add HCV resource PDF if available for enhanced context
+            content_parts = [
+                prompt
+            ]  # Add HCV resource PDF if available for enhanced context
             if self.hcv_resource_file:
                 content_parts.append(self.hcv_resource_file)
                 # Add instruction to reference the PDF when relevant
-                enhanced_prompt = f"""Based on the user's question and the HCV resource document provided, please answer the following question. If the information is available in the HCV resource document, reference it appropriately. If the question relates to Hepatitis C, use the comprehensive information from the resource to provide accurate, detailed responses.
+                enhanced_prompt = f"""You have access to an HCV resource document. Only reference this document if the user's question is specifically related to Hepatitis C, liver disease, or medical topics that would benefit from the clinical information in the resource. For general questions or topics unrelated to HCV/liver health, respond normally without referencing the document.
 
 User question: {prompt}
 
-Please provide a helpful, accurate response using both your knowledge and the HCV resource document when relevant."""
+Please provide a helpful response. If this question relates to Hepatitis C or liver health, you may use information from the HCV resource document to enhance your answer."""
                 content_parts = [enhanced_prompt, self.hcv_resource_file]
 
             if chat_history:
