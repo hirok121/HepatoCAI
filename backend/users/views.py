@@ -162,7 +162,7 @@ class CheckEmailView(APIView):
     @extend_schema(
         operation_id="check_email_availability",
         summary="Check email availability",
-        description="Check if an email address is already registered in the system.",
+        description="Check if an email address is already registered in the system with a usable password.",
         request=EmailCheckSerializer,
         responses={
             200: OpenApiResponse(description="Email check completed successfully"),
@@ -181,41 +181,34 @@ class CheckEmailView(APIView):
         # Security validation
         if not SecurityValidator.validate_input_data(request.data):
             AuditLogger.log_suspicious_activity(
-                "invalid_email_check_input",
-                ip_address=client_ip,
-                details={"data_keys": list(request.data.keys())},
+                "invalid_input", ip_address=client_ip, details=request.data
             )
-            return StandardResponse.error(
-                message="Invalid input data detected",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
+            return StandardResponse.bad_request("Invalid input data")
 
         try:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 email = serializer.validated_data["email"]
 
-                # Validate email format
-                if not SecurityValidator.validate_email_format(email):
-                    AuditLogger.log_suspicious_activity(
-                        "invalid_email_format_check",
-                        ip_address=client_ip,
-                        details={"email": email},
-                    )
-                    return StandardResponse.error(
-                        message="Invalid email format",
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                    )
+                # Use the serializer method to check email with usable password
+                exists = serializer.check_email_exists_with_usable_password(email)
 
-                exists = User.objects.filter(email=email).exists()
+                logger.info(
+                    f"Email check for: {email} from IP: {client_ip} - Result: {'exists' if exists else 'not exists'}"
+                )
+
                 return StandardResponse.success(
                     data={"exists": exists},
-                    message="Email check completed successfully",
+                    message="Email exists" if exists else "Email not exists",
                 )
-            return StandardResponse.validation_error(serializer.errors)
+            else:
+                return StandardResponse.validation_error(
+                    errors=serializer.errors, message="Invalid email format"
+                )
         except Exception as e:
-            logger.error(f"Error in CheckEmailView: {str(e)}")
-            return StandardResponse.server_error("Failed to check email", e)
+            logger.error(f"Email check error for IP {client_ip}: {str(e)}")
+            return StandardResponse.server_error("Email check failed", e)
+        return Response({"message": "Hello, world!"})
 
 
 class RegisterViewset(viewsets.ViewSet):
@@ -260,9 +253,6 @@ class RegisterViewset(viewsets.ViewSet):
                     user.save()
                     SendVerificationEmail(user)
                     logger.info(f"Updated existing inactive user: {email}")
-                    # AuditLogger.log_authentication_event(
-                    #     "user_account_updated", user=user, ip_address=client_ip
-                    # )
 
                     return StandardResponse.success(
                         data=serializer.data,
@@ -276,15 +266,9 @@ class RegisterViewset(viewsets.ViewSet):
                 return StandardResponse.validation_error(
                     errors=serializer.errors, message="Invalid registration data"
                 )
-
             # Active user with usable password already exists
             # Log the registration attempt
             logger.info(f"Registration attempt for existing active user: {email}")
-            # AuditLogger.log_authentication_event(
-            #     "duplicate_registration_attempt",
-            #     ip_address=client_ip,
-            #     details={"email": email},
-            # )
             return StandardResponse.error(
                 message="A user with this email already exists.",
                 status_code=status.HTTP_400_BAD_REQUEST,

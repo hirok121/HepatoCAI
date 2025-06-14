@@ -19,12 +19,7 @@ import { styled } from "@mui/material/styles";
 import AppTheme from "../../theme/AppTheme";
 // import ColorModeSelect from "../../theme/ColorModeSelect";
 import api from "../../services/api";
-import {
-  GoogleIcon,
-  FacebookIcon,
-  SitemarkIcon,
-  HepatoCAIIcon,
-} from "../../components/ui/CustomIcons";
+import { GoogleIcon, HepatoCAIIcon } from "../../components/ui/CustomIcons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_CONFIG, API_ENDPOINTS } from "../../config/constants";
 
@@ -136,7 +131,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
 
     try {
       setLoading(true);
-      await api.post("/users/register/", payload);
+      const response = await api.post("/users/register/", payload);
+      console.log("Sign up response:", response.data);
 
       navigate("/signup", {
         state: { message: "Signup successful. Check your email to verify." },
