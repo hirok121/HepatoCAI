@@ -110,15 +110,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class EmailCheckSerializer(serializers.Serializer):
-    """Serializer for checking email availability during registration."""
+    """Serializer for checking email existence with usable password."""
 
-    email = serializers.EmailField(help_text="Email address to check for availability")
+    email = serializers.EmailField(help_text="Email address to check for existence")
 
     def validate_email(self, value):
-        """Check if email is already taken"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email address is already in use.")
+        """Basic email format validation only"""
+        # Just validate format, actual existence check is done in the view
         return value
+
+    def check_email_exists_with_usable_password(self, email):
+        """
+        Check if email exists with a usable password.
+        Returns True if email has account with usable password, False otherwise.
+        """
+        try:
+            user = User.objects.get(email=email)
+            # Check if user has a usable password
+            return user.has_usable_password()
+        except User.DoesNotExist:
+            return False
 
 
 class ProfileSerializer(serializers.ModelSerializer):
