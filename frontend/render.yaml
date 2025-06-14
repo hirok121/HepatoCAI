@@ -4,19 +4,32 @@ services:
     env: static
     buildCommand: npm run build
     staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
     headers:
       - key: Cache-Control
+        value: public, max-age=31536000, immutable
+        path: /assets/*
+      - key: Cache-Control
         value: public, max-age=0, must-revalidate
+        path: /
     routes:
+      # Serve static assets with long cache
+      - type: rewrite
+        source: /assets/*
+        destination: /assets/:splat
+      # Serve favicon
+      - type: rewrite
+        source: /favicon.ico
+        destination: /favicon.ico
+      # Serve manifest
+      - type: rewrite
+        source: /manifest.json
+        destination: /manifest.json
+      # Serve robots.txt if it exists
+      - type: rewrite
+        source: /robots.txt
+        destination: /robots.txt
+      # Catch all other routes and serve index.html (SPA routing)
       - type: rewrite
         source: /*
-        destination: /index.html
-      - type: rewrite
-        source: /auth/callback
-        destination: /index.html
-      - type: rewrite
-        source: /signin
-        destination: /index.html
-      - type: rewrite
-        source: /signup
         destination: /index.html

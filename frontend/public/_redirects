@@ -1,7 +1,8 @@
 # SPA routing redirects - all routes should serve the main React app
-/*    /index.html   200
+# Static assets should be served normally
+/assets/*  /assets/:splat  200
+/favicon.ico  /favicon.ico  200
+/manifest.json  /manifest.json  200
 
-# Specific auth routes (these will be handled by React Router)
-/auth/*    /index.html   200
-/signin    /index.html   200
-/signup    /index.html   200
+# All other routes should serve index.html for client-side routing
+/*    /index.html   200

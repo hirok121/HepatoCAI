@@ -41,14 +41,13 @@ export default defineConfig(({ mode }) => {
         }
       })
     },
-    
-    // Preview configuration for SPA routing
+      // Preview configuration for SPA routing
     preview: {
       port: 4173,
       host: true,
       cors: true,
-      // Enable SPA fallback for preview server
-      spa: true
+      // Handle SPA routing for preview server
+      middlewareMode: false,
     },
     
     // Optimization
