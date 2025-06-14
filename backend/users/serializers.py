@@ -84,22 +84,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
-        """Validate email uniqueness"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+        """Validate email uniqueness, allowing updates for inactive users or users without usable passwords"""
+        existing_user = User.objects.filter(email=value).first()
+
+        if existing_user:
+            # Allow registration/update if user doesn't have usable password or is inactive
+            if existing_user.has_usable_password() and existing_user.is_active:
+                raise serializers.ValidationError(
+                    "A user with this email already exists."
+                )
+
         return value
-
-    def validate(self, attrs):
-        """Validate password confirmation and other fields"""
-        password = attrs.get("password")
-        password_confirm = attrs.pop("password_confirm", None)
-
-        if password != password_confirm:
-            raise serializers.ValidationError(
-                {"password_confirm": "Password fields do not match."}
-            )
-
-        return attrs
 
     def create(self, validated_data):
         password = validated_data.pop("password")

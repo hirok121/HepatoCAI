@@ -253,9 +253,6 @@ class RegisterViewset(viewsets.ViewSet):
                     user.save()
                     SendVerificationEmail(user)
                     logger.info(f"Updated existing inactive user: {email}")
-                    # AuditLogger.log_authentication_event(
-                    #     "user_account_updated", user=user, ip_address=client_ip
-                    # )
 
                     return StandardResponse.success(
                         data=serializer.data,
@@ -269,15 +266,9 @@ class RegisterViewset(viewsets.ViewSet):
                 return StandardResponse.validation_error(
                     errors=serializer.errors, message="Invalid registration data"
                 )
-
             # Active user with usable password already exists
             # Log the registration attempt
             logger.info(f"Registration attempt for existing active user: {email}")
-            # AuditLogger.log_authentication_event(
-            #     "duplicate_registration_attempt",
-            #     ip_address=client_ip,
-            #     details={"email": email},
-            # )
             return StandardResponse.error(
                 message="A user with this email already exists.",
                 status_code=status.HTTP_400_BAD_REQUEST,
