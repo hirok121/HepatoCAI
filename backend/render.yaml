@@ -4,7 +4,7 @@ services:
     name: hepatocai-backend
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn backend.wsgi:application"
+    startCommand: "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.3
@@ -13,8 +13,22 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        sync: false
+        value: "hepatocai-backend.onrender.com,hepatocai.onrender.com,localhost,127.0.0.1"
       - key: BACKEND_URL
-        sync: false
+        value: "https://hepatocai-backend.onrender.com"
       - key: FRONTEND_URL
+        value: "https://hepatocai.onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://hepatocai.onrender.com,http://localhost:5173,http://localhost:3000"
+      - key: CORS_ALLOW_CREDENTIALS
+        value: true
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_OAUTH2_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH2_CLIENT_SECRET
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
         sync: false

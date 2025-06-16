@@ -18,6 +18,7 @@ const TokenRedirectHandler = ({ children }) => {
       const refresh = urlParams.get("refresh");
       const resetPasswordConfirm = urlParams.get("reset-password-confirm");
       const resetPassword = urlParams.get("reset-password");
+      const signin = urlParams.get("signin");
       const token = urlParams.get("token");
 
       console.log("TokenRedirectHandler - Checking for tokens on home page", {
@@ -26,6 +27,7 @@ const TokenRedirectHandler = ({ children }) => {
         hasRefresh: !!refresh,
         hasResetPasswordConfirm: !!resetPasswordConfirm,
         hasResetPassword: !!resetPassword,
+        hasSignin: !!signin,
         hasToken: !!token,
         search: location.search,
         hasRedirected: hasRedirected.current,
@@ -40,8 +42,7 @@ const TokenRedirectHandler = ({ children }) => {
 
         // Redirect to AuthCallback with the tokens
         navigate(`/auth/callback${location.search}`, { replace: true });
-      }
-      // Handle reset password confirmation
+      } // Handle reset password confirmation
       else if (resetPasswordConfirm === "true" && token) {
         console.log(
           "TokenRedirectHandler - Found reset password confirmation, redirecting"
@@ -60,6 +61,14 @@ const TokenRedirectHandler = ({ children }) => {
 
         // Redirect to reset password page
         navigate(`/resetpassword`, { replace: true });
+      }
+      // Handle signin
+      else if (signin === "true") {
+        console.log("TokenRedirectHandler - Found signin request, redirecting");
+        hasRedirected.current = true; // Mark as redirected to prevent loops
+
+        // Redirect to signin page
+        navigate(`/signin`, { replace: true });
       }
     }
   }, [location, navigate]);
