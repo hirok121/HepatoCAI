@@ -84,22 +84,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
-        """Validate email uniqueness"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+        """Validate email uniqueness, allowing updates for inactive users or users without usable passwords"""
+        existing_user = User.objects.filter(email=value).first()
+
+        if existing_user:
+            # Allow registration/update if user doesn't have usable password or is inactive
+            if existing_user.has_usable_password() and existing_user.is_active:
+                raise serializers.ValidationError(
+                    "A user with this email already exists."
+                )
+
         return value
-
-    def validate(self, attrs):
-        """Validate password confirmation and other fields"""
-        password = attrs.get("password")
-        password_confirm = attrs.pop("password_confirm", None)
-
-        if password != password_confirm:
-            raise serializers.ValidationError(
-                {"password_confirm": "Password fields do not match."}
-            )
-
-        return attrs
 
     def create(self, validated_data):
         password = validated_data.pop("password")
@@ -110,15 +105,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class EmailCheckSerializer(serializers.Serializer):
-    """Serializer for checking email availability during registration."""
+    """Serializer for checking email existence with usable password."""
 
-    email = serializers.EmailField(help_text="Email address to check for availability")
+    email = serializers.EmailField(help_text="Email address to check for existence")
 
     def validate_email(self, value):
-        """Check if email is already taken"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email address is already in use.")
+        """Basic email format validation only"""
+        # Just validate format, actual existence check is done in the view
         return value
+
+    def check_email_exists_with_usable_password(self, email):
+        """
+        Check if email exists with a usable password.
+        Returns True if email has account with usable password, False otherwise.
+        """
+        try:
+            user = User.objects.get(email=email)
+            # Check if user has a usable password
+            return user.has_usable_password()
+        except User.DoesNotExist:
+            return False
 
 
 class ProfileSerializer(serializers.ModelSerializer):

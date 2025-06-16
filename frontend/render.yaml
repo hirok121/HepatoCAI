@@ -4,34 +4,31 @@ services:
     env: static
     buildCommand: npm run build
     staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
     headers:
       - key: Cache-Control
+        value: public, max-age=31536000, immutable
+        path: /assets/*
+      - key: Cache-Control
         value: public, max-age=0, must-revalidate
+        path: /
       - key: X-Frame-Options
         value: DENY
       - key: X-Content-Type-Options
         value: nosniff
     routes:
-      # Specific routes for static HTML files (these serve actual files)
       - type: rewrite
-        source: /resetpassword/confirm
-        destination: /resetpassword/confirm.html
-      - type: rewrite
-        source: /resetpassword/confirm/*
-        destination: /resetpassword/confirm.html
-      - type: rewrite
-        source: /resetpassword
-        destination: /resetpassword/index.html
-      - type: rewrite
-        source: /auth/callback
-        destination: /auth/callback.html
-      
-      # SPA routes (these redirect to React app)
-      - type: rewrite
-        source: /signin
+        source: /*
         destination: /index.html
       - type: rewrite
-        source: /signup
+        source: /auth/callback
+        destination: /index.html
+      - type: rewrite
+        source: /robots.txt
+        destination: /robots.txt
+      # Catch all other routes and serve index.html (SPA routing)
+      - type: rewrite
+        source: /*
         destination: /index.html
       - type: rewrite
         source: /diagnosis
@@ -42,7 +39,7 @@ services:
       - type: rewrite
         source: /admin/*
         destination: /index.html
-      
+
       # Catch-all route (must be last)
       - type: rewrite
         source: /*

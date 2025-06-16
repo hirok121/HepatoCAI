@@ -19,7 +19,7 @@ import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppTheme from "../../theme/AppTheme";
-import { SitemarkIcon } from "../../components/ui/CustomIcons";
+import { HepatoCAIIcon } from "../../components/ui/CustomIcons";
 import api from "../../services/api";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
       <CssBaseline enableColorScheme />
       <ForgotPasswordContainer direction="column" justifyContent="center">
         <Card variant="outlined">
-          <SitemarkIcon />
+          <HepatoCAIIcon />
           <Typography component="h1" variant="h4">
             Reset Password
           </Typography>
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
           <Divider />
           <Typography sx={{ textAlign: "center" }}>
             Remember your password?{" "}
-            <Link href="/signin" variant="body2">
+            <Link onClick={() => navigate("/signin")} variant="body2">
               Sign in
             </Link>
           </Typography>
