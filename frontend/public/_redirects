@@ -1,7 +1,8 @@
-# SPA routing redirects - all routes should serve the main React app
-/*    /index.html   200
-
 # Specific auth routes (these will be handled by React Router)
+# IMPORTANT: Specific routes must come before the catch-all rule
 /auth/*    /index.html   200
 /signin    /index.html   200
 /signup    /index.html   200
+
+# SPA routing redirects - catch-all rule (must be last)
+/*    /index.html   200

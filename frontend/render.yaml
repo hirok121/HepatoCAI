@@ -7,16 +7,43 @@ services:
     headers:
       - key: Cache-Control
         value: public, max-age=0, must-revalidate
+      - key: X-Frame-Options
+        value: DENY
+      - key: X-Content-Type-Options
+        value: nosniff
     routes:
+      # Specific routes for static HTML files (these serve actual files)
       - type: rewrite
-        source: /*
-        destination: /index.html
+        source: /resetpassword/confirm
+        destination: /resetpassword/confirm.html
+      - type: rewrite
+        source: /resetpassword/confirm/*
+        destination: /resetpassword/confirm.html
+      - type: rewrite
+        source: /resetpassword
+        destination: /resetpassword/index.html
       - type: rewrite
         source: /auth/callback
-        destination: /index.html
+        destination: /auth/callback.html
+      
+      # SPA routes (these redirect to React app)
       - type: rewrite
         source: /signin
         destination: /index.html
       - type: rewrite
         source: /signup
+        destination: /index.html
+      - type: rewrite
+        source: /diagnosis
+        destination: /index.html
+      - type: rewrite
+        source: /profile
+        destination: /index.html
+      - type: rewrite
+        source: /admin/*
+        destination: /index.html
+      
+      # Catch-all route (must be last)
+      - type: rewrite
+        source: /*
         destination: /index.html
