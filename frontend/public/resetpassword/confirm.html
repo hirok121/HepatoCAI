@@ -48,9 +48,14 @@
       // Extract the search parameters (including the token)
       const searchParams = window.location.search;
 
-      // Redirect to the main React app with the same path and parameters
-      // This will be handled by React Router
-      window.location.replace("/resetpassword/confirm" + searchParams);
+      // Redirect to the main React app root with reset-password-confirm flag and token
+      // The React app will detect this and route to the correct component
+      const redirectUrl =
+        "/?reset-password-confirm=true" +
+        (searchParams ? "&" + searchParams.substring(1) : "");
+
+      console.log("Redirecting to:", redirectUrl);
+      window.location.replace(redirectUrl);
     </script>
   </head>
   <body>

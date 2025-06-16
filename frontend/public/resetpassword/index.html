@@ -48,8 +48,14 @@
       // Extract the search parameters
       const searchParams = window.location.search;
 
-      // Redirect to the main React app with the same path and parameters
-      window.location.replace("/resetpassword" + searchParams);
+      // Redirect to the main React app root with reset-password flag
+      // The React app will detect this and route to the correct component
+      const redirectUrl =
+        "/?reset-password=true" +
+        (searchParams ? "&" + searchParams.substring(1) : "");
+
+      console.log("Redirecting to:", redirectUrl);
+      window.location.replace(redirectUrl);
     </script>
   </head>
   <body>
